@@ -1,5 +1,6 @@
-#!/bin/bash
-echo "--> create the PropertiesConfig.js"
+#!/bin/sh
+# alpine version does not support bash, use sh instead.
+
 file="/opt/mqttbridge/main/PropertiesConfig.js"
 echo "{
     const COMPONENT_NAME   = \"MqttBridge\";
@@ -20,9 +21,8 @@ echo "{
     module.exports.AMQP_PWD = AMQP_PWD;
 }" > $file
 
-cat $file
-
 echo "--> mqttbridge prepare to start ..."
-node /opt/mqttbridge/main/Main.js
+# if we execute: node /opt/mqttbridge/main/Main.js dereactly , there won't generate /opt/mqttbridge/logs/log file, it will be generate under where you execute this command.
+cd /opt/mqttbridge/main && node Main.js
 
 

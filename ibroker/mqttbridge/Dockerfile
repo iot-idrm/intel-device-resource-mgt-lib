@@ -1,5 +1,5 @@
 # set node v10 as base image
-FROM node:10.15
+FROM node:lts-alpine3.11
 # set work directory
 WORKDIR /opt
 
