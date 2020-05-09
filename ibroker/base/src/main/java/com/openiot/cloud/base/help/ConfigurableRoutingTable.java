@@ -6,14 +6,14 @@ package com.openiot.cloud.base.help;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openiot.cloud.base.mongo.model.help.RoutingTableItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigurableRoutingTable {
   private static final Logger logger = LoggerFactory.getLogger(ConfigurableRoutingTable.class);
@@ -24,6 +24,8 @@ public class ConfigurableRoutingTable {
       "((\\d{1,3}\\.){3}\\d{1,3})" + ":(" + PORT_PATTERN + ")";
   private static final String DOMAIN_NAME_PATTERN =
       "((\\S{1,63}\\.)+[A-Za-z]{2,6})" + ":(" + PORT_PATTERN + ")";
+  private static final String DOMAIN_NAME_PATTERN_SIMPLE =
+      "([A-Za-z]{1,50})" + ":(" + PORT_PATTERN + ")";
 
   public static Map<String, InetSocketAddress> readRoutingTable(InputStream in) {
     if (in == null) {
@@ -40,6 +42,8 @@ public class ConfigurableRoutingTable {
     Pattern localhost = Pattern.compile(LOCALHOST_PATTERN);
     Pattern ipAddress = Pattern.compile(IP_ADDRESS_PATTERN);
     Pattern domainName = Pattern.compile(DOMAIN_NAME_PATTERN);
+    Pattern SimpleDomainName = Pattern.compile(DOMAIN_NAME_PATTERN_SIMPLE);
+
     try {
       RoutingTableItem[] allItems = objectMapper.readValue(in, RoutingTableItem[].class);
       if (allItems == null || allItems.length == 0) {
@@ -80,6 +84,17 @@ public class ConfigurableRoutingTable {
           InetSocketAddress inetAddr = new InetSocketAddress(hostname, port);
           routingTable.put(item.getUriPath(), inetAddr);
           logger.debug(item + " matches domainName pattern " + inetAddr);
+          continue;
+        }
+
+        Matcher matcherSimple = SimpleDomainName.matcher(item.getInetAddr());
+        if (matcherSimple.matches()) {
+          logger.warn("-------> matches SimpleDomainName pattern ");
+          String hostname = matcherSimple.group(1);
+          int port = Integer.parseInt(matcherSimple.group(2));
+          InetSocketAddress inetAddr = new InetSocketAddress(hostname, port);
+          routingTable.put(item.getUriPath(), inetAddr);
+          logger.warn(item + " matches domainName pattern " + inetAddr);
           continue;
         }
 
