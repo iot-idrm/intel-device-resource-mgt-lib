@@ -5,8 +5,11 @@ ARG JAR_FILE=./target/httpproxy-0.0.1.jar
 
 COPY ${JAR_FILE} /app/app.jar
 
+COPY run.sh        /
+RUN chmod 777 /run.sh
+
 WORKDIR ["/app"]
 
 EXPOSE 8081
 
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /app/app.jar"]
+ENTRYPOINT ["/run.sh"]
