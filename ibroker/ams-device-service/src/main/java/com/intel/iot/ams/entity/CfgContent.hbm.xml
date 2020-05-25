@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+<hibernate-mapping> 
+    <class name="com.intel.iot.ams.entity.CfgContent" table="CfgContent"> 
+        <id name="id" type="java.lang.Integer"> 
+            <column name="id" /> 
+            <generator class="identity" /> 
+        </id> 
+        <property name="contentType" type="int"> 
+            <column name="contentType" /> 
+        </property> 
+        <property name="sharedName" type="string"> 
+            <column name="sharedName" /> 
+        </property> 
+        <property name="content" type="string"> 
+            <column name="content" /> 
+        </property> 
+        <property name="contentHash" type="string"> 
+            <column name="contentHash" /> 
+        </property> 
+        <property name="formatId" type="string"> 
+            <column name="formatId" /> 
+        </property> 
+        <property name="expirationTime" type="int"> 
+            <column name="expirationTime" /> 
+        </property> 
+        <property name="tag" type="string"> 
+            <column name="tag" /> 
+        </property> 
+        <property name="description" type="string"> 
+            <column name="description" /> 
+        </property> 
+    </class> 
+</hibernate-mapping>

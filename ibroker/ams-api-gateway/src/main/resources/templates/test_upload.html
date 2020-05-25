@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Upload File Test</title>
+    <link rel="icon" href="data:image/ico;base64,aWNv">
+</head>
+<body>
+<div><font size="3"><b>Upload BPK File Test</b></font></div>
+<br/>
+<form action="/ams/v1/product/upload" method="post" enctype="multipart/form-data">
+    <div>Choose upload BPK file:</div>
+    <br/>
+    <div>
+        <input type="file" name="file" id="file"/>
+    </div>
+    <br/>
+    <div>
+        <input type="submit" value="upload"/>
+    </div>
+</form>
+<br/><br/>
+<div><font size="3"><b>Upload Configuration File Test</b></font></div>
+<br/>
+<form action="/ams/configurations/default_app_config/file/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1" method="post"
+      enctype="multipart/form-data">
+    <div>Choose upload configuration file:</div>
+    <br/>
+    <div>
+        <input type="file" name="configFile"/>
+    </div>
+    <br/>
+    <div>
+        <input type="submit" value="upload"/>
+    </div>
+</form>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+<hibernate-mapping> 
+    <class name="com.intel.iot.ams.entity.HistoricCfgInstance" table="HistoricCfgInstance"> 
+        <id name="id" type="java.lang.Integer"> 
+            <column name="id" /> 
+            <generator class="identity" /> 
+        </id> 
+        <property name="cfgUuid" type="string"> 
+            <column name="cfgUuid" /> 
+        </property> 
+        <property name="userName" type="string"> 
+            <column name="userName" /> 
+        </property> 
+        <property name="pathName" type="string"> 
+            <column name="pathName" /> 
+        </property> 
+        <property name="targetType" type="string"> 
+            <column name="targetType" /> 
+        </property> 
+        <property name="instanceId" type="int"> 
+            <column name="instanceId" /> 
+        </property> 
+        <property name="targetId" type="string"> 
+            <column name="targetId" /> 
+        </property> 
+        <property name="contentId" type="int"> 
+            <column name="contentId" /> 
+        </property> 
+        <property name="contentType" type="int"> 
+            <column name="contentType" /> 
+        </property> 
+        <property name="sharedName" type="string"> 
+            <column name="sharedName" /> 
+        </property> 
+        <property name="content" type="string"> 
+            <column name="content" /> 
+        </property> 
+        <property name="contentHash" type="string"> 
+            <column name="contentHash" /> 
+        </property> 
+        <property name="formatId" type="string"> 
+            <column name="formatId" /> 
+        </property> 
+        <property name="startTime" type="java.util.Date"> 
+            <column name="startTime" /> 
+        </property> 
+        <property name="endTime" type="java.util.Date"> 
+            <column name="endTime" /> 
+        </property> 
+    </class> 
+</hibernate-mapping>

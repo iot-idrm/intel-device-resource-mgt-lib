@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+<hibernate-mapping> 
+    <class name="com.intel.iot.ams.entity.AmsClient" table="AmsClient"> 
+        <id name="id" type="java.lang.Integer"> 
+            <column name="id" /> 
+            <generator class="identity" /> 
+        </id> 
+        <property name="clientUuid" type="string"> 
+            <column name="amsClientUuid" /> 
+        </property> 
+        <property name="templateName" type="string"> 
+            <column name="templateName" /> 
+        </property> 
+        <property name="deviceName" type="string"> 
+            <column name="deviceName" /> 
+        </property> 
+        <property name="amsClientVersion" type="string"> 
+            <column name="amsClientVersion" /> 
+        </property> 
+        <property name="cpu" type="string"> 
+            <column name="cpu" /> 
+        </property> 
+        <property name="platform" type="string"> 
+            <column name="platform" /> 
+        </property> 
+        <property name="os" type="string"> 
+            <column name="os" /> 
+        </property> 
+        <property name="osVer" type="string"> 
+            <column name="osVer" /> 
+        </property> 
+        <property name="system" type="string"> 
+            <column name="system" /> 
+        </property> 
+        <property name="sysVer" type="string"> 
+            <column name="sysVer" /> 
+        </property> 
+        <property name="bits" type="string"> 
+            <column name="bits" /> 
+        </property> 
+        <property name="serial" type="string"> 
+            <column name="serial" /> 
+        </property> 
+        <property name="description" type="string"> 
+            <column name="description" /> 
+        </property> 
+        <property name="provisionTime" type="java.util.Date"> 
+            <column name="provisionTime" /> 
+        </property> 
+        <property name="lastProductUpdateTime" type="java.util.Date"> 
+            <column name="lastProductUpdateTime" /> 
+        </property> 
+        <property name="lastConfigUpdateTime" type="java.util.Date"> 
+            <column name="lastConfigUpdateTime" /> 
+        </property> 
+        <property name="lastConnectionTime" type="java.util.Date"> 
+            <column name="lastConnectionTime" /> 
+        </property> 
+        <property name="fwVersion" type="string"> 
+            <column name="fwVersion" /> 
+        </property> 
+        <property name="deviceType" type="string"> 
+            <column name="deviceType" /> 
+        </property> 
+        <property name="aotEnable" type="java.lang.Boolean"> 
+            <column name="aotEnable" /> 
+        </property> 
+        <property name="wasmEnable" type="java.lang.Boolean"> 
+            <column name="wasmEnable" /> 
+        </property> 
+        <property name="wasmVersion" type="java.lang.Integer"> 
+            <column name="wasmVersion" /> 
+        </property> 
+        <property name="productLock" type="java.lang.Boolean"> 
+            <column name="productLock" /> 
+        </property> 
+        <property name="projectId" type="string"> 
+            <column name="projectId" /> 
+        </property> 
+    </class> 
+</hibernate-mapping>

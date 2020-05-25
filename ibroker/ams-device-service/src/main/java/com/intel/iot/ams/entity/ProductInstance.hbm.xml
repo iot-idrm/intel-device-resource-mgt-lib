@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+<hibernate-mapping> 
+    <class name="com.intel.iot.ams.entity.ProductInstance" table="ProductInstance"> 
+        <id name="instanceId" type="java.lang.Integer"> 
+            <column name="instanceId" /> 
+            <generator class="identity" /> 
+        </id> 
+        <property name="instanceName" type="string"> 
+            <column name="instanceName" /> 
+        </property> 
+        <property name="productName" type="string"> 
+            <column name="productName" /> 
+        </property> 
+        <property name="version" type="string"> 
+            <column name="version" /> 
+        </property> 
+        <property name="cpu" type="string"> 
+            <column name="cpu" /> 
+        </property> 
+        <property name="platform" type="string"> 
+            <column name="platform" /> 
+        </property> 
+        <property name="os" type="string"> 
+            <column name="os" /> 
+        </property> 
+        <property name="osMin" type="string"> 
+            <column name="osMin" /> 
+        </property> 
+        <property name="system" type="string"> 
+            <column name="system" /> 
+        </property> 
+        <property name="sysMin" type="string"> 
+            <column name="sysMin" /> 
+        </property> 
+        <property name="bits" type="string"> 
+            <column name="bits" /> 
+        </property> 
+        <property name="dependencyList" type="string"> 
+            <column name="dependencyList" /> 
+        </property> 
+        <property name="metadata" type="string"> 
+            <column name="metadata" /> 
+        </property> 
+        <property name="aotEnable" type="java.lang.Boolean"> 
+            <column name="aotEnable" /> 
+        </property> 
+        <property name="wasmEnable" type="java.lang.Boolean"> 
+            <column name="wasmEnable" /> 
+        </property> 
+        <property name="wasmVersion" type="java.lang.Integer"> 
+            <column name="wasmVersion" /> 
+        </property> 
+        <property name="minWasmVersion" type="java.lang.Integer"> 
+            <column name="minWasmVersion" /> 
+        </property>
+        <property name="uploadTime" type="java.util.Date">
+            <column name="uploadTime" />
+        </property>
+
+    </class> 
+</hibernate-mapping>

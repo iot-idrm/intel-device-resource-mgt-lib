@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+<hibernate-mapping> 
+    <class name="com.intel.iot.ams.entity.CfgInstance" table="CfgInstance"> 
+        <id name="id" type="java.lang.Integer"> 
+            <column name="id" /> 
+            <generator class="identity" /> 
+        </id> 
+        <property name="cfgUuid" type="string"> 
+            <column name="cfgUuid" /> 
+        </property> 
+        <property name="targetId" type="string"> 
+            <column name="targetId" /> 
+        </property> 
+        <property name="contentId" type="java.lang.Integer"> 
+            <column name="contentId" /> 
+        </property> 
+    </class> 
+</hibernate-mapping>
