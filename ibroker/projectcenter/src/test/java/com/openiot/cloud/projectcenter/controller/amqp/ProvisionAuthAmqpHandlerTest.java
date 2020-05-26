@@ -4,6 +4,10 @@
 
 package com.openiot.cloud.projectcenter.controller.amqp;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
+
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.projectcenter.service.GatewayService;
 import com.openiot.cloud.projectcenter.service.dto.GatewayDTO;
@@ -13,34 +17,28 @@ import com.openiot.cloud.projectcenter.utils.RandomKeyGen;
 import com.openiot.cloud.sdk.service.IConnectRequest;
 import com.openiot.cloud.sdk.service.IConnectResponse;
 import com.openiot.cloud.sdk.service.JMSResponseSender;
+import java.lang.reflect.Method;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.mockito.ArgumentMatchers.isA;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doAnswer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.lang.reflect.Method;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ProvisionAuthAmqpHandlerTest {
-  @Autowired
-  private ProvisionAuthAmqpHandler provisionAuthAmqpHandler;
-  @Autowired
-  private GatewayService gatewayService;
-  @Mock
-  private JMSResponseSender fakeResponseSender;
+  @Autowired private ProvisionAuthAmqpHandler provisionAuthAmqpHandler;
+  @Autowired private GatewayService gatewayService;
+  @Mock private JMSResponseSender fakeResponseSender;
 
   @Before
   public void setup() throws Exception {
@@ -82,22 +80,23 @@ public class ProvisionAuthAmqpHandlerTest {
 
     //
     CompletableFuture<Boolean> result1 = new CompletableFuture<>();
-    doAnswer(invocation -> {
-      IConnectResponse response = invocation.getArgument(0);
-      result1.complete(response.getStatus().is2xxSuccessful());
-      return null;
-    }).when(fakeResponseSender).send(isA(IConnectResponse.class));
+    doAnswer(
+            invocation -> {
+              IConnectResponse response = invocation.getArgument(0);
+              result1.complete(response.getStatus().is2xxSuccessful());
+              return null;
+            })
+        .when(fakeResponseSender)
+        .send(isA(IConnectResponse.class));
 
-    IConnectRequest request = IConnectRequest.create(HttpMethod.POST,
-                                                     String.format("%s?random=%s&aid=%s",
-                                                                   ConstDef.MQ_QUEUE_PROV_AUTH,
-                                                                   random1,
-                                                                   iAgentId),
-                                                     MediaType.TEXT_PLAIN,
-                                                     payload);
+    IConnectRequest request =
+        IConnectRequest.create(
+            HttpMethod.POST,
+            String.format("%s?random=%s&aid=%s", ConstDef.MQ_QUEUE_PROV_AUTH, random1, iAgentId),
+            MediaType.TEXT_PLAIN,
+            payload);
     request.setResponseSender(fakeResponseSender);
     provisionAuthAmqpHandler.onRequest(request);
     assertThat(result1.get(5, TimeUnit.SECONDS)).isTrue();
   }
-
 }

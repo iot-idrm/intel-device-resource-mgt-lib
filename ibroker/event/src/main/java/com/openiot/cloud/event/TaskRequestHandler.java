@@ -2,7 +2,6 @@
  * Copyright (C) 2020 Intel Corporation. All rights reserved. SPDX-License-Identifier: Apache-2.0
  */
 
-
 package com.openiot.cloud.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,6 +12,7 @@ import com.openiot.cloud.sdk.service.IConnectRequest;
 import com.openiot.cloud.sdk.service.IConnectResponse;
 import com.openiot.cloud.sdk.service.IConnectServiceHandler;
 import com.openiot.cloud.sdk.utilities.UrlUtil;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +20,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import java.util.Map;
 
 @Component
 public class TaskRequestHandler implements IConnectServiceHandler {
 
   public static final Logger logger = LoggerFactory.getLogger(TaskRequestHandler.class);
 
-  @Autowired
-  private TaskNewRepository taskRepo;
+  @Autowired private TaskNewRepository taskRepo;
 
   @Override
   public void onRequest(IConnectRequest request) {
@@ -53,10 +51,9 @@ public class TaskRequestHandler implements IConnectServiceHandler {
       respPayload = "Query params 'id' is required!";
       respCode = HttpStatus.BAD_REQUEST;
       respDataType = MediaType.TEXT_PLAIN;
-      resp = IConnectResponse.createFromRequest(request,
-                                                respCode,
-                                                respDataType,
-                                                respPayload.getBytes());
+      resp =
+          IConnectResponse.createFromRequest(
+              request, respCode, respDataType, respPayload.getBytes());
       resp.send();
       return;
     }
@@ -76,10 +73,9 @@ public class TaskRequestHandler implements IConnectServiceHandler {
     Map<String, String> params = UrlUtil.getAllQueryParam(url);
     if (params == null || params.get("monitor") == null) {
       respPayload = "Query params 'monitor' is required!";
-      resp = IConnectResponse.createFromRequest(request,
-                                                HttpStatus.BAD_REQUEST,
-                                                MediaType.TEXT_PLAIN,
-                                                respPayload.getBytes());
+      resp =
+          IConnectResponse.createFromRequest(
+              request, HttpStatus.BAD_REQUEST, MediaType.TEXT_PLAIN, respPayload.getBytes());
       resp.send();
       return;
     }
@@ -88,10 +84,9 @@ public class TaskRequestHandler implements IConnectServiceHandler {
     TaskNew task = taskRepo.findTopByMonitorNameOrderByCreateTimeAsc(monitorName);
     if (task != null) {
       try {
-        resp = IConnectResponse.createFromRequest(request,
-                                                  HttpStatus.OK,
-                                                  respDataType,
-                                                  new ObjectMapper().writeValueAsBytes(task));
+        resp =
+            IConnectResponse.createFromRequest(
+                request, HttpStatus.OK, respDataType, new ObjectMapper().writeValueAsBytes(task));
         resp.send();
       } catch (JsonProcessingException e) {
         e.printStackTrace();

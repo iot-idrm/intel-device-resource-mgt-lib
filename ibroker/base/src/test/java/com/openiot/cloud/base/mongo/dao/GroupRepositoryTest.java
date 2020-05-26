@@ -4,6 +4,8 @@
 
 package com.openiot.cloud.base.mongo.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.openiot.cloud.base.Application;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.Group;
@@ -13,14 +15,6 @@ import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity.Reference;
 import com.openiot.cloud.base.service.model.DataSourceType;
-import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Collections;
@@ -28,18 +22,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {Application.class}, properties = {"mongo.db = test_openiot"})
+@SpringBootTest(
+    classes = {Application.class},
+    properties = {"mongo.db = test_openiot"})
 public class GroupRepositoryTest {
-  @Autowired
-  private GroupRepository groupRepository;
+  @Autowired private GroupRepository groupRepository;
 
-  @Autowired
-  private GroupTypeRepository groupTypeRepository;
+  @Autowired private GroupTypeRepository groupTypeRepository;
 
-  @Autowired
-  private MongoTemplate template;
+  @Autowired private MongoTemplate template;
 
   @Before
   public void setUp() throws Exception {
@@ -121,9 +121,8 @@ public class GroupRepositoryTest {
     List<DataSourceEntity> dataSourceList =
         groupRepository.findDssByGroupNameAndDsName("group_1", "data_source_1");
     assertThat(dataSourceList).isNotEmpty();
-    assertThat(dataSourceList.get(0)
-                             .getAttributeList()
-                             .get(0)).hasFieldOrPropertyWithValue("av", "from template");
+    assertThat(dataSourceList.get(0).getAttributeList().get(0))
+        .hasFieldOrPropertyWithValue("av", "from template");
 
     DataSourceEntity dataSource =
         new DataSourceEntity("data_source_1", DataSourceType.TABLE.name());
@@ -132,9 +131,8 @@ public class GroupRepositoryTest {
     groupRepository.save(group);
 
     dataSourceList = groupRepository.findDssByGroupNameAndDsName("group_1", "data_source_1");
-    assertThat(dataSourceList.get(0)
-                             .getAttributeList()
-                             .get(0)).hasFieldOrPropertyWithValue("av", "from data source");
+    assertThat(dataSourceList.get(0).getAttributeList().get(0))
+        .hasFieldOrPropertyWithValue("av", "from data source");
   }
 
   @Test
@@ -216,15 +214,13 @@ public class GroupRepositoryTest {
     dataSourceTable.setDsdefItem(new Reference("", "", "", 1, 1));
     DataSourceEntity dataSourceReference =
         new DataSourceEntity("datasource_2", DataSourceType.REFERENCE.toString());
-    dataSourceReference.setDsdefItem(new Reference("dummy_device",
-                                                   "/switch",
-                                                   "value",
-                                                   LocalDateTime.of(2000, 1, 2, 3, 4, 5)
-                                                                .toInstant(ZoneOffset.UTC)
-                                                                .toEpochMilli(),
-                                                   LocalDateTime.of(2000, 2, 3, 4, 5, 6)
-                                                                .toInstant(ZoneOffset.UTC)
-                                                                .toEpochMilli()));
+    dataSourceReference.setDsdefItem(
+        new Reference(
+            "dummy_device",
+            "/switch",
+            "value",
+            LocalDateTime.of(2000, 1, 2, 3, 4, 5).toInstant(ZoneOffset.UTC).toEpochMilli(),
+            LocalDateTime.of(2000, 2, 3, 4, 5, 6).toInstant(ZoneOffset.UTC).toEpochMilli()));
     group.insertOrUpdateDss(dataSourceTable);
     group.insertOrUpdateDss(dataSourceReference);
     groupRepository.save(group);
@@ -265,15 +261,15 @@ public class GroupRepositoryTest {
     assertThat(group.getMd()).isNull();
     assertThat(group.getMr()).isNull();
 
-    group.replaceOrClearAs(Stream.of(new AttributeEntity("grape", "13"),
-                                     new AttributeEntity("lime", "3.14"))
-                                 .collect(Collectors.toList()));
+    group.replaceOrClearAs(
+        Stream.of(new AttributeEntity("grape", "13"), new AttributeEntity("lime", "3.14"))
+            .collect(Collectors.toList()));
     assertThat(group.getAs()).isNotEmpty();
     group.replaceOrClearAs(null);
     assertThat(group.getAs()).isNotEmpty().extracting("av").containsOnly("13", "3.14");
 
-    group.replaceOrClearCs(Stream.of(new ConfigurationEntity("apricot", "true"))
-                                 .collect(Collectors.toList()));
+    group.replaceOrClearCs(
+        Stream.of(new ConfigurationEntity("apricot", "true")).collect(Collectors.toList()));
     assertThat(group.getCs()).isNotEmpty();
     group.replaceOrClearCs(new LinkedList<>());
     assertThat(group.getCs()).isNull();
@@ -294,7 +290,7 @@ public class GroupRepositoryTest {
     group.removeItemsFromMd(Collections.emptyList());
     group.removeItemsFromMd(Stream.of("not exist").collect(Collectors.toList()));
     group.removeItemsFromMr(Collections.emptyList());
-    group.removeItemsFromMr(Stream.of(new Group.MemberResRef("not", "exist"))
-                                  .collect(Collectors.toList()));
+    group.removeItemsFromMr(
+        Stream.of(new Group.MemberResRef("not", "exist")).collect(Collectors.toList()));
   }
 }

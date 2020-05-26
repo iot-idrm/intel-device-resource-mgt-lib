@@ -4,7 +4,6 @@
 
 package com.openiot.cloud.cfg.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -78,8 +77,8 @@ public class ProjectCfg {
     super();
   }
 
-  public ProjectCfg(String id, String name, String group_title, String description,
-      String location) {
+  public ProjectCfg(
+      String id, String name, String group_title, String description, String location) {
     this.id = id;
     this.name = name;
     this.group_title = group_title;
@@ -97,20 +96,29 @@ public class ProjectCfg {
   }
 
   public static ProjectCfg from(ProjectDTO prj) {
-    Optional<ProjectCfg> prjCfg = Optional.ofNullable(prj).map(p -> {
-      ProjectCfg cfg = new ProjectCfg(p.getId(),
-                                      p.getName(),
-                                      p.getGroup_title(),
-                                      p.getDescription(),
-                                      p.getLocation());
-      if (p.getAs() != null) {
-        cfg.setAttr(p.getAs().stream().collect(Collectors.toMap(x -> x.getAn(), x -> x.getAv())));
-      }
-      if (p.getCs() != null) {
-        cfg.setCfg(p.getCs().stream().collect(Collectors.toMap(x -> x.getCn(), x -> x.getCv())));
-      }
-      return cfg;
-    });
+    Optional<ProjectCfg> prjCfg =
+        Optional.ofNullable(prj)
+            .map(
+                p -> {
+                  ProjectCfg cfg =
+                      new ProjectCfg(
+                          p.getId(),
+                          p.getName(),
+                          p.getGroup_title(),
+                          p.getDescription(),
+                          p.getLocation());
+                  if (p.getAs() != null) {
+                    cfg.setAttr(
+                        p.getAs().stream()
+                            .collect(Collectors.toMap(x -> x.getAn(), x -> x.getAv())));
+                  }
+                  if (p.getCs() != null) {
+                    cfg.setCfg(
+                        p.getCs().stream()
+                            .collect(Collectors.toMap(x -> x.getCn(), x -> x.getCv())));
+                  }
+                  return cfg;
+                });
     return prjCfg.orElse(null);
   }
 }

@@ -16,6 +16,11 @@ import com.openiot.cloud.cfg.model.ProjectCfg;
 import com.openiot.cloud.sdk.service.IConnectRequest;
 import com.openiot.cloud.sdk.service.IConnectResponse;
 import com.openiot.cloud.sdk.service.IConnectResponseHandler;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,30 +28,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 @Component
 public class ConfigTaskHandler implements IConnectResponseHandler {
   private static Logger logger = LoggerFactory.getLogger(ConfigTaskHandler.class);
 
-  @Autowired
-  private ConfigRepository cfgRepo;
-  @Autowired
-  private GroupRepository grpRepo;
-  @Autowired
-  private DeviceRepository devRepo;
-  @Autowired
-  private ResourceRepository resRepo;
-  @Autowired
-  private ResProRepository resProRepo;
+  @Autowired private ConfigRepository cfgRepo;
+  @Autowired private GroupRepository grpRepo;
+  @Autowired private DeviceRepository devRepo;
+  @Autowired private ResourceRepository resRepo;
+  @Autowired private ResProRepository resProRepo;
 
   private boolean isTaskHandleSuccess = false;
   private Object taskLock = new Object();
@@ -67,15 +58,15 @@ public class ConfigTaskHandler implements IConnectResponseHandler {
 
           if (task != null) {
             switch (task.getTargetType()) {
-              // device config update
+                // device config update
               case ConstDef.EVENT_TARGET_TYPE_DEVICE:
                 generateDevConfiguration(task.getTargetId());
                 break;
-              // group config update
+                // group config update
               case ConstDef.EVENT_TARGET_TYPE_GROUP:
                 generateGroupConfiguration(task.getTargetId());
                 break;
-              // project config update
+                // project config update
               case ConstDef.EVENT_TARGET_TYPE_PROJECT:
                 generateProjectConfiguration(task.getTargetId());
                 break;
@@ -87,15 +78,18 @@ public class ConfigTaskHandler implements IConnectResponseHandler {
             // Delete the task after handling
             String url = "/task?id=" + currentTaskId;
             IConnectRequest request = IConnectRequest.create(HttpMethod.DELETE, url, null, null);
-            request.send((resp) -> {
-              synchronized (taskLock) {
-                if (resp.getStatus().equals(HttpStatus.OK)) {
-                  isTaskHandleSuccess = true;
-                  logger.info("Config service handle task: {} succeed!", currentTaskId);
-                }
-                taskLock.notifyAll(); // Task handle succeed, notify the sender thread
-              }
-            }, 10, TimeUnit.SECONDS);
+            request.send(
+                (resp) -> {
+                  synchronized (taskLock) {
+                    if (resp.getStatus().equals(HttpStatus.OK)) {
+                      isTaskHandleSuccess = true;
+                      logger.info("Config service handle task: {} succeed!", currentTaskId);
+                    }
+                    taskLock.notifyAll(); // Task handle succeed, notify the sender thread
+                  }
+                },
+                10,
+                TimeUnit.SECONDS);
           } else {
             logger.warn("Config service pull task with wrong payload!");
             taskLock.notifyAll(); // GET task payload is not correct, handling failed, notify the
@@ -140,30 +134,31 @@ public class ConfigTaskHandler implements IConnectResponseHandler {
     Optional<List<Group>> deviceGroups =
         device.map(dev -> grpRepo.findAllGroupByDevId(dev.getId()));
     Optional<List<Group>> resourceGroups =
-        resources.map(reses -> reses.stream()
-                                    .map(res -> grpRepo.findAllGroupByRes(res.getDevId(),
-                                                                          res.getUrl()))
-                                    .filter(gllist -> !gllist.isEmpty())
-                                    .flatMap(List::stream)
-                                    .collect(Collectors.toList()));
+        resources.map(
+            reses ->
+                reses.stream()
+                    .map(res -> grpRepo.findAllGroupByRes(res.getDevId(), res.getUrl()))
+                    .filter(gllist -> !gllist.isEmpty())
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList()));
 
-    Optional<DeviceConfig> devCfg = Optional.ofNullable(DeviceConfig.from(device,
-                                                                          resources,
-                                                                          properties,
-                                                                          deviceGroups,
-                                                                          resourceGroups));
-    devCfg.map(dc -> dc.toJsonString())
-          .filter(dcJson -> !dcJson.isEmpty())
-          .ifPresent(dcJson -> addConfig(ConstDef.CFG_TT_DEVONGW, deviceId.get(), dcJson));
+    Optional<DeviceConfig> devCfg =
+        Optional.ofNullable(
+            DeviceConfig.from(device, resources, properties, deviceGroups, resourceGroups));
+    devCfg
+        .map(dc -> dc.toJsonString())
+        .filter(dcJson -> !dcJson.isEmpty())
+        .ifPresent(dcJson -> addConfig(ConstDef.CFG_TT_DEVONGW, deviceId.get(), dcJson));
   }
 
   public void generateGroupConfiguration(String groupName) {
     logger.debug("going to generateGroupConfiguration for {} ", groupName);
     Optional<Group> group = Optional.ofNullable(grpRepo.findOneByName(groupName));
     Optional<GroupConfig> grpCfg = Optional.ofNullable(GroupConfig.from(group));
-    grpCfg.map(gc -> gc.toJsonString())
-          .filter(gcJson -> !gcJson.isEmpty())
-          .ifPresent(gcJson -> addConfig(ConstDef.CFG_TT_GRP, groupName, gcJson));
+    grpCfg
+        .map(gc -> gc.toJsonString())
+        .filter(gcJson -> !gcJson.isEmpty())
+        .ifPresent(gcJson -> addConfig(ConstDef.CFG_TT_GRP, groupName, gcJson));
   }
 
   public void addConfig(String targetType, String targetId, String config) {
@@ -179,28 +174,31 @@ public class ConfigTaskHandler implements IConnectResponseHandler {
   }
 
   public void generateProjectConfiguration(String projectID) {
-    IConnectRequest.create(HttpMethod.GET,
-                           String.format("/api/project?%s=%s", ConstDef.Q_ID, projectID),
-                           MediaType.APPLICATION_JSON,
-                           null)
-                   .send(response -> {
-                     if (response.getStatus().is2xxSuccessful()) {
-                       try {
-                         ProjectDTO[] projectDTO =
-                             new ObjectMapper().readValue(response.getPayload(),
-                                                          ProjectDTO[].class);
-                         if (projectDTO.length == 0) {
-                           logger.warn("empty project information about {}", projectID);
-                         } else {
-                           ProjectCfg projectCfg = ProjectCfg.from(projectDTO[0]);
-                           addConfig(ConstDef.CFG_TT_PRJ, projectID, projectCfg.toJsonString());
-                         }
-                       } catch (IOException e) {
-                         logger.error("can not parse the payload from /api/project");
-                       }
-                     } else {
-                       logger.error("GET /api/project failed {}", response);
-                     }
-                   }, 5, TimeUnit.SECONDS);
+    IConnectRequest.create(
+            HttpMethod.GET,
+            String.format("/api/project?%s=%s", ConstDef.Q_ID, projectID),
+            MediaType.APPLICATION_JSON,
+            null)
+        .send(
+            response -> {
+              if (response.getStatus().is2xxSuccessful()) {
+                try {
+                  ProjectDTO[] projectDTO =
+                      new ObjectMapper().readValue(response.getPayload(), ProjectDTO[].class);
+                  if (projectDTO.length == 0) {
+                    logger.warn("empty project information about {}", projectID);
+                  } else {
+                    ProjectCfg projectCfg = ProjectCfg.from(projectDTO[0]);
+                    addConfig(ConstDef.CFG_TT_PRJ, projectID, projectCfg.toJsonString());
+                  }
+                } catch (IOException e) {
+                  logger.error("can not parse the payload from /api/project");
+                }
+              } else {
+                logger.error("GET /api/project failed {}", response);
+              }
+            },
+            5,
+            TimeUnit.SECONDS);
   }
 }

@@ -42,20 +42,16 @@ public class ILinkEncoder extends MessageToByteEncoder<ILinkMessage> {
 
     // leading byte
     outBuf.writeByte(msg.getLeadingByte());
-    logger.debug(String.format("%d - %d is %s",
-                               prevPhaseWriteIndex,
-                               outBuf.writerIndex(),
-                               "leading byte"));
+    logger.debug(
+        String.format("%d - %d is %s", prevPhaseWriteIndex, outBuf.writerIndex(), "leading byte"));
 
     // message id
     prevPhaseWriteIndex = outBuf.writerIndex();
     if (msg.getLeadingByte() != LeadingByte.PLAIN.valueOf()) {
       outBuf.writeBytes(msg.getIlinkMessageId(), 0, 4);
     }
-    logger.debug(String.format("%d - %d is %s",
-                               prevPhaseWriteIndex,
-                               outBuf.writerIndex(),
-                               "message id"));
+    logger.debug(
+        String.format("%d - %d is %s", prevPhaseWriteIndex, outBuf.writerIndex(), "message id"));
 
     // message type
     prevPhaseWriteIndex = outBuf.writerIndex();
@@ -64,10 +60,8 @@ public class ILinkEncoder extends MessageToByteEncoder<ILinkMessage> {
       mt = (byte) (0x80 | mt);
     }
     outBuf.writeByte(mt);
-    logger.debug(String.format("%d - %d is %s",
-                               prevPhaseWriteIndex,
-                               outBuf.writerIndex(),
-                               "message type"));
+    logger.debug(
+        String.format("%d - %d is %s", prevPhaseWriteIndex, outBuf.writerIndex(), "message type"));
 
     // message BL + EL
     prevPhaseWriteIndex = outBuf.writerIndex();
@@ -93,40 +87,37 @@ public class ILinkEncoder extends MessageToByteEncoder<ILinkMessage> {
       // 2 bytes, the highest bit is 0
       outBuf.writeShort(bodyLength & 0x7fff);
     }
-    logger.debug(String.format("  bodyLength = %d, flexHeaderLen = %d",
-                               bodyLength,
-                               flexHeaderByCBor == null ? 0 : flexHeaderByCBor.length));
-    logger.debug(String.format("%d - %d is %s",
-                               prevPhaseWriteIndex,
-                               outBuf.writerIndex(),
-                               "body length"));
+    logger.debug(
+        String.format(
+            "  bodyLength = %d, flexHeaderLen = %d",
+            bodyLength, flexHeaderByCBor == null ? 0 : flexHeaderByCBor.length));
+    logger.debug(
+        String.format("%d - %d is %s", prevPhaseWriteIndex, outBuf.writerIndex(), "body length"));
 
     // FLEXHEADER
     prevPhaseWriteIndex = outBuf.writerIndex();
     if (flexHeaderByCBor != null && flexHeaderByCBor.length > 0) {
       // TL. flex header size as bytes
       outBuf.writeShort(flexHeaderByCBor.length);
-      logger.debug(String.format("%d - %d is %s",
-                                 prevPhaseWriteIndex,
-                                 outBuf.writerIndex(),
-                                 "flex header TL(as byte)"));
+      logger.debug(
+          String.format(
+              "%d - %d is %s",
+              prevPhaseWriteIndex, outBuf.writerIndex(), "flex header TL(as byte)"));
 
       // NN. how many entries are there
       prevPhaseWriteIndex = outBuf.writerIndex();
       outBuf.writeShort(msg.getFLexHeaderSize());
-      logger.debug(String.format("%d - %d is %s",
-                                 prevPhaseWriteIndex,
-                                 outBuf.writerIndex(),
-                                 "flex header NN(as entry)"));
+      logger.debug(
+          String.format(
+              "%d - %d is %s",
+              prevPhaseWriteIndex, outBuf.writerIndex(), "flex header NN(as entry)"));
 
       // outBuf.writeShort(flexHeaderByCBor.length);
       prevPhaseWriteIndex = outBuf.writerIndex();
       outBuf.writeBytes(flexHeaderByCBor);
     }
-    logger.debug(String.format("%d - %d is %s",
-                               prevPhaseWriteIndex,
-                               outBuf.writerIndex(),
-                               "flex header"));
+    logger.debug(
+        String.format("%d - %d is %s", prevPhaseWriteIndex, outBuf.writerIndex(), "flex header"));
 
     // flush everything to dest
     if (outBuf.readableBytes() > 0) {

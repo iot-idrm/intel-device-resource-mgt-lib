@@ -4,7 +4,6 @@
 
 package com.openiot.cloud.ibroker.utils;
 
-
 import lombok.Data;
 
 @Data

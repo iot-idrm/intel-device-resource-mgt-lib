@@ -16,14 +16,14 @@ import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
 import com.openiot.cloud.base.mongo.model.validator.*;
+import java.util.*;
+import java.util.function.Predicate;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.*;
-import java.util.function.Predicate;
 
 @Document(collection = ConstDef.C_GRP)
 @JsonInclude(Include.NON_EMPTY)
@@ -31,7 +31,10 @@ public class Group {
   @Untouchable
   @Id
   @JsonProperty(ConstDef.F_NAME)
-  @CheckName(value = Group.class, message = "need an unique name", groups = {CreateValidator.class})
+  @CheckName(
+      value = Group.class,
+      message = "need an unique name",
+      groups = {CreateValidator.class})
   String n;
 
   @Field(ConstDef.F_DISPLAYNAME)
@@ -53,7 +56,9 @@ public class Group {
 
   @Field(ConstDef.F_GRPTYPE)
   @JsonProperty(ConstDef.F_GRPTYPE)
-  @CheckGt(value = Group.class, message = "need an valid group type name",
+  @CheckGt(
+      value = Group.class,
+      message = "need an valid group type name",
       groups = {CreateValidator.class, UpdateValidator.class})
   String gt;
 
@@ -85,7 +90,9 @@ public class Group {
 
   @Field(ConstDef.F_DATASOURCES)
   @JsonProperty(ConstDef.F_DATASOURCES)
-  @CheckDs(value = Group.class, message = "all dsn should be unique",
+  @CheckDs(
+      value = Group.class,
+      message = "all dsn should be unique",
       groups = {CreateValidator.class, UpdateValidator.class})
   @Valid
   List<DataSourceEntity> dss;
@@ -106,8 +113,8 @@ public class Group {
 
   private static <T> T findByName(List<T> list, Predicate<T> filter) {
     return Optional.ofNullable(list)
-                   .map(l -> l.stream().filter(item -> filter.test(item)).findFirst().orElse(null))
-                   .orElse(null);
+        .map(l -> l.stream().filter(item -> filter.test(item)).findFirst().orElse(null))
+        .orElse(null);
   }
 
   private static <T> void removeByName(List<T> list, Predicate<T> filter) {
@@ -235,9 +242,9 @@ public class Group {
     Objects.requireNonNull(names);
 
     Optional.ofNullable(this.as)
-            .ifPresent(asList -> names.forEach(toRemove -> removeByName(asList,
-                                                                        a -> a.getAn()
-                                                                              .equals(toRemove))));
+        .ifPresent(
+            asList ->
+                names.forEach(toRemove -> removeByName(asList, a -> a.getAn().equals(toRemove))));
   }
 
   public ConfigurationEntity getCfgByName(String name) {
@@ -261,9 +268,9 @@ public class Group {
     Objects.requireNonNull(names);
 
     Optional.ofNullable(this.cs)
-            .ifPresent(csList -> names.forEach(toRemove -> removeByName(csList,
-                                                                        c -> c.getCn()
-                                                                              .equals(toRemove))));
+        .ifPresent(
+            csList ->
+                names.forEach(toRemove -> removeByName(csList, c -> c.getCn().equals(toRemove))));
   }
 
   public void insertOrUpdateMds(String devId) {
@@ -284,7 +291,7 @@ public class Group {
 
   public void removeItemsFromMd(List<String> devIdList) {
     Optional.ofNullable(this.md)
-            .ifPresent(mdList -> Optional.ofNullable(devIdList).ifPresent(mdList::removeAll));
+        .ifPresent(mdList -> Optional.ofNullable(devIdList).ifPresent(mdList::removeAll));
   }
 
   public void insertOrUpdateMrs(MemberResRef resRef) {
@@ -301,13 +308,15 @@ public class Group {
 
   public void removeItemFromMr(MemberResRef resRef) {
     Optional.ofNullable(this.mr)
-            .ifPresent(mrList -> mrList.removeIf(resource -> resource.equals(resRef)));
+        .ifPresent(mrList -> mrList.removeIf(resource -> resource.equals(resRef)));
   }
 
   public void removeItemsFromMr(List<MemberResRef> resList) {
     Optional.ofNullable(this.mr)
-            .ifPresent(mrList -> Optional.ofNullable(resList)
-                                         .ifPresent(reses -> reses.forEach(this::removeItemFromMr)));
+        .ifPresent(
+            mrList ->
+                Optional.ofNullable(resList)
+                    .ifPresent(reses -> reses.forEach(this::removeItemFromMr)));
   }
 
   public DataSourceEntity getDsByName(String name) {
@@ -323,9 +332,18 @@ public class Group {
   }
 
   public static List<String> allFields() {
-    return Arrays.asList(new String[] {ConstDef.F_ID, ConstDef.F_DISPLAYNAME,
-        ConstDef.F_DESCRIPTION, ConstDef.F_GRPTYPE, ConstDef.F_ATTRS, ConstDef.F_CONFIGS,
-        ConstDef.F_DATASOURCES, ConstDef.F_MBR, ConstDef.F_PROJECT});
+    return Arrays.asList(
+        new String[] {
+          ConstDef.F_ID,
+          ConstDef.F_DISPLAYNAME,
+          ConstDef.F_DESCRIPTION,
+          ConstDef.F_GRPTYPE,
+          ConstDef.F_ATTRS,
+          ConstDef.F_CONFIGS,
+          ConstDef.F_DATASOURCES,
+          ConstDef.F_MBR,
+          ConstDef.F_PROJECT
+        });
   }
 
   @JsonInclude(Include.NON_NULL)
@@ -339,8 +357,8 @@ public class Group {
     String uri;
 
     @JsonCreator
-    public MemberResRef(@JsonProperty(ConstDef.F_DEVID) String di,
-        @JsonProperty(ConstDef.F_RESURI) String uri) {
+    public MemberResRef(
+        @JsonProperty(ConstDef.F_DEVID) String di, @JsonProperty(ConstDef.F_RESURI) String uri) {
       this.di = di;
       this.uri = uri;
     }
@@ -377,31 +395,46 @@ public class Group {
 
     @Override
     public boolean equals(Object obj) {
-      if (this == obj)
-        return true;
-      if (obj == null)
-        return false;
-      if (getClass() != obj.getClass())
-        return false;
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
       MemberResRef other = (MemberResRef) obj;
       if (di == null) {
-        if (other.di != null)
-          return false;
-      } else if (!this.di.equals(other.di))
-        return false;
+        if (other.di != null) return false;
+      } else if (!this.di.equals(other.di)) return false;
       if (this.uri == null) {
-        if (other.uri != null)
-          return false;
-      } else if (!uri.equals(other.uri))
-        return false;
+        if (other.uri != null) return false;
+      } else if (!uri.equals(other.uri)) return false;
       return true;
     }
   }
 
   @Override
   public String toString() {
-    return "Group [n=" + n + ", dpn=" + dpn + ", d=" + d + ", prj=" + prj + ", gtdpn=" + gtdpn
-        + ", gt=" + gt + ", md=" + md + ", mr=" + mr + ", cs=" + cs + ", as=" + as + ", dss=" + dss
-        + ", gtdtl=" + gtdtl + "]";
+    return "Group [n="
+        + n
+        + ", dpn="
+        + dpn
+        + ", d="
+        + d
+        + ", prj="
+        + prj
+        + ", gtdpn="
+        + gtdpn
+        + ", gt="
+        + gt
+        + ", md="
+        + md
+        + ", mr="
+        + mr
+        + ", cs="
+        + cs
+        + ", as="
+        + as
+        + ", dss="
+        + dss
+        + ", gtdtl="
+        + gtdtl
+        + "]";
   }
 }

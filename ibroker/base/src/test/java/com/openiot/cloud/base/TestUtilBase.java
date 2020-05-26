@@ -10,6 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.openiot.cloud.base.help.ConstDef;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,19 +25,11 @@ import org.skyscreamer.jsonassert.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class TestUtilBase {
 
-  @Autowired
-  MongoTemplate mo;
+  @Autowired MongoTemplate mo;
 
   Map<String, List<String>> fileLines = new HashMap<String, List<String>>(); // for readLines
   Map<String, String> fileContent = new HashMap<String, String>(); // for readAll
@@ -38,8 +37,8 @@ public class TestUtilBase {
   public List<String> readLines(String fileName) {
     if (fileLines.get(fileName) == null) {
       try {
-        fileLines.put(fileName,
-                      Files.readAllLines(Paths.get(getClass().getResource(fileName).getFile())));
+        fileLines.put(
+            fileName, Files.readAllLines(Paths.get(getClass().getResource(fileName).getFile())));
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -51,9 +50,9 @@ public class TestUtilBase {
   public String readAll(String fileName) {
     if (fileContent.get(fileName) == null) {
       try {
-        fileContent.put(fileName,
-                        new String(Files.readAllBytes(Paths.get(getClass().getResource(fileName)
-                                                                          .getFile()))));
+        fileContent.put(
+            fileName,
+            new String(Files.readAllBytes(Paths.get(getClass().getResource(fileName).getFile()))));
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -128,8 +127,9 @@ public class TestUtilBase {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode obj = null;
     try {
-      obj = mapper.readTree(Files.newBufferedReader(Paths.get(getClass().getResource(fileName)
-                                                                        .getFile())));
+      obj =
+          mapper.readTree(
+              Files.newBufferedReader(Paths.get(getClass().getResource(fileName).getFile())));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -178,8 +178,9 @@ public class TestUtilBase {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode obj = null;
     try {
-      obj = mapper.readTree(Files.newBufferedReader(Paths.get(getClass().getResource(fileName)
-                                                                        .getFile())));
+      obj =
+          mapper.readTree(
+              Files.newBufferedReader(Paths.get(getClass().getResource(fileName).getFile())));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -203,8 +204,9 @@ public class TestUtilBase {
       ObjectMapper mapper = new ObjectMapper();
       JsonNode obj = null;
       try {
-        obj = mapper.readTree(Files.newBufferedReader(Paths.get(getClass().getResource(fileName)
-                                                                          .getFile())));
+        obj =
+            mapper.readTree(
+                Files.newBufferedReader(Paths.get(getClass().getResource(fileName).getFile())));
       } catch (IOException e) {
         e.printStackTrace();
       }

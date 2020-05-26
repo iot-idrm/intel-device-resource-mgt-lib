@@ -4,8 +4,6 @@
 
 package com.openiot.cloud.base.help;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -14,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * it is a thread safe map to store sent requests, in order to maintain the relationship between a
@@ -67,8 +67,8 @@ public class ConcurrentRequestMap<K, V> {
     this(128, 10, 30, null);
   }
 
-  public ConcurrentRequestMap(int capacity, int newAgePeriod, int oldAgePeriod,
-      BiConsumer<K, V> rejectHandler) {
+  public ConcurrentRequestMap(
+      int capacity, int newAgePeriod, int oldAgePeriod, BiConsumer<K, V> rejectHandler) {
     requestMap = new ConcurrentHashMap<>();
     timestampMap = new ConcurrentSkipListMap<>();
     this.capacity = capacity;
@@ -76,13 +76,17 @@ public class ConcurrentRequestMap<K, V> {
     this.oldAgePeriod = oldAgePeriod > newAgePeriod ? oldAgePeriod : (newAgePeriod << 1);
     this.rejectHandler = rejectHandler;
 
-    ses.scheduleAtFixedRate(() -> {
-      try {
-        removeExpiredEntry();
-      } catch (Exception e) {
-        logger.error("scheduled clean just failed as " + BaseUtil.getStackTrace(e));
-      }
-    }, 0, this.oldAgePeriod, TimeUnit.SECONDS);
+    ses.scheduleAtFixedRate(
+        () -> {
+          try {
+            removeExpiredEntry();
+          } catch (Exception e) {
+            logger.error("scheduled clean just failed as " + BaseUtil.getStackTrace(e));
+          }
+        },
+        0,
+        this.oldAgePeriod,
+        TimeUnit.SECONDS);
   }
 
   public void put(K key, V value) {
@@ -103,8 +107,13 @@ public class ConcurrentRequestMap<K, V> {
       if (null != rejectHandler) {
         rejectHandler.accept(key, value);
       }
-      logger.info("reject when it is full and the first is still young (" + key + "," + value + "),"
-          + toString());
+      logger.info(
+          "reject when it is full and the first is still young ("
+              + key
+              + ","
+              + value
+              + "),"
+              + toString());
     }
   }
 
@@ -134,8 +143,16 @@ public class ConcurrentRequestMap<K, V> {
 
   @Override
   public String toString() {
-    return "ConcurrentRequestMap{" + "capacity=" + capacity + ", oldAgePeriod=" + oldAgePeriod
-        + ", newAgePeriod=" + newAgePeriod + ",size=" + requestMap.mappingCount() + '}';
+    return "ConcurrentRequestMap{"
+        + "capacity="
+        + capacity
+        + ", oldAgePeriod="
+        + oldAgePeriod
+        + ", newAgePeriod="
+        + newAgePeriod
+        + ",size="
+        + requestMap.mappingCount()
+        + '}';
   }
 
   private boolean checkCapacityOrReject() {
@@ -149,20 +166,28 @@ public class ConcurrentRequestMap<K, V> {
         // an empty map
         return true;
       }
-      if (System.currentTimeMillis()
-          - firstEntry.getKey() <= TimeUnit.SECONDS.toMillis(newAgePeriod)) {
+      if (System.currentTimeMillis() - firstEntry.getKey()
+          <= TimeUnit.SECONDS.toMillis(newAgePeriod)) {
         // reject incoming requests
         return false;
       } else {
         // remove the least recently requests
-        firstEntry.getValue().forEach(k -> {
-          V v = requestMap.remove(k);
-          if (null != rejectHandler) {
-            rejectHandler.accept(k, v);
-          }
-          logger.info("reject when it is full and the first is expiring " + k + " and " + v + ","
-              + toString());
-        });
+        firstEntry
+            .getValue()
+            .forEach(
+                k -> {
+                  V v = requestMap.remove(k);
+                  if (null != rejectHandler) {
+                    rejectHandler.accept(k, v);
+                  }
+                  logger.info(
+                      "reject when it is full and the first is expiring "
+                          + k
+                          + " and "
+                          + v
+                          + ","
+                          + toString());
+                });
         return true;
       }
     }
@@ -176,12 +201,13 @@ public class ConcurrentRequestMap<K, V> {
 
     // sync maps
     if (timestampMap.isEmpty()) {
-      requestMap.forEach((k, v) -> {
-        if (rejectHandler != null) {
-          rejectHandler.accept(k, v);
-        }
-        logger.info("reject when it is already removed" + k + " and " + v + "," + toString());
-      });
+      requestMap.forEach(
+          (k, v) -> {
+            if (rejectHandler != null) {
+              rejectHandler.accept(k, v);
+            }
+            logger.info("reject when it is already removed" + k + " and " + v + "," + toString());
+          });
       requestMap.clear();
       return;
     }
@@ -195,29 +221,40 @@ public class ConcurrentRequestMap<K, V> {
     Map.Entry<Long, List<K>> firstEntry = timestampMap.firstEntry();
 
     // do nothing if the least recent entry is still in new age
-    if (System.currentTimeMillis()
-        - firstEntry.getKey() > TimeUnit.SECONDS.toMillis(newAgePeriod)) {
+    if (System.currentTimeMillis() - firstEntry.getKey()
+        > TimeUnit.SECONDS.toMillis(newAgePeriod)) {
       long deadline = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(oldAgePeriod);
       Map<Long, List<K>> expiringMap = timestampMap.headMap(deadline);
 
-      logger.debug("expiringMap.size() " + expiringMap.size() + " by " + deadline + ","
-          + LocalDateTime.ofInstant(Instant.ofEpochMilli(deadline), ZoneOffset.UTC));
+      logger.debug(
+          "expiringMap.size() "
+              + expiringMap.size()
+              + " by "
+              + deadline
+              + ","
+              + LocalDateTime.ofInstant(Instant.ofEpochMilli(deadline), ZoneOffset.UTC));
 
-      expiringMap.values().stream().flatMap(List::stream).forEach(key -> {
-        // may have been removed by remove()
-        if (requestMap.containsKey((key))) {
-          V value = requestMap.remove(key);
-          if (rejectHandler != null) {
-            rejectHandler.accept(key, value);
-          }
-          logger.info("reject when it is timeout (" + key + "," + value + ")," + toString());
-        }
-      });
+      expiringMap.values().stream()
+          .flatMap(List::stream)
+          .forEach(
+              key -> {
+                // may have been removed by remove()
+                if (requestMap.containsKey((key))) {
+                  V value = requestMap.remove(key);
+                  if (rejectHandler != null) {
+                    rejectHandler.accept(key, value);
+                  }
+                  logger.info(
+                      "reject when it is timeout (" + key + "," + value + ")," + toString());
+                }
+              });
       expiringMap.clear();
     } else {
-      logger.debug("there is no items older than "
-          + LocalDateTime.now(ZoneOffset.UTC).minusSeconds(oldAgePeriod) + ", the first is "
-          + LocalDateTime.ofInstant(Instant.ofEpochMilli(firstEntry.getKey()), ZoneOffset.UTC));
+      logger.debug(
+          "there is no items older than "
+              + LocalDateTime.now(ZoneOffset.UTC).minusSeconds(oldAgePeriod)
+              + ", the first is "
+              + LocalDateTime.ofInstant(Instant.ofEpochMilli(firstEntry.getKey()), ZoneOffset.UTC));
     }
   }
 

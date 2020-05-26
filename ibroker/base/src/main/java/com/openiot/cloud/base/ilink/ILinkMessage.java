@@ -144,8 +144,8 @@ public class ILinkMessage {
 
   public int getResponseCode() {
     return Optional.ofNullable(getFlexHeaderValue(ConstDef.FH_K_REP))
-                   .map(obj -> (Integer) obj)
-                   .orElse(ConstDef.FH_V_SUCC);
+        .map(obj -> (Integer) obj)
+        .orElse(ConstDef.FH_V_SUCC);
   }
 
   public ILinkMessage setResponseCode(int value) {
@@ -180,10 +180,18 @@ public class ILinkMessage {
 
   @Override
   public String toString() {
-    return "ILinkMessage [leadingByte=" + leadingByte + ", ilinkMessageId="
-        + Arrays.toString(ilinkMessageId) + ", messageType=" + MessageType.fromValue(messageType)
-        + ", flexHeader=" + flexHeader + ", payload SZ="
-        + Optional.ofNullable(payload).map(p -> p.length).orElse(0) + ", messageId=" + messageId
+    return "ILinkMessage [leadingByte="
+        + leadingByte
+        + ", ilinkMessageId="
+        + Arrays.toString(ilinkMessageId)
+        + ", messageType="
+        + MessageType.fromValue(messageType)
+        + ", flexHeader="
+        + flexHeader
+        + ", payload SZ="
+        + Optional.ofNullable(payload).map(p -> p.length).orElse(0)
+        + ", messageId="
+        + messageId
         + "]";
   }
 }

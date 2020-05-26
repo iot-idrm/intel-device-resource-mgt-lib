@@ -4,7 +4,6 @@
 
 package com.openiot.cloud.projectcenter.server;
 
-import sun.security.x509.*;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -13,6 +12,7 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import sun.security.x509.*;
 
 /*
  * This class would require rt.jar in the class path in order to generated it alternative is using

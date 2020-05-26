@@ -13,13 +13,13 @@ import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
 import com.openiot.cloud.base.mongo.model.validator.UpdateValidator;
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.mapping.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.util.*;
-import java.util.stream.Collectors;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @JsonInclude(Include.NON_EMPTY)
 public class DataSourceEntity {
@@ -29,7 +29,8 @@ public class DataSourceEntity {
 
   @Field(ConstDef.F_DATASOURCETYPE)
   @JsonProperty(ConstDef.F_DATASOURCETYPE)
-  @Pattern(regexp = ConstDef.F_DATASOURCETABLE + "|" + ConstDef.F_DATASOURCEREF,
+  @Pattern(
+      regexp = ConstDef.F_DATASOURCETABLE + "|" + ConstDef.F_DATASOURCEREF,
       groups = {CreateValidator.class, UpdateValidator.class})
   private String dst;
 
@@ -130,7 +131,8 @@ public class DataSourceEntity {
 
   @JsonIgnore
   public Reference getLatestReference() {
-    return this.dsdefs == null || this.dsdefs.isEmpty() ? null
+    return this.dsdefs == null || this.dsdefs.isEmpty()
+        ? null
         : this.dsdefs.get(this.dsdefs.size() - 1);
   }
 
@@ -148,11 +150,13 @@ public class DataSourceEntity {
     long toAdjust = to == 0 ? BaseUtil.getNowAsEpochMillis() : to;
 
     return this.dsdefs.stream()
-                      .filter(reference -> Objects.nonNull(reference.getDsri()))
-                      .filter(referenceDataSource -> referenceDataSource.dsrf <= toAdjust
-                          && (referenceDataSource.dsrt == 0 ? Long.MAX_VALUE
-                              : referenceDataSource.dsrt) >= fromAdjust)
-                      .collect(Collectors.toList());
+        .filter(reference -> Objects.nonNull(reference.getDsri()))
+        .filter(
+            referenceDataSource ->
+                referenceDataSource.dsrf <= toAdjust
+                    && (referenceDataSource.dsrt == 0 ? Long.MAX_VALUE : referenceDataSource.dsrt)
+                        >= fromAdjust)
+        .collect(Collectors.toList());
   }
 
   public void setDsdefs(List<Reference> dsdefs) {
@@ -288,19 +292,47 @@ public class DataSourceEntity {
 
   @Override
   public String toString() {
-    return "DataSourceEntity{" + "dsn='" + dsn + '\'' + ", dst='" + dst + '\'' + ", dsintId='"
-        + dsintId + '\'' + ", dsdefs=" + dsdefs + ", defRule=" + defRule + ", title='" + title
-        + '\'' + ", classInfo='" + classInfo + '\'' + ", description='" + description + '\''
-        + ", unit='" + unit + '\'' + ", threshHigh=" + threshHigh + ", threshLow=" + threshLow
-        + ", interval=" + interval + ", attributeList=" + attributeList + '}';
+    return "DataSourceEntity{"
+        + "dsn='"
+        + dsn
+        + '\''
+        + ", dst='"
+        + dst
+        + '\''
+        + ", dsintId='"
+        + dsintId
+        + '\''
+        + ", dsdefs="
+        + dsdefs
+        + ", defRule="
+        + defRule
+        + ", title='"
+        + title
+        + '\''
+        + ", classInfo='"
+        + classInfo
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", unit='"
+        + unit
+        + '\''
+        + ", threshHigh="
+        + threshHigh
+        + ", threshLow="
+        + threshLow
+        + ", interval="
+        + interval
+        + ", attributeList="
+        + attributeList
+        + '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     DataSourceEntity that = (DataSourceEntity) o;
     return Objects.equals(dsn, that.dsn);
   }
@@ -351,7 +383,7 @@ public class DataSourceEntity {
     public String getDsrurl() {
       this.dsrurl =
           Optional.ofNullable(this.dsrurl)
-                  .orElse(BaseUtil.formAFullUrl(dsri.getDi(), dsri.getResUri(), dsri.getPt()));
+              .orElse(BaseUtil.formAFullUrl(dsri.getDi(), dsri.getResUri(), dsri.getPt()));
       return this.dsrurl;
     }
 
@@ -400,8 +432,17 @@ public class DataSourceEntity {
 
     @Override
     public String toString() {
-      return "Reference{" + "dsrurl='" + dsrurl + '\'' + ", dsri=" + dsri + ", dsrf=" + dsrf
-          + ", dsrt=" + dsrt + '}';
+      return "Reference{"
+          + "dsrurl='"
+          + dsrurl
+          + '\''
+          + ", dsri="
+          + dsri
+          + ", dsrf="
+          + dsrf
+          + ", dsrt="
+          + dsrt
+          + '}';
     }
   }
 
@@ -464,8 +505,15 @@ public class DataSourceEntity {
     @JsonCreator
     public OperateEntity() {}
 
-    public OperateEntity(String type, String background_state, String di, String url, String pn,
-        String sched, String state_cmds, Integer repeat) {
+    public OperateEntity(
+        String type,
+        String background_state,
+        String di,
+        String url,
+        String pn,
+        String sched,
+        String state_cmds,
+        Integer repeat) {
       this.type = type == null || type.isEmpty() ? null : type;
       this.background_state =
           background_state == null || background_state.isEmpty() ? null : background_state;
@@ -543,9 +591,30 @@ public class DataSourceEntity {
 
     @Override
     public String toString() {
-      return "OperateEntity{" + "type='" + type + '\'' + ", background_state='" + background_state
-          + '\'' + ", di='" + di + '\'' + ", url='" + url + '\'' + ", pn='" + pn + '\''
-          + ", sched='" + sched + '\'' + ", state_cmds='" + state_cmds + '\'' + ", repeat=" + repeat
+      return "OperateEntity{"
+          + "type='"
+          + type
+          + '\''
+          + ", background_state='"
+          + background_state
+          + '\''
+          + ", di='"
+          + di
+          + '\''
+          + ", url='"
+          + url
+          + '\''
+          + ", pn='"
+          + pn
+          + '\''
+          + ", sched='"
+          + sched
+          + '\''
+          + ", state_cmds='"
+          + state_cmds
+          + '\''
+          + ", repeat="
+          + repeat
           + '}';
     }
   }

@@ -13,14 +13,12 @@ public class StreamReader {
     StringBuilder buf = new StringBuilder();
     try {
       while ((i = fin.read()) != -1) {
-        if (buf.length() > 0)
-          buf.append(",");
+        if (buf.length() > 0) buf.append(",");
         buf.append("(byte)");
         buf.append(i);
       }
 
-    } catch (Throwable e) {
-      ;
+    } catch (Throwable e) {;
     }
 
     return buf.toString();

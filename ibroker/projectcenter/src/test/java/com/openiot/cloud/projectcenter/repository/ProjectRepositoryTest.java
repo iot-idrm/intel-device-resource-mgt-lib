@@ -4,25 +4,25 @@
 
 package com.openiot.cloud.projectcenter.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
-import com.openiot.cloud.projectcenter.repository.document.Project;
 import com.openiot.cloud.base.service.model.UserAndRole;
-import static org.assertj.core.api.Assertions.assertThat;
+import com.openiot.cloud.projectcenter.repository.document.Project;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.util.ArrayList;
-import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class ProjectRepositoryTest {
-  @Autowired
-  private ProjectRepository projectRepository;
+  @Autowired private ProjectRepository projectRepository;
 
   private List<Project> projectList = new ArrayList<>();
 
@@ -59,24 +59,17 @@ public class ProjectRepositoryTest {
 
   @Test
   public void testBasic() throws Exception {
-    assertThat(projectRepository.findById(projectList.get(0).getId())
-                                .orElse(null)).isNotNull()
-                                              .hasFieldOrPropertyWithValue("name",
-                                                                           projectList.get(0)
-                                                                                      .getName());
+    assertThat(projectRepository.findById(projectList.get(0).getId()).orElse(null))
+        .isNotNull()
+        .hasFieldOrPropertyWithValue("name", projectList.get(0).getName());
 
-    assertThat(projectRepository.findByName(projectList.get(0).getName())
-                                .get(0)).hasFieldOrPropertyWithValue("name",
-                                                                     projectList.get(0).getName())
-                                        .hasFieldOrPropertyWithValue("user", null);
+    assertThat(projectRepository.findByName(projectList.get(0).getName()).get(0))
+        .hasFieldOrPropertyWithValue("name", projectList.get(0).getName())
+        .hasFieldOrPropertyWithValue("user", null);
 
-    assertThat(projectRepository.findByUserName(projectList.get(1)
-                                                           .getUser()
-                                                           .get(0)
-                                                           .getName())).hasSize(1)
-                                                                       .element(0)
-                                                                       .hasFieldOrPropertyWithValue("name",
-                                                                                                    projectList.get(1)
-                                                                                                               .getName());
+    assertThat(projectRepository.findByUserName(projectList.get(1).getUser().get(0).getName()))
+        .hasSize(1)
+        .element(0)
+        .hasFieldOrPropertyWithValue("name", projectList.get(1).getName());
   }
 }

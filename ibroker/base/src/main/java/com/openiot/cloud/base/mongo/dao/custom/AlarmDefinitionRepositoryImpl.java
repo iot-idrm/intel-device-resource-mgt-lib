@@ -7,5 +7,4 @@ package com.openiot.cloud.base.mongo.dao.custom;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AlarmDefinitionRepositoryImpl implements AlarmDefinitionRepositoryCustom {
-}
+public class AlarmDefinitionRepositoryImpl implements AlarmDefinitionRepositoryCustom {}

@@ -20,8 +20,7 @@ import org.springframework.stereotype.Component;
 public class Ping {
   private static final Logger logger = LoggerFactory.getLogger(Ping.class);
 
-  @Autowired
-  private IAgentCache dc;
+  @Autowired private IAgentCache dc;
 
   public void onDefaultRequestReceived(Device srcDevice, ILinkMessage request) {
     logger.debug(String.format("#Request %s -> ping", request.getMessageId()));
@@ -29,10 +28,10 @@ public class Ping {
     dc.resetMissedPingCount((IAgent) srcDevice);
 
     ILinkMessage message =
-        new ILinkMessage(LeadingByte.RESPONSE.valueOf(),
-                         (byte) MessageType.INTEL_IAGENT.valueOf()).setTag(ConstDef.FH_V_PING)
-                                                                   .setResponseCode(ConstDef.FH_V_SUCC)
-                                                                   .setIlinkMessageId(request.getIlinkMessageId());
+        new ILinkMessage(LeadingByte.RESPONSE.valueOf(), (byte) MessageType.INTEL_IAGENT.valueOf())
+            .setTag(ConstDef.FH_V_PING)
+            .setResponseCode(ConstDef.FH_V_SUCC)
+            .setIlinkMessageId(request.getIlinkMessageId());
     ((IAgent) srcDevice).sendMessage(message);
   }
 }

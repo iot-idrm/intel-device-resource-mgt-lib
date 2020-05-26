@@ -4,9 +4,12 @@
 
 package com.openiot.cloud.projectcenter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
+import com.openiot.cloud.base.service.model.UserAndRole;
 import com.openiot.cloud.projectcenter.controller.ao.AuthenticationAO;
 import com.openiot.cloud.projectcenter.controller.ao.AuthorizationAO;
 import com.openiot.cloud.projectcenter.repository.ProjectRepository;
@@ -15,11 +18,17 @@ import com.openiot.cloud.projectcenter.repository.document.Project;
 import com.openiot.cloud.projectcenter.repository.document.User;
 import com.openiot.cloud.projectcenter.service.UserService;
 import com.openiot.cloud.projectcenter.utils.ApiJwtTokenUtil;
-import com.openiot.cloud.base.service.model.UserAndRole;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,34 +41,20 @@ import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {"mongo.db = test_openiot"})
 public class ApplicationSecurityConfigTest {
-  @Autowired
-  private TestRestTemplate testRestTemplate;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private ProjectRepository projectRepository;
-  @Autowired
-  private ApiJwtTokenUtil jwtTokenUtil;
-  @LocalServerPort
-  private int localServerPort;
-  @Autowired
-  private UserService userService;
+  @Autowired private TestRestTemplate testRestTemplate;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private UserRepository userRepository;
+  @Autowired private ProjectRepository projectRepository;
+  @Autowired private ApiJwtTokenUtil jwtTokenUtil;
+  @LocalServerPort private int localServerPort;
+  @Autowired private UserService userService;
 
   // in the project honeydew
   private User adminCherry;
@@ -146,12 +141,10 @@ public class ApplicationSecurityConfigTest {
     request.setUsername(userGrape.getName());
     request.setPassword("grape");
     ResponseEntity<byte[]> response =
-        testRestTemplate.postForEntity(builder.cloneBuilder()
-                                              .path("api/user/login")
-                                              .build()
-                                              .toString(),
-                                       request,
-                                       byte[].class);
+        testRestTemplate.postForEntity(
+            builder.cloneBuilder().path("api/user/login").build().toString(),
+            request,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     String token = objectMapper.readValue(response.getBody(), AuthorizationAO.class).getToken();
@@ -163,46 +156,54 @@ public class ApplicationSecurityConfigTest {
     headers.setBearerAuth(token);
 
     HttpEntity<byte[]> requestEntity = new HttpEntity<>(headers);
-    response = testRestTemplate.exchange(builder.cloneBuilder().path("api/user").build().toString(),
-                                         HttpMethod.GET,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user").build().toString(),
+            HttpMethod.GET,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     // POST api/user
     JSONObject jsonObject = new JSONObject().put("name", "apricot").put("password", "apricot");
     requestEntity = new HttpEntity<>(jsonObject.toString().getBytes(), headers);
-    response = testRestTemplate.exchange(builder.cloneBuilder().path("api/user").build().toString(),
-                                         HttpMethod.POST,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user").build().toString(),
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     // PUT api/user
     userGrape.setLocation("street");
     requestEntity = new HttpEntity<>(objectMapper.writeValueAsBytes(userGrape), headers);
     response =
-        testRestTemplate.exchange(builder.cloneBuilder()
-                                         .path("api/user")
-                                         .queryParam("name", userGrape.getName())
-                                         .build()
-                                         .toString(),
-                                  HttpMethod.PUT,
-                                  requestEntity,
-                                  byte[].class);
+        testRestTemplate.exchange(
+            builder
+                .cloneBuilder()
+                .path("api/user")
+                .queryParam("name", userGrape.getName())
+                .build()
+                .toString(),
+            HttpMethod.PUT,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
     // DELETE api/user
     requestEntity = new HttpEntity<>(headers);
-    response = testRestTemplate.exchange(
-                                         builder.cloneBuilder()
-                                                .path("api/user")
-                                                .queryParam("name", userGrape.getName())
-                                                .build()
-                                                .toString(),
-                                         HttpMethod.DELETE,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder
+                .cloneBuilder()
+                .path("api/user")
+                .queryParam("name", userGrape.getName())
+                .build()
+                .toString(),
+            HttpMethod.DELETE,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
   }
 
@@ -215,13 +216,14 @@ public class ApplicationSecurityConfigTest {
     apiJwtAuthenticationRequest.setUsername(adminPear.getName());
     apiJwtAuthenticationRequest.setPassword("pear");
     HttpEntity<byte[]> requestEntity =
-        new HttpEntity<>(objectMapper.writeValueAsBytes(apiJwtAuthenticationRequest),
-                         defaultHeader);
+        new HttpEntity<>(
+            objectMapper.writeValueAsBytes(apiJwtAuthenticationRequest), defaultHeader);
     ResponseEntity<byte[]> response =
-        testRestTemplate.exchange(builder.cloneBuilder().path("api/user/login").build().toString(),
-                                  HttpMethod.POST,
-                                  requestEntity,
-                                  byte[].class);
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user/login").build().toString(),
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     String token = objectMapper.readValue(response.getBody(), AuthorizationAO.class).getToken();
@@ -237,13 +239,11 @@ public class ApplicationSecurityConfigTest {
     requestEntity =
         new HttpEntity<>(objectMapper.writeValueAsBytes(apiJwtAuthenticationResponse), headers);
     response =
-        testRestTemplate.exchange(builder.cloneBuilder()
-                                         .path("api/user/selectproject")
-                                         .build()
-                                         .toString(),
-                                  HttpMethod.POST,
-                                  requestEntity,
-                                  byte[].class);
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user/selectproject").build().toString(),
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     token = objectMapper.readValue(response.getBody(), AuthorizationAO.class).getToken();
     assertThat(token).isNotEmpty();
@@ -251,46 +251,54 @@ public class ApplicationSecurityConfigTest {
     // GET api/user
     headers.setBearerAuth(token);
     requestEntity = new HttpEntity<>(headers);
-    response = testRestTemplate.exchange(builder.cloneBuilder().path("api/user").build().toString(),
-                                         HttpMethod.GET,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user").build().toString(),
+            HttpMethod.GET,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     // POST api/user
     JSONObject jsonObject = new JSONObject().put("name", "apricot").put("password", "apricot");
     requestEntity = new HttpEntity<>(jsonObject.toString().getBytes(), headers);
-    response = testRestTemplate.exchange(builder.cloneBuilder().path("api/user").build().toString(),
-                                         HttpMethod.POST,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user").build().toString(),
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     // PUT api/user
     jsonObject = new JSONObject().put("location", "street");
     requestEntity = new HttpEntity<>(jsonObject.toString().getBytes(), headers);
     response =
-        testRestTemplate.exchange(builder.cloneBuilder()
-                                         .path("api/user")
-                                         .queryParam("name", userGrape.getName())
-                                         .build()
-                                         .toString(),
-                                  HttpMethod.PUT,
-                                  requestEntity,
-                                  byte[].class);
+        testRestTemplate.exchange(
+            builder
+                .cloneBuilder()
+                .path("api/user")
+                .queryParam("name", userGrape.getName())
+                .build()
+                .toString(),
+            HttpMethod.PUT,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
     // DELETE api/user
     requestEntity = new HttpEntity<>(headers);
-    response = testRestTemplate.exchange(
-                                         builder.cloneBuilder()
-                                                .path("api/user")
-                                                .queryParam("name", userGrape.getName())
-                                                .build()
-                                                .toString(),
-                                         HttpMethod.DELETE,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder
+                .cloneBuilder()
+                .path("api/user")
+                .queryParam("name", userGrape.getName())
+                .build()
+                .toString(),
+            HttpMethod.DELETE,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
   }
 
@@ -303,13 +311,14 @@ public class ApplicationSecurityConfigTest {
     apiJwtAuthenticationRequest.setUsername(sysAdmin.getName());
     apiJwtAuthenticationRequest.setPassword("sys");
     HttpEntity<byte[]> requestEntity =
-        new HttpEntity<>(objectMapper.writeValueAsBytes(apiJwtAuthenticationRequest),
-                         defaultHeader);
+        new HttpEntity<>(
+            objectMapper.writeValueAsBytes(apiJwtAuthenticationRequest), defaultHeader);
     ResponseEntity<byte[]> response =
-        testRestTemplate.exchange(builder.cloneBuilder().path("api/user/login").build().toString(),
-                                  HttpMethod.POST,
-                                  requestEntity,
-                                  byte[].class);
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user/login").build().toString(),
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     String token = objectMapper.readValue(response.getBody(), AuthorizationAO.class).getToken();
@@ -325,13 +334,11 @@ public class ApplicationSecurityConfigTest {
     requestEntity =
         new HttpEntity<>(objectMapper.writeValueAsBytes(apiJwtAuthenticationResponse), headers);
     response =
-        testRestTemplate.exchange(builder.cloneBuilder()
-                                         .path("api/user/selectproject")
-                                         .build()
-                                         .toString(),
-                                  HttpMethod.POST,
-                                  requestEntity,
-                                  byte[].class);
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user/selectproject").build().toString(),
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     token = objectMapper.readValue(response.getBody(), AuthorizationAO.class).getToken();
     assertThat(token).isNotEmpty();
@@ -340,46 +347,54 @@ public class ApplicationSecurityConfigTest {
     headers.setBearerAuth(token);
 
     requestEntity = new HttpEntity<>(headers);
-    response = testRestTemplate.exchange(builder.cloneBuilder().path("api/user").build().toString(),
-                                         HttpMethod.GET,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user").build().toString(),
+            HttpMethod.GET,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     // POST api/user
     JSONObject jsonObject = new JSONObject().put("name", "apricot").put("password", "apricot");
     requestEntity = new HttpEntity<>(jsonObject.toString().getBytes(), headers);
-    response = testRestTemplate.exchange(builder.cloneBuilder().path("api/user").build().toString(),
-                                         HttpMethod.POST,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder.cloneBuilder().path("api/user").build().toString(),
+            HttpMethod.POST,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     // PUT api/user
     jsonObject = new JSONObject().put("location", "street");
     requestEntity = new HttpEntity<>(jsonObject.toString().getBytes(), headers);
     response =
-        testRestTemplate.exchange(builder.cloneBuilder()
-                                         .path("api/user")
-                                         .queryParam("name", userGrape.getName())
-                                         .build()
-                                         .toString(),
-                                  HttpMethod.PUT,
-                                  requestEntity,
-                                  byte[].class);
+        testRestTemplate.exchange(
+            builder
+                .cloneBuilder()
+                .path("api/user")
+                .queryParam("name", userGrape.getName())
+                .build()
+                .toString(),
+            HttpMethod.PUT,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     // DELETE api/user
     requestEntity = new HttpEntity<>(headers);
-    response = testRestTemplate.exchange(
-                                         builder.cloneBuilder()
-                                                .path("api/user")
-                                                .queryParam("name", userGrape.getName())
-                                                .build()
-                                                .toString(),
-                                         HttpMethod.DELETE,
-                                         requestEntity,
-                                         byte[].class);
+    response =
+        testRestTemplate.exchange(
+            builder
+                .cloneBuilder()
+                .path("api/user")
+                .queryParam("name", userGrape.getName())
+                .build()
+                .toString(),
+            HttpMethod.DELETE,
+            requestEntity,
+            byte[].class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 
@@ -394,15 +409,14 @@ public class ApplicationSecurityConfigTest {
     user.setTime_reg(now.toEpochMilli());
     userRepository.save(user);
 
-    assertThat(userRepository.findByName(user.getName())
-                             .get(0)).hasFieldOrPropertyWithValue("time_reg", user.getTime_reg());
+    assertThat(userRepository.findByName(user.getName()).get(0))
+        .hasFieldOrPropertyWithValue("time_reg", user.getTime_reg());
 
     String token = jwtTokenUtil.generateToken(user.getName(), null);
     assertThat(token).isNotNull().isNotEmpty();
     assertThat(jwtTokenUtil.getUsernameFromToken(token)).isEqualTo(user.getName());
-    assertThat((Boolean) ReflectionTestUtils.invokeMethod(jwtTokenUtil,
-                                                          "isTokenExpired",
-                                                          token)).isFalse();
+    assertThat((Boolean) ReflectionTestUtils.invokeMethod(jwtTokenUtil, "isTokenExpired", token))
+        .isFalse();
     assertThat(jwtTokenUtil.canTokenBeRefreshed(token, null)).isTrue();
     assertThat(jwtTokenUtil.canTokenBeRefreshed(token, Date.from(now))).isTrue();
     assertThat(jwtTokenUtil.canTokenBeRefreshed(token, Date.from(now.minusSeconds(10)))).isTrue();
@@ -429,20 +443,22 @@ public class ApplicationSecurityConfigTest {
     Map<String, Object> claims = new HashMap<>();
     claims.put(ConstDef.KEY_PID, "123");
 
-    String token = Jwts.builder()
-                       .setClaims(claims)
-                       .setSubject("abc")
-                       .setIssuedAt(nowAsDate)
-                       .setExpiration(Date.from(now.plusSeconds(3600)))
-                       .signWith(SignatureAlgorithm.HS512, "iconnect")
-                       .compact();
+    String token =
+        Jwts.builder()
+            .setClaims(claims)
+            .setSubject("abc")
+            .setIssuedAt(nowAsDate)
+            .setExpiration(Date.from(now.plusSeconds(3600)))
+            .signWith(SignatureAlgorithm.HS512, "iconnect")
+            .compact();
 
     Date creationTimeOfToken = jwtTokenUtil.getIssuedAtDateFromToken(token);
-    log.info("ct in token {}({}), should be {}({}",
-             creationTimeOfToken,
-             creationTimeOfToken.toInstant(),
-             nowAsDate,
-             nowAsDate.toInstant());
+    log.info(
+        "ct in token {}({}), should be {}({}",
+        creationTimeOfToken,
+        creationTimeOfToken.toInstant(),
+        nowAsDate,
+        nowAsDate.toInstant());
     assertThat(creationTimeOfToken.equals(nowAsDate)).isFalse();
   }
 }

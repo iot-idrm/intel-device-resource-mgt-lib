@@ -5,8 +5,8 @@
 package com.openiot.cloud.projectcenter.repository;
 
 import com.openiot.cloud.projectcenter.repository.document.Gateway;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface GatewayRepository extends MongoRepository<Gateway, String> {
   public List<Gateway> findByHwSn(String hwSn);

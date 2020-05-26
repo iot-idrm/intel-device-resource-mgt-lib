@@ -34,8 +34,11 @@ public class TargetEntity {
   String dsn;
 
   @JsonCreator
-  public TargetEntity(@JsonProperty("di") String di, @JsonProperty("res") String res,
-      @JsonProperty("pt") String pt, @JsonProperty("grp") String grp,
+  public TargetEntity(
+      @JsonProperty("di") String di,
+      @JsonProperty("res") String res,
+      @JsonProperty("pt") String pt,
+      @JsonProperty("grp") String grp,
       @JsonProperty("dsn") String dsn) {
     super();
     this.di = di;

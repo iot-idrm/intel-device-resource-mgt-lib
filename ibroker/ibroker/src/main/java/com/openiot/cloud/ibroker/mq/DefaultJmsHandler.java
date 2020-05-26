@@ -11,6 +11,9 @@ import com.openiot.cloud.base.ilink.MessageType;
 import com.openiot.cloud.ibroker.base.device.IAgent;
 import com.openiot.cloud.ibroker.base.protocols.ilink.ILinkCoapOverTcpMessageHandler;
 import com.openiot.cloud.sdk.service.IConnectRequest;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 import org.iotivity.cloud.base.device.Device;
 import org.iotivity.cloud.base.protocols.IRequest;
 import org.iotivity.cloud.base.protocols.MessageBuilder;
@@ -25,24 +28,22 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class DefaultJmsHandler {
   public static final Logger logger = LoggerFactory.getLogger(DefaultJmsHandler.class);
 
-  public void onDefaultRequestReceived(Device srcDevice, IRequest request,
-                                       ILinkMessage iLinkMessage) {
+  public void onDefaultRequestReceived(
+      Device srcDevice, IRequest request, ILinkMessage iLinkMessage) {
     try {
       // coap_tcp -> jms
       CoapRequest cReq = (CoapRequest) request;
-      logger.info(String.format("#Request %s -> %s -> %s",
-                                iLinkMessage.getMessageId(),
-                                cReq.getUriPath(),
-                                cReq.getPayload() == null ? "null"
-                                    : new String(cReq.getPayload())));
+      logger.info(
+          String.format(
+              "#Request %s -> %s -> %s",
+              iLinkMessage.getMessageId(),
+              cReq.getUriPath(),
+              cReq.getPayload() == null ? "null" : new String(cReq.getPayload())));
 
       URI uri = new URI(null, null, cReq.getUriPath(), cReq.getUriQuery(), null);
       HttpMethod method = getHttpMethodFromCoapMethod(cReq.getMethod());
@@ -50,27 +51,37 @@ public class DefaultJmsHandler {
       IConnectRequest jmsReq =
           IConnectRequest.create(method, uri.toString(), format, cReq.getPayload());
 
-      jmsReq.send((response) -> {
-        HttpStatus respStatus = response.getStatus();
-        MediaType respFormat = response.getFormat();
-        CoapResponse coapResp =
-            (CoapResponse) MessageBuilder.createResponse(request,
-                                                         getCoapStatus(respStatus),
-                                                         getContentFormat(respFormat),
-                                                         response.getPayload());
+      jmsReq.send(
+          (response) -> {
+            HttpStatus respStatus = response.getStatus();
+            MediaType respFormat = response.getFormat();
+            CoapResponse coapResp =
+                (CoapResponse)
+                    MessageBuilder.createResponse(
+                        request,
+                        getCoapStatus(respStatus),
+                        getContentFormat(respFormat),
+                        response.getPayload());
 
-        logger.info("receive JMS response message[status=" + respStatus + "(" + coapResp.getCode()
-            + ")]: " + response);
+            logger.info(
+                "receive JMS response message[status="
+                    + respStatus
+                    + "("
+                    + coapResp.getCode()
+                    + ")]: "
+                    + response);
 
-        ILinkMessage ilink = new ILinkMessage(LeadingByte.RESPONSE.valueOf(),
-                                              (byte) MessageType.COAP_OVER_TCP.valueOf());
-        ILinkCoapOverTcpMessageHandler.restoreMessageIDAndToken(coapResp.getToken(),
-                                                                coapResp,
-                                                                ilink);
-        ILinkCoapOverTcpMessageHandler.encodeCoapMessageAsPayload(coapResp, ilink);
-        ilink.setAgentId(((IAgent) srcDevice).getAgentId());
-        ((IAgent) srcDevice).sendMessage(ilink);
-      }, 10, TimeUnit.SECONDS);
+            ILinkMessage ilink =
+                new ILinkMessage(
+                    LeadingByte.RESPONSE.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf());
+            ILinkCoapOverTcpMessageHandler.restoreMessageIDAndToken(
+                coapResp.getToken(), coapResp, ilink);
+            ILinkCoapOverTcpMessageHandler.encodeCoapMessageAsPayload(coapResp, ilink);
+            ilink.setAgentId(((IAgent) srcDevice).getAgentId());
+            ((IAgent) srcDevice).sendMessage(ilink);
+          },
+          10,
+          TimeUnit.SECONDS);
     } catch (URISyntaxException e) {
       e.printStackTrace();
       logger.error(BaseUtil.getStackTrace(e));
@@ -78,26 +89,20 @@ public class DefaultJmsHandler {
   }
 
   private ContentFormat getContentFormat(MediaType format) {
-    if (format == null)
-      return ContentFormat.APPLICATION_TEXTPLAIN;
-    if (format.equals(MediaType.APPLICATION_JSON))
-      return ContentFormat.APPLICATION_JSON;
+    if (format == null) return ContentFormat.APPLICATION_TEXTPLAIN;
+    if (format.equals(MediaType.APPLICATION_JSON)) return ContentFormat.APPLICATION_JSON;
     if (format.equals(MediaType.APPLICATION_OCTET_STREAM))
       return ContentFormat.APPLICATION_OCTET_STREAM;
-    if (format.equals(MediaType.APPLICATION_XML))
-      return ContentFormat.APPLICATION_XML;
+    if (format.equals(MediaType.APPLICATION_XML)) return ContentFormat.APPLICATION_XML;
     return ContentFormat.APPLICATION_TEXTPLAIN;
   }
 
   private MediaType getMediaType(ContentFormat format) {
-    if (format == null)
-      return MediaType.TEXT_PLAIN;
-    if (format.equals(ContentFormat.APPLICATION_JSON))
-      return MediaType.APPLICATION_JSON;
+    if (format == null) return MediaType.TEXT_PLAIN;
+    if (format.equals(ContentFormat.APPLICATION_JSON)) return MediaType.APPLICATION_JSON;
     if (format.equals(ContentFormat.APPLICATION_OCTET_STREAM))
       return MediaType.APPLICATION_OCTET_STREAM;
-    if (format.equals(ContentFormat.APPLICATION_XML))
-      return MediaType.APPLICATION_XML;
+    if (format.equals(ContentFormat.APPLICATION_XML)) return MediaType.APPLICATION_XML;
     return MediaType.TEXT_PLAIN;
   }
 
@@ -121,8 +126,7 @@ public class DefaultJmsHandler {
   }
 
   private HttpStatus getHttpStatus(ResponseStatus status) {
-    if (status == null)
-      return HttpStatus.OK;
+    if (status == null) return HttpStatus.OK;
     switch (status) {
       case CREATED:
         return HttpStatus.CREATED;
@@ -173,8 +177,7 @@ public class DefaultJmsHandler {
   }
 
   private ResponseStatus getCoapStatus(HttpStatus status) {
-    if (status == null)
-      return ResponseStatus.CREATED;
+    if (status == null) return ResponseStatus.CREATED;
     switch (status) {
       case CREATED:
         return ResponseStatus.CREATED;

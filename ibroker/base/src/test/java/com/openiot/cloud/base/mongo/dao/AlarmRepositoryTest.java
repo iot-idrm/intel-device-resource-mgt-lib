@@ -4,10 +4,15 @@
 
 package com.openiot.cloud.base.mongo.dao;
 
+import static java.time.ZoneOffset.UTC;
+import static java.time.temporal.ChronoUnit.HOURS;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import com.openiot.cloud.base.Application;
-import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.mongo.model.Alarm;
 import com.openiot.cloud.base.mongo.model.AlarmStats;
+import java.time.LocalDateTime;
+import java.util.*;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -16,20 +21,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
-import static java.time.ZoneOffset.UTC;
-import static java.time.temporal.ChronoField.MICRO_OF_SECOND;
-import static java.time.temporal.ChronoUnit.HOURS;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {Application.class}, properties = {"mongo.db = test_openiot"})
+@SpringBootTest(
+    classes = {Application.class},
+    properties = {"mongo.db = test_openiot"})
 public class AlarmRepositoryTest {
-  @Autowired
-  private AlarmRepository alarmRepo;
+  @Autowired private AlarmRepository alarmRepo;
 
   @Before
   public void setup() throws Exception {
@@ -168,8 +166,7 @@ public class AlarmRepositoryTest {
     List<?> task = alarmRepo.filter("fruit", aids, null, null, "h", null, from, to, null, null);
     assertThat(task).isNotNull().asList().hasSize(101);
     LocalDateTime end = LocalDateTime.now();
-    assertThat(end.toInstant(UTC).toEpochMilli()
-        - now.toInstant(UTC).toEpochMilli()).isLessThan(1000);
+    assertThat(end.toInstant(UTC).toEpochMilli() - now.toInstant(UTC).toEpochMilli())
+        .isLessThan(1000);
   }
-
 }

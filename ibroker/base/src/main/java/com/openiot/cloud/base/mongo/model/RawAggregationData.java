@@ -137,8 +137,17 @@ public class RawAggregationData {
   }
 
   public boolean hasData() {
-    if (cnt == null && rngc == null && min == null && max == null && avg == null && sum == null
-        && sw == null && dur == null && durMax == null && durMin == null && durAvg == null) {
+    if (cnt == null
+        && rngc == null
+        && min == null
+        && max == null
+        && avg == null
+        && sum == null
+        && sw == null
+        && dur == null
+        && durMax == null
+        && durMin == null
+        && durAvg == null) {
       return false;
     }
 
@@ -146,8 +155,17 @@ public class RawAggregationData {
   }
 
   public List<Data> serialize() {
-    if (cnt == null && rngc == null && min == null && max == null && avg == null && sum == null
-        && sw == null && dur == null && durMax == null && durMin == null && durAvg == null) {
+    if (cnt == null
+        && rngc == null
+        && min == null
+        && max == null
+        && avg == null
+        && sum == null
+        && sw == null
+        && dur == null
+        && durMax == null
+        && durMin == null
+        && durAvg == null) {
       return null;
     }
 

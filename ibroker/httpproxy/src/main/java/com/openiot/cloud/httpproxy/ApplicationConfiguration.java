@@ -8,21 +8,20 @@ import com.openiot.cloud.base.profiling.DurationCounterConfiguration;
 import com.openiot.cloud.base.profiling.DurationCounterManage;
 import com.openiot.cloud.base.profiling.DurationCounterOfUrlBuilder;
 import com.openiot.cloud.base.profiling.DurationCounterOfUrlBuilder.CounterOfUrl;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class ApplicationConfiguration {
   @Value("${mq.host:localhost}")
   private String mqServerHost;
 
-  @Autowired
-  private Environment env;
+  @Autowired private Environment env;
 
   @Bean
   public List<CounterOfUrl> counterOfUrls() {

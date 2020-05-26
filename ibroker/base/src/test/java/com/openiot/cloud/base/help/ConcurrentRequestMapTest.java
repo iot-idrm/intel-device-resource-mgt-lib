@@ -4,17 +4,18 @@
 
 package com.openiot.cloud.base.help;
 
-import com.openiot.cloud.base.Application;
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+
+import com.openiot.cloud.base.Application;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
@@ -92,9 +93,12 @@ public class ConcurrentRequestMapTest {
     ExecutorService executorService = Executors.newFixedThreadPool(4);
     for (int i = 0; i < smallNumber; i++) {
       int finalI = i;
-      putFuture[i] = CompletableFuture.runAsync(() -> {
-        requestMap.put(finalI, String.valueOf(finalI + 'a'));
-      }, executorService);
+      putFuture[i] =
+          CompletableFuture.runAsync(
+              () -> {
+                requestMap.put(finalI, String.valueOf(finalI + 'a'));
+              },
+              executorService);
     }
     CompletableFuture.allOf(putFuture).get(30, TimeUnit.SECONDS);
     assertThat(rejected.get()).isEqualTo(0);
@@ -121,8 +125,8 @@ public class ConcurrentRequestMapTest {
       int toPut = i;
 
       putAndRemoveFuture[futureIndex++] =
-          CompletableFuture.runAsync(() -> largetRequestMap.put(toPut, "lime_" + toPut),
-                                     executorService);
+          CompletableFuture.runAsync(
+              () -> largetRequestMap.put(toPut, "lime_" + toPut), executorService);
 
       if (i - bucketSize >= 0) {
         int toRemove = i - bucketSize;

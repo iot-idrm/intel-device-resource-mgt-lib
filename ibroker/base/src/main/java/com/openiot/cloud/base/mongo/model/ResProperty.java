@@ -15,28 +15,45 @@ import com.openiot.cloud.base.mongo.model.ResourceType.PropertyType;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
 import com.openiot.cloud.base.mongo.model.validator.UpdateValidator;
+import java.util.*;
+import javax.validation.constraints.Pattern;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import javax.validation.constraints.Pattern;
-import java.util.*;
 
 @Document(collection = ConstDef.C_RESPRO)
 @JsonInclude(Include.NON_NULL)
 public class ResProperty {
-  @Untouchable
-  @Id
-  @JsonIgnore
-  private String id;
+  @Untouchable @Id @JsonIgnore private String id;
 
   @Field(ConstDef.F_ACCESS)
   @JsonProperty(ConstDef.F_ACCESS)
   @Pattern(
-      regexp = ConstDef.AC_EXE + "|" + ConstDef.AC_EXE + ConstDef.AC_WRITE + "|" + ConstDef.AC_EXE
-          + ConstDef.AC_READ + "|" + ConstDef.AC_READ + "|" + ConstDef.AC_READ + ConstDef.AC_WRITE
-          + "|" + ConstDef.AC_READ + ConstDef.AC_EXE + "|" + ConstDef.AC_WRITE + "|"
-          + ConstDef.AC_WRITE + ConstDef.AC_READ + "|" + ConstDef.AC_WRITE + ConstDef.AC_EXE,
+      regexp =
+          ConstDef.AC_EXE
+              + "|"
+              + ConstDef.AC_EXE
+              + ConstDef.AC_WRITE
+              + "|"
+              + ConstDef.AC_EXE
+              + ConstDef.AC_READ
+              + "|"
+              + ConstDef.AC_READ
+              + "|"
+              + ConstDef.AC_READ
+              + ConstDef.AC_WRITE
+              + "|"
+              + ConstDef.AC_READ
+              + ConstDef.AC_EXE
+              + "|"
+              + ConstDef.AC_WRITE
+              + "|"
+              + ConstDef.AC_WRITE
+              + ConstDef.AC_READ
+              + "|"
+              + ConstDef.AC_WRITE
+              + ConstDef.AC_EXE,
       groups = {CreateValidator.class, UpdateValidator.class})
   private String access;
 
@@ -196,27 +213,62 @@ public class ResProperty {
 
   @Override
   public String toString() {
-    return "ResProperty{" + "id='" + id + '\'' + ", access='" + access + '\'' + ", devId='" + devId
-        + '\'' + ", implemented=" + implemented + ", name='" + name + '\'' + ", res='" + res + '\''
-        + ", type='" + type + '\'' + ", unit='" + unit + '\'' + ", userCfgs=" + userCfgs
-        + ", resTypes=" + resTypes + ", fullUrl='" + fullUrl + '\'' + '}';
+    return "ResProperty{"
+        + "id='"
+        + id
+        + '\''
+        + ", access='"
+        + access
+        + '\''
+        + ", devId='"
+        + devId
+        + '\''
+        + ", implemented="
+        + implemented
+        + ", name='"
+        + name
+        + '\''
+        + ", res='"
+        + res
+        + '\''
+        + ", type='"
+        + type
+        + '\''
+        + ", unit='"
+        + unit
+        + '\''
+        + ", userCfgs="
+        + userCfgs
+        + ", resTypes="
+        + resTypes
+        + ", fullUrl='"
+        + fullUrl
+        + '\''
+        + '}';
   }
 
-  public static ResProperty from(PropertyType propt, Resource res, String devId,
-                                 Boolean implemented, List<String> resTypes) {
-    return from(devId,
-                res.getUrl(),
-                propt.getName(),
-                propt.getType(),
-                propt.getAccess(),
-                propt.getUnit(),
-                implemented,
-                resTypes);
+  public static ResProperty from(
+      PropertyType propt, Resource res, String devId, Boolean implemented, List<String> resTypes) {
+    return from(
+        devId,
+        res.getUrl(),
+        propt.getName(),
+        propt.getType(),
+        propt.getAccess(),
+        propt.getUnit(),
+        implemented,
+        resTypes);
   }
 
-  public static ResProperty from(String devId, String resUrl, String propName, String dataType,
-                                 String access, String unit, Boolean implemented,
-                                 List<String> resTypes) {
+  public static ResProperty from(
+      String devId,
+      String resUrl,
+      String propName,
+      String dataType,
+      String access,
+      String unit,
+      Boolean implemented,
+      List<String> resTypes) {
     ResProperty prop = new ResProperty();
     prop.setDevId(devId);
     prop.setRes(resUrl);

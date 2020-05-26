@@ -5,8 +5,6 @@
 package com.openiot.cloud.base.mq;
 
 import com.openiot.cloud.base.help.BaseUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +15,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MessageBuffer<T> {
   public static class Message<T> {
@@ -51,8 +51,8 @@ public class MessageBuffer<T> {
   private List<Message<T>> batch;
   private static final Logger logger = LoggerFactory.getLogger(MessageBuffer.class);
 
-  public MessageBuffer(int capacity, int batchSize, long oldestLimitation,
-      Consumer<List<T>> consumer) {
+  public MessageBuffer(
+      int capacity, int batchSize, long oldestLimitation, Consumer<List<T>> consumer) {
     this.queue = new LinkedBlockingQueue<>(capacity);
     this.capacity = capacity;
     this.oldestLimitation = oldestLimitation;
@@ -61,44 +61,49 @@ public class MessageBuffer<T> {
     this.batch = new LinkedList<>();
 
     // selector
-    Executors.newSingleThreadExecutor().execute(() -> {
-      while (true) {
-        try {
-          logger.debug("to take ... ");
+    Executors.newSingleThreadExecutor()
+        .execute(
+            () -> {
+              while (true) {
+                try {
+                  logger.debug("to take ... ");
 
-          Optional.ofNullable(queue.poll(100, TimeUnit.MILLISECONDS))
-                  .ifPresent(message -> batch.add(message));
-          if (batch.isEmpty()) {
-            continue;
-          }
+                  Optional.ofNullable(queue.poll(100, TimeUnit.MILLISECONDS))
+                      .ifPresent(message -> batch.add(message));
+                  if (batch.isEmpty()) {
+                    continue;
+                  }
 
-          int curCapacity = batch.size();
-          Message<T> oldest = batch.get(0);
-          if (curCapacity >= batchSize
-              || Instant.now().toEpochMilli() - oldest.getTimestamp() >= oldestLimitation) {
-            logger.debug("batch opt " + batch.size() + " messages");
-            consumer.accept(batch.stream().map(Message::getData).collect(Collectors.toList()));
-            batch.clear();
-          } else {
-            logger.debug("keep waiting");
-          }
-        } catch (InterruptedException e) {
-          logger.warn("receive " + e.getLocalizedMessage() + " and break");
-          consumer.accept(batch.stream().map(Message::getData).collect(Collectors.toList()));
-          queue.clear();
-          break;
-        } catch (Exception e) {
-          logger.error("exception caught " + BaseUtil.getStackTrace(e));
-        }
-      }
-    });
+                  int curCapacity = batch.size();
+                  Message<T> oldest = batch.get(0);
+                  if (curCapacity >= batchSize
+                      || Instant.now().toEpochMilli() - oldest.getTimestamp() >= oldestLimitation) {
+                    logger.debug("batch opt " + batch.size() + " messages");
+                    consumer.accept(
+                        batch.stream().map(Message::getData).collect(Collectors.toList()));
+                    batch.clear();
+                  } else {
+                    logger.debug("keep waiting");
+                  }
+                } catch (InterruptedException e) {
+                  logger.warn("receive " + e.getLocalizedMessage() + " and break");
+                  consumer.accept(
+                      batch.stream().map(Message::getData).collect(Collectors.toList()));
+                  queue.clear();
+                  break;
+                } catch (Exception e) {
+                  logger.error("exception caught " + BaseUtil.getStackTrace(e));
+                }
+              }
+            });
   }
 
   public void add(T data) {
     if (queue.size() >= capacity) {
-      logger.info(String.format("[MessageBuffer] full. The first one is about %s seconds ago",
-                                ((Instant.now().toEpochMilli() - queue.peek().getTimestamp())
-                                    * 1000)));
+      logger.info(
+          String.format(
+              "[MessageBuffer] full. The first one is about %s seconds ago",
+              ((Instant.now().toEpochMilli() - queue.peek().getTimestamp()) * 1000)));
       logger.debug("[MessageBuffer] to remove one before insert ...");
       queue.drainTo(new LinkedList<>(), Math.max(1, queue.size() - capacity));
     }
@@ -114,11 +119,8 @@ public class MessageBuffer<T> {
   }
 
   public String toString() {
-    return String.format("Message[%s], current size %d, capacity=%s, oldestLimitation=%sms, batchSize=%s",
-                         System.identityHashCode(this),
-                         queue.size(),
-                         capacity,
-                         oldestLimitation,
-                         batchSize);
+    return String.format(
+        "Message[%s], current size %d, capacity=%s, oldestLimitation=%sms, batchSize=%s",
+        System.identityHashCode(this), queue.size(), capacity, oldestLimitation, batchSize);
   }
 }

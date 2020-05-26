@@ -7,7 +7,8 @@ package com.openiot.cloud.base.service.model;
 import com.openiot.cloud.base.help.ConstDef;
 
 public enum DataSourceType {
-  REFERENCE(ConstDef.F_DATASOURCEREF), TABLE(ConstDef.F_DATASOURCETABLE);
+  REFERENCE(ConstDef.F_DATASOURCEREF),
+  TABLE(ConstDef.F_DATASOURCETABLE);
 
   private String value;
 

@@ -8,13 +8,13 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.dao.DeviceRepository;
 import com.openiot.cloud.base.mongo.model.Device;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
-import com.openiot.cloud.sdk.service.ApplicationContextProvider;
 import com.openiot.cloud.sdk.event.TaskOperations;
+import com.openiot.cloud.sdk.service.ApplicationContextProvider;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * The utility to access devices in openiot cloud.<br>
@@ -27,12 +27,10 @@ import java.util.Optional;
 @Component(value = "deviceUtils")
 public class DeviceUtility {
 
-  @Autowired
-  DeviceRepository deviceRepo;
+  @Autowired DeviceRepository deviceRepo;
   // @Autowired
   // TaskTrigger ttrigger;
-  @Autowired
-  TaskOperations taskOps;
+  @Autowired TaskOperations taskOps;
 
   public static DeviceUtility getInstance() {
     return ApplicationContextProvider.getBean(DeviceUtility.class);
@@ -78,22 +76,29 @@ public class DeviceUtility {
    * @return List of all devices that match all specified conditions.
    * @see com.openiot.cloud.base.mongo.model.Device
    */
-  public List<Device> getDeviceWith(String projectId, String standard, String dtName,
-                                    String groupName, String iAgentId, Boolean isConnected,
-                                    Boolean isEnabled, AttributeEntity attribute) {
-    return deviceRepo.filter(Optional.ofNullable(projectId),
-                             Optional.empty(),
-                             Optional.empty(),
-                             Optional.ofNullable(standard),
-                             Optional.ofNullable(dtName),
-                             Optional.ofNullable(groupName),
-                             Optional.ofNullable(iAgentId),
-                             Optional.empty(),
-                             Optional.ofNullable(isConnected),
-                             Optional.ofNullable(isEnabled).orElse(Boolean.TRUE),
-                             Optional.empty(),
-                             Optional.ofNullable(attribute),
-                             new PageRequest(0, ConstDef.MAX_SIZE));
+  public List<Device> getDeviceWith(
+      String projectId,
+      String standard,
+      String dtName,
+      String groupName,
+      String iAgentId,
+      Boolean isConnected,
+      Boolean isEnabled,
+      AttributeEntity attribute) {
+    return deviceRepo.filter(
+        Optional.ofNullable(projectId),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(standard),
+        Optional.ofNullable(dtName),
+        Optional.ofNullable(groupName),
+        Optional.ofNullable(iAgentId),
+        Optional.empty(),
+        Optional.ofNullable(isConnected),
+        Optional.ofNullable(isEnabled).orElse(Boolean.TRUE),
+        Optional.empty(),
+        Optional.ofNullable(attribute),
+        new PageRequest(0, ConstDef.MAX_SIZE));
   }
 
   public void updateDevice(Device iagent) {
@@ -103,14 +108,15 @@ public class DeviceUtility {
       // shall not happen
     }
 
-    taskOps.createTask("CFG_MONITOR",
-                       ConstDef.EVENT_TYPE_CFG_SYNC,
-                       null,
-                       ConstDef.EVENT_TARGET_TYPE_DEVICE,
-                       iagent.getId(),
-                       ConstDef.DAY_SECONDS,
-                       null,
-                       null,
-                       ConstDef.EVENT_TASK_OPTION_OVERWRITE);
+    taskOps.createTask(
+        "CFG_MONITOR",
+        ConstDef.EVENT_TYPE_CFG_SYNC,
+        null,
+        ConstDef.EVENT_TARGET_TYPE_DEVICE,
+        iagent.getId(),
+        ConstDef.DAY_SECONDS,
+        null,
+        null,
+        ConstDef.EVENT_TASK_OPTION_OVERWRITE);
   }
 }

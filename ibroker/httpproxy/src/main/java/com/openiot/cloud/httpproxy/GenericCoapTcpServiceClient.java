@@ -10,6 +10,9 @@ import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.httpproxy.utils.CoapStatusToHttpStatus;
 import com.openiot.cloud.httpproxy.utils.HttpContentTypeToCoapContentType;
 import com.openiot.cloud.httpproxy.utils.HttpMethodToCoapMethod;
+import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.iotivity.cloud.base.connector.ConnectorPool;
 import org.iotivity.cloud.base.device.IRequestChannel;
 import org.iotivity.cloud.base.device.IResponseEventHandler;
@@ -23,9 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
-import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Component
 public class GenericCoapTcpServiceClient {
@@ -41,8 +41,10 @@ public class GenericCoapTcpServiceClient {
     @Override
     public void onResponseReceived(IResponse response) {
       try {
-        HttpStatus status = response == null ? HttpStatus.NOT_IMPLEMENTED
-            : CoapStatusToHttpStatus.transfer(response.getStatus());
+        HttpStatus status =
+            response == null
+                ? HttpStatus.NOT_IMPLEMENTED
+                : CoapStatusToHttpStatus.transfer(response.getStatus());
         byte[] payload = response == null ? null : response.getPayload();
         boolean ret = result.setResult(ResponseEntity.status(status).body(payload));
         if (!ret) {
@@ -55,9 +57,11 @@ public class GenericCoapTcpServiceClient {
     }
   }
 
-  public void defaultRequestHandle(String modifiedUriPath, RequestEntity<byte[]> request,
-                                   DeferredResult<ResponseEntity<?>> result,
-                                   Map<String, String> extraParam) {
+  public void defaultRequestHandle(
+      String modifiedUriPath,
+      RequestEntity<byte[]> request,
+      DeferredResult<ResponseEntity<?>> result,
+      Map<String, String> extraParam) {
     logger.debug("GenericCoapTcpServiceClient handle it");
 
     HttpMethod method = request.getMethod();
@@ -73,11 +77,12 @@ public class GenericCoapTcpServiceClient {
 
     MediaType ct = request.getHeaders().getContentType();
     IRequest coapRequest =
-        MessageBuilder.createRequest(cmethod,
-                                     BaseUtil.removeTrailingSlash(modifiedUriPath),
-                                     request.getUrl().getQuery(),
-                                     HttpContentTypeToCoapContentType.transfer(ct),
-                                     payload);
+        MessageBuilder.createRequest(
+            cmethod,
+            BaseUtil.removeTrailingSlash(modifiedUriPath),
+            request.getUrl().getQuery(),
+            HttpContentTypeToCoapContentType.transfer(ct),
+            payload);
     if (extraParam != null && !extraParam.isEmpty()) {
       try {
         String optionUser = new ObjectMapper().writeValueAsString(extraParam);
@@ -85,8 +90,11 @@ public class GenericCoapTcpServiceClient {
       } catch (JsonProcessingException e) {
         logger.info(BaseUtil.getStackTrace(e));
       }
-      logger.info("set " + extraParam + " in coap req option: "
-          + ((CoapRequest) coapRequest).getOptionsString());
+      logger.info(
+          "set "
+              + extraParam
+              + " in coap req option: "
+              + ((CoapRequest) coapRequest).getOptionsString());
     }
 
     IRequestChannel coapClient = ConnectorPool.getConnectionWithMinMatch(modifiedUriPath);
@@ -98,9 +106,11 @@ public class GenericCoapTcpServiceClient {
     }
   }
 
-  public void defaultRequestHandle(RequestEntity<byte[]> request,
-                                   CompletableFuture<ResponseEntity<byte[]>> result,
-                                   String modifiedUriPath, Map<String, String> extraParam) {
+  public void defaultRequestHandle(
+      RequestEntity<byte[]> request,
+      CompletableFuture<ResponseEntity<byte[]>> result,
+      String modifiedUriPath,
+      Map<String, String> extraParam) {
     logger.debug("A COAP Server gona handle it");
 
     // convert HTTP requests into Coap+tcp requests and send them
@@ -114,12 +124,12 @@ public class GenericCoapTcpServiceClient {
 
     URI uri = request.getUrl();
     IRequest coapRequest =
-        MessageBuilder.createRequest(coapMethod,
-                                     modifiedUriPath,
-                                     uri.getQuery(),
-                                     HttpContentTypeToCoapContentType.transfer(request.getHeaders()
-                                                                                      .getContentType()),
-                                     request.getBody());
+        MessageBuilder.createRequest(
+            coapMethod,
+            modifiedUriPath,
+            uri.getQuery(),
+            HttpContentTypeToCoapContentType.transfer(request.getHeaders().getContentType()),
+            request.getBody());
 
     if (extraParam != null && !extraParam.isEmpty()) {
       try {
@@ -128,19 +138,26 @@ public class GenericCoapTcpServiceClient {
       } catch (JsonProcessingException e) {
         logger.info(BaseUtil.getStackTrace(e));
       }
-      logger.info("set " + extraParam + " in coap req option: "
-          + ((CoapRequest) coapRequest).getOptionsString());
+      logger.info(
+          "set "
+              + extraParam
+              + " in coap req option: "
+              + ((CoapRequest) coapRequest).getOptionsString());
     }
 
     IRequestChannel coapClient = ConnectorPool.getConnectionWithMinMatch(modifiedUriPath);
     if (coapClient != null) {
       logger.debug("dispatch to a coap connection based on " + uri.getPath());
-      coapClient.sendRequest(coapRequest, response -> {
-        HttpStatus status = response == null ? HttpStatus.NOT_IMPLEMENTED
-            : CoapStatusToHttpStatus.transfer(response.getStatus());
-        byte[] payload = response == null ? null : response.getPayload();
-        result.complete(ResponseEntity.status(status).body(payload));
-      });
+      coapClient.sendRequest(
+          coapRequest,
+          response -> {
+            HttpStatus status =
+                response == null
+                    ? HttpStatus.NOT_IMPLEMENTED
+                    : CoapStatusToHttpStatus.transfer(response.getStatus());
+            byte[] payload = response == null ? null : response.getPayload();
+            result.complete(ResponseEntity.status(status).body(payload));
+          });
     } else {
       logger.warn(String.format("There is no handler for the uri %s", uri.getPath()));
       result.complete(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());

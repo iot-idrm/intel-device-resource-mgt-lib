@@ -5,7 +5,9 @@
 package com.openiot.cloud.base.ilink;
 
 public enum LeadingByte {
-  REQUEST((byte) 0xFA), RESPONSE((byte) 0xCE), PLAIN((byte) 0xBA);
+  REQUEST((byte) 0xFA),
+  RESPONSE((byte) 0xCE),
+  PLAIN((byte) 0xBA);
 
   public static LeadingByte fromValue(byte value) {
     for (LeadingByte code : values()) {

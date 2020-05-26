@@ -10,13 +10,13 @@ import com.openiot.cloud.base.mongo.dao.GroupRepository;
 import com.openiot.cloud.base.mongo.model.Group;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
 import com.openiot.cloud.sdk.service.ApplicationContextProvider;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The utility to access DSS data, to be defined .<br>
@@ -30,8 +30,7 @@ import java.util.stream.Collectors;
 public class DssUtility {
   // @Autowired
   // StatsDataRepository statDataRepo;
-  @Autowired
-  GroupRepository grpRepo;
+  @Autowired GroupRepository grpRepo;
 
   private static final Logger logger = LoggerFactory.getLogger(DssUtility.class.getName());
 
@@ -70,16 +69,15 @@ public class DssUtility {
     return 0l;
   }
 
-  public DataSourceEntity createDssRef(Group grp, DataSourceEntity ds, String deviceID,
-                                       String resourceUrl, String propertyName) {
-    Optional<DataSourceEntity> dsInDBOpt = Optional.ofNullable(grp)
-                                                   .map(g -> g.getDss())
-                                                   .filter(dss -> !dss.isEmpty())
-                                                   .map(dss -> dss.stream()
-                                                                  .filter(dsDB -> dsDB.equals(ds))
-                                                                  .collect(Collectors.toList()))
-                                                   .filter(dssDB -> dssDB.size() == 1)
-                                                   .map(dssDB -> dssDB.get(0));
+  public DataSourceEntity createDssRef(
+      Group grp, DataSourceEntity ds, String deviceID, String resourceUrl, String propertyName) {
+    Optional<DataSourceEntity> dsInDBOpt =
+        Optional.ofNullable(grp)
+            .map(g -> g.getDss())
+            .filter(dss -> !dss.isEmpty())
+            .map(dss -> dss.stream().filter(dsDB -> dsDB.equals(ds)).collect(Collectors.toList()))
+            .filter(dssDB -> dssDB.size() == 1)
+            .map(dssDB -> dssDB.get(0));
     if (!dsInDBOpt.isPresent()) {
       // can't find such a ds in grp or there are more than one ds in grp
       return ds;
@@ -87,11 +85,8 @@ public class DssUtility {
 
     // insert one ref in group collection
     DataSourceEntity.Reference dsDef =
-        new DataSourceEntity.Reference(deviceID,
-                                       resourceUrl,
-                                       propertyName,
-                                       BaseUtil.getNowAsEpochMillis(),
-                                       0);
+        new DataSourceEntity.Reference(
+            deviceID, resourceUrl, propertyName, BaseUtil.getNowAsEpochMillis(), 0);
     dsInDBOpt.get().setDsdefItem(dsDef);
     grpRepo.save(grp);
     return ds;
@@ -99,26 +94,31 @@ public class DssUtility {
 
   public String getFu(DataSourceEntity ds) {
     return Optional.ofNullable(ds)
-                   .map(datasource -> datasource.getDsdefs())
-                   .filter(dsDefs -> !dsDefs.isEmpty())
-                   .map(dsDefs -> dsDefs.get(dsDefs.size() - 1))
-                   .map(dsDef -> dsDef.getDsrurl())
-                   .orElse(null);
+        .map(datasource -> datasource.getDsdefs())
+        .filter(dsDefs -> !dsDefs.isEmpty())
+        .map(dsDefs -> dsDefs.get(dsDefs.size() - 1))
+        .map(dsDef -> dsDef.getDsrurl())
+        .orElse(null);
   }
 
   public void stopDssRef(Group group, Set<String> keySet) {
-    if (group == null || group.getDss() == null || group.getDss().size() == 0)
-      return;
+    if (group == null || group.getDss() == null || group.getDss().size() == 0) return;
     long nowTime = BaseUtil.getNowAsEpochMillis();
-    group.getDss()
-         .stream()
-         .filter(dssEntiry -> keySet.contains(dssEntiry.getDsn()) && dssEntiry.getDsdefs() != null
-             && dssEntiry.getDsdefs().size() > 0)
-         .forEach(dssEntiry -> {
-           dssEntiry.getDsdefs().stream().filter(dsDef -> dsDef.getDsrt() == 0).forEach(dsDef -> {
-             dsDef.setDsrt(nowTime);
-           });
-         });
+    group.getDss().stream()
+        .filter(
+            dssEntiry ->
+                keySet.contains(dssEntiry.getDsn())
+                    && dssEntiry.getDsdefs() != null
+                    && dssEntiry.getDsdefs().size() > 0)
+        .forEach(
+            dssEntiry -> {
+              dssEntiry.getDsdefs().stream()
+                  .filter(dsDef -> dsDef.getDsrt() == 0)
+                  .forEach(
+                      dsDef -> {
+                        dsDef.setDsrt(nowTime);
+                      });
+            });
     grpRepo.save(group);
   }
 
@@ -126,15 +126,21 @@ public class DssUtility {
     if (group == null || dssName == null || group.getDss() == null || group.getDss().size() == 0)
       return;
     long nowTime = BaseUtil.getNowAsEpochMillis();
-    group.getDss()
-         .stream()
-         .filter(dssEntiry -> dssName.equals(dssEntiry.getDsn()) && dssEntiry.getDsdefs() != null
-             && dssEntiry.getDsdefs().size() > 0)
-         .forEach(dssEntiry -> {
-           dssEntiry.getDsdefs().stream().filter(dsDef -> dsDef.getDsrt() == 0).forEach(dsDef -> {
-             dsDef.setDsrt(nowTime);
-           });
-         });
+    group.getDss().stream()
+        .filter(
+            dssEntiry ->
+                dssName.equals(dssEntiry.getDsn())
+                    && dssEntiry.getDsdefs() != null
+                    && dssEntiry.getDsdefs().size() > 0)
+        .forEach(
+            dssEntiry -> {
+              dssEntiry.getDsdefs().stream()
+                  .filter(dsDef -> dsDef.getDsrt() == 0)
+                  .forEach(
+                      dsDef -> {
+                        dsDef.setDsrt(nowTime);
+                      });
+            });
     grpRepo.save(group);
   }
   // dsEntity->Optional.ofNullable(dsEntity.getDsdefs())

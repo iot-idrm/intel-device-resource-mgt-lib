@@ -2,7 +2,6 @@
  * Copyright (C) 2020 Intel Corporation. All rights reserved. SPDX-License-Identifier: Apache-2.0
  */
 
-
 /** */
 package com.openiot.cloud.projectcenter.server;
 
@@ -13,8 +12,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslHandler;
-import org.springframework.stereotype.Component;
 import javax.net.ssl.SSLEngine;
+import org.springframework.stereotype.Component;
 
 /** @author sunny */
 @Component
@@ -39,7 +38,7 @@ public class SecureSocketServerILinkMessageInitializer extends ChannelInitialize
     pipeline.addLast("decoder", new ILinkDecoder());
     pipeline.addLast("encoder", new ILinkEncoder());
     // and then business logic.
-    pipeline.addLast("handler",
-                     ApplicationContextProvider.getBean(SecureSocketServerHandler.class));
+    pipeline.addLast(
+        "handler", ApplicationContextProvider.getBean(SecureSocketServerHandler.class));
   }
 }

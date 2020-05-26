@@ -5,13 +5,13 @@
 package com.openiot.cloud.sdk.service;
 
 import com.openiot.cloud.base.help.BaseUtil;
+import java.util.HashMap;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import java.util.HashMap;
-import java.util.Set;
 
 /**
  * The Api Service abstract class, where there is only one abstract method getApiServiceRegInfo()

@@ -4,8 +4,6 @@
 
 package com.openiot.cloud.base.mq;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -13,6 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MessageQueue<T> {
   public static class DataAndConsumer<T> {
@@ -40,8 +40,14 @@ public class MessageQueue<T> {
 
     @Override
     public String toString() {
-      return "DataAndConsumer{" + "data=" + data + ", timestamp=" + timestamp + ", consumer="
-          + consumer + '}';
+      return "DataAndConsumer{"
+          + "data="
+          + data
+          + ", timestamp="
+          + timestamp
+          + ", consumer="
+          + consumer
+          + '}';
     }
   }
 
@@ -54,39 +60,42 @@ public class MessageQueue<T> {
     this.maxCapacity = maxCapacity;
 
     // selector
-    Executors.newSingleThreadExecutor().execute(() -> {
-      while (true) {
-        try {
-          logger.debug("[MessageQueue] to poll ... ");
+    Executors.newSingleThreadExecutor()
+        .execute(
+            () -> {
+              while (true) {
+                try {
+                  logger.debug("[MessageQueue] to poll ... ");
 
-          DataAndConsumer<T> item = queue.take();
+                  DataAndConsumer<T> item = queue.take();
 
-          // dispose data added one hour ago, 3600 * 1000
-          // if (isOneHourAgo(item.getTimestamp())) {
-          // disposeUnderCondition(timestamp -> isOneHourAgo(timestamp));
-          // }
+                  // dispose data added one hour ago, 3600 * 1000
+                  // if (isOneHourAgo(item.getTimestamp())) {
+                  // disposeUnderCondition(timestamp -> isOneHourAgo(timestamp));
+                  // }
 
-          int curCapacity = queue.size();
-          if (curCapacity > 0 && curCapacity % (1024 * 1024) == 0) {
-            logger.debug(String.format("[MessageQueue] current size : %s", curCapacity));
-          }
+                  int curCapacity = queue.size();
+                  if (curCapacity > 0 && curCapacity % (1024 * 1024) == 0) {
+                    logger.debug(String.format("[MessageQueue] current size : %s", curCapacity));
+                  }
 
-          item.getConsumer().accept(item.getData());
-        } catch (InterruptedException e) {
-          logger.warn("[MessageQueue] receive " + e.getLocalizedMessage() + " and break");
-          break;
-        } catch (Exception e) {
-          logger.error("[MessageQueue] exception caught " + e.getLocalizedMessage());
-        }
-      }
-    });
+                  item.getConsumer().accept(item.getData());
+                } catch (InterruptedException e) {
+                  logger.warn("[MessageQueue] receive " + e.getLocalizedMessage() + " and break");
+                  break;
+                } catch (Exception e) {
+                  logger.error("[MessageQueue] exception caught " + e.getLocalizedMessage());
+                }
+              }
+            });
   }
 
   public void add(T data, Consumer<T> consumer) {
     if (queue.size() >= maxCapacity) {
-      logger.info(String.format("[MessageQueue] full. The first one is about %s seconds ago",
-                                ((Instant.now().toEpochMilli() - queue.peek().getTimestamp())
-                                    * 1000)));
+      logger.info(
+          String.format(
+              "[MessageQueue] full. The first one is about %s seconds ago",
+              ((Instant.now().toEpochMilli() - queue.peek().getTimestamp()) * 1000)));
       queue.poll();
     }
 

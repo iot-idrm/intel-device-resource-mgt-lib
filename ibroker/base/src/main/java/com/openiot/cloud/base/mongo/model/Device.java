@@ -11,19 +11,17 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.help.Untouchable;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = ConstDef.C_DEV)
 @JsonInclude(Include.NON_NULL)
 public class Device {
-  @Untouchable
-  @Id
-  String id;
+  @Untouchable @Id String id;
 
   @Field(ConstDef.F_STAND)
   @JsonProperty(ConstDef.F_STAND)
@@ -183,11 +181,39 @@ public class Device {
 
   @Override
   public String toString() {
-    return "Device{" + "id='" + id + '\'' + ", standard='" + standard + '\'' + ", name='" + name
-        + '\'' + ", deviceType='" + deviceType + '\'' + ", iAgentId='" + iAgentId + '\''
-        + ", folderId='" + folderId + '\'' + ", iBroker='" + iBroker + '\'' + ", connected="
-        + connected + ", enabled=" + enabled + ", config=" + config + ", grps=" + grps + ", prj="
-        + prj + '}';
+    return "Device{"
+        + "id='"
+        + id
+        + '\''
+        + ", standard='"
+        + standard
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", deviceType='"
+        + deviceType
+        + '\''
+        + ", iAgentId='"
+        + iAgentId
+        + '\''
+        + ", folderId='"
+        + folderId
+        + '\''
+        + ", iBroker='"
+        + iBroker
+        + '\''
+        + ", connected="
+        + connected
+        + ", enabled="
+        + enabled
+        + ", config="
+        + config
+        + ", grps="
+        + grps
+        + ", prj="
+        + prj
+        + '}';
   }
 
   @JsonInclude(Include.NON_NULL)
@@ -242,8 +268,15 @@ public class Device {
 
     @Override
     public String toString() {
-      return "Config [refNum=" + refNum + ", dataLife=" + dataLife + ", attributes=" + attributes
-          + ", userCfgs=" + userCfgs + "]";
+      return "Config [refNum="
+          + refNum
+          + ", dataLife="
+          + dataLife
+          + ", attributes="
+          + attributes
+          + ", userCfgs="
+          + userCfgs
+          + "]";
     }
   }
 }

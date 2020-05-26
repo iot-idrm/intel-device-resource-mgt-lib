@@ -35,7 +35,18 @@ public class DssStats {
 
   @Override
   public String toString() {
-    return "DssStats [num_over=" + num_over + ", num_room=" + num_room + ", td_total=" + td_total
-        + ", td_ava=" + td_ava + ", td_min=" + td_min + ", td_max=" + td_max + "]";
+    return "DssStats [num_over="
+        + num_over
+        + ", num_room="
+        + num_room
+        + ", td_total="
+        + td_total
+        + ", td_ava="
+        + td_ava
+        + ", td_min="
+        + td_min
+        + ", td_max="
+        + td_max
+        + "]";
   }
 }

@@ -10,34 +10,31 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
+import com.openiot.cloud.base.service.model.UserAndRole;
 import com.openiot.cloud.projectcenter.repository.ProjectRepository;
 import com.openiot.cloud.projectcenter.repository.document.Project;
 import com.openiot.cloud.projectcenter.service.dto.ProjectDTO;
-import com.openiot.cloud.base.service.model.UserAndRole;
 import com.openiot.cloud.sdk.event.TaskOperations;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class ProjectService {
-  @Autowired
-  private ProjectRepository projectRepository;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private TaskOperations taskOperations;
+  @Autowired private ProjectRepository projectRepository;
+  @Autowired private UserService userService;
+  @Autowired private TaskOperations taskOperations;
 
   private List<String> parseArray(String asArray) {
     return Arrays.stream(asArray.substring(1, asArray.length() - 1).split(","))
-                 .filter(Objects::nonNull)
-                 .map(String::trim)
-                 .filter(i -> !i.isEmpty())
-                 .collect(Collectors.toList());
+        .filter(Objects::nonNull)
+        .map(String::trim)
+        .filter(i -> !i.isEmpty())
+        .collect(Collectors.toList());
   }
 
   public ProjectDTO createProject(ProjectDTO newProjectDTO, TokenContent tokenContent) {
@@ -58,15 +55,16 @@ public class ProjectService {
     project = projectRepository.save(project);
 
     // create project.cfg on AMS server
-    taskOperations.createTask("CFG_MONITOR",
-                              ConstDef.EVENT_TYPE_CFG_SYNC,
-                              null,
-                              ConstDef.EVENT_TARGET_TYPE_PROJECT,
-                              project.getId(),
-                              ConstDef.DAY_SECONDS,
-                              null,
-                              null,
-                              ConstDef.EVENT_TASK_OPTION_OVERWRITE);
+    taskOperations.createTask(
+        "CFG_MONITOR",
+        ConstDef.EVENT_TYPE_CFG_SYNC,
+        null,
+        ConstDef.EVENT_TARGET_TYPE_PROJECT,
+        project.getId(),
+        ConstDef.DAY_SECONDS,
+        null,
+        null,
+        ConstDef.EVENT_TASK_OPTION_OVERWRITE);
 
     newProjectDTO.setId(project.getId());
     return newProjectDTO;
@@ -94,9 +92,10 @@ public class ProjectService {
           BaseUtil.copyPropertiesIgnoreAllNull(newProjectDTO, project);
           // make sure keep the id
         } else {
-          log.info("current login user {} is only project {} user and can not modify project information",
-                   tokenContent.getUser(),
-                   newProjectDTO.getId());
+          log.info(
+              "current login user {} is only project {} user and can not modify project information",
+              tokenContent.getUser(),
+              newProjectDTO.getId());
           return false;
         }
       } else {
@@ -104,29 +103,31 @@ public class ProjectService {
         List<Project> projects =
             projectRepository.findByIdAndUserName(newProjectDTO.getId(), tokenContent.getUser());
         if (projects.isEmpty()) {
-          log.warn("current login user {} is not in the project {}",
-                   tokenContent.getUser(),
-                   newProjectDTO.getId());
+          log.warn(
+              "current login user {} is not in the project {}",
+              tokenContent.getUser(),
+              newProjectDTO.getId());
           return false;
         } else {
           UserRole roleInProject =
               projects.stream()
-                      .map(Project::getUser)
-                      .filter(Objects::nonNull)
-                      .flatMap(Collection::stream)
-                      .filter(userAndRole -> Objects.equals(tokenContent.getUser(),
-                                                            userAndRole.getName()))
-                      .findAny()
-                      .map(UserAndRole::getRole)
-                      .orElse(null);
+                  .map(Project::getUser)
+                  .filter(Objects::nonNull)
+                  .flatMap(Collection::stream)
+                  .filter(
+                      userAndRole -> Objects.equals(tokenContent.getUser(), userAndRole.getName()))
+                  .findAny()
+                  .map(UserAndRole::getRole)
+                  .orElse(null);
           if (Objects.equals(UserRole.ADMIN, roleInProject)) {
             // a admin can modify its project
             BaseUtil.copyPropertiesIgnoreAllNull(newProjectDTO, project);
             // make sure keep the id
           } else {
-            log.info("current login user {} is only project user and can not modify project information",
-                     tokenContent.getUser(),
-                     newProjectDTO.getId());
+            log.info(
+                "current login user {} is only project user and can not modify project information",
+                tokenContent.getUser(),
+                newProjectDTO.getId());
             return false;
           }
         }
@@ -136,20 +137,22 @@ public class ProjectService {
     log.debug("the new project is {}", project);
 
     project = projectRepository.save(project);
-    taskOperations.createTask("CFG_MONITOR",
-                              ConstDef.EVENT_TYPE_CFG_SYNC,
-                              null,
-                              ConstDef.EVENT_TARGET_TYPE_PROJECT,
-                              project.getId(),
-                              ConstDef.DAY_SECONDS,
-                              null,
-                              null,
-                              ConstDef.EVENT_TASK_OPTION_OVERWRITE);
+    taskOperations.createTask(
+        "CFG_MONITOR",
+        ConstDef.EVENT_TYPE_CFG_SYNC,
+        null,
+        ConstDef.EVENT_TARGET_TYPE_PROJECT,
+        project.getId(),
+        ConstDef.DAY_SECONDS,
+        null,
+        null,
+        ConstDef.EVENT_TASK_OPTION_OVERWRITE);
     return true;
   }
 
   /**
    * gona query all
+   *
    * @param tokenContent
    * @return
    */
@@ -165,11 +168,14 @@ public class ProjectService {
       projectList = projectRepository.findByUserName(tokenContent.getUser());
     }
 
-    return projectList.stream().map(project -> {
-      ProjectDTO projectDTO = new ProjectDTO();
-      BeanUtils.copyProperties(project, projectDTO);
-      return projectDTO;
-    }).collect(Collectors.toList());
+    return projectList.stream()
+        .map(
+            project -> {
+              ProjectDTO projectDTO = new ProjectDTO();
+              BeanUtils.copyProperties(project, projectDTO);
+              return projectDTO;
+            })
+        .collect(Collectors.toList());
   }
 
   public boolean removeProject(String projectId) {
@@ -192,29 +198,38 @@ public class ProjectService {
 
     // a system admin can see all projects
     if (userService.isSysAdmin(userName)) {
-      return projectRepository.findAll().stream().map(project -> {
-        ProjectDTO projectDTO = new ProjectDTO();
-        BeanUtils.copyProperties(project, projectDTO);
-        return projectDTO;
-      }).collect(Collectors.toList());
+      return projectRepository.findAll().stream()
+          .map(
+              project -> {
+                ProjectDTO projectDTO = new ProjectDTO();
+                BeanUtils.copyProperties(project, projectDTO);
+                return projectDTO;
+              })
+          .collect(Collectors.toList());
     } else {
-      return projectRepository.findByUserName(userName).stream().map(project -> {
-        ProjectDTO projectDTO = new ProjectDTO();
-        BeanUtils.copyProperties(project, projectDTO);
-        return projectDTO;
-      }).collect(Collectors.toList());
+      return projectRepository.findByUserName(userName).stream()
+          .map(
+              project -> {
+                ProjectDTO projectDTO = new ProjectDTO();
+                BeanUtils.copyProperties(project, projectDTO);
+                return projectDTO;
+              })
+          .collect(Collectors.toList());
     }
   }
 
   public ProjectDTO findByProjectId(String projectId) {
     Objects.requireNonNull(projectId);
 
-    return projectRepository.findById(projectId).map(project -> {
-      ProjectDTO projectDTO = new ProjectDTO();
-      BeanUtils.copyProperties(project, projectDTO);
-      return projectDTO;
-
-    }).orElse(null);
+    return projectRepository
+        .findById(projectId)
+        .map(
+            project -> {
+              ProjectDTO projectDTO = new ProjectDTO();
+              BeanUtils.copyProperties(project, projectDTO);
+              return projectDTO;
+            })
+        .orElse(null);
   }
 
   /**
@@ -231,17 +246,22 @@ public class ProjectService {
     log.debug("find a project with id {} and a user name {}", projectId, userName);
     if (userService.isSysAdmin(userName)) {
       log.debug("{} is SYS_ADMIN and can operate any project, include {}", userName, projectId);
-      return projectRepository.findById(projectId).map(project -> {
-        log.debug("mapping a project document to DTO");
+      return projectRepository
+          .findById(projectId)
+          .map(
+              project -> {
+                log.debug("mapping a project document to DTO");
 
-        ProjectDTO projectDTO = new ProjectDTO();
-        BeanUtils.copyProperties(project, projectDTO);
-        return projectDTO;
-      }).orElseGet(() -> {
-        log.debug("can not find a project with id {}", projectId);
+                ProjectDTO projectDTO = new ProjectDTO();
+                BeanUtils.copyProperties(project, projectDTO);
+                return projectDTO;
+              })
+          .orElseGet(
+              () -> {
+                log.debug("can not find a project with id {}", projectId);
 
-        return null;
-      });
+                return null;
+              });
     } else {
       List<Project> projects = projectRepository.findByIdAndUserName(projectId, userName);
       if (projects.isEmpty()) {
@@ -271,8 +291,8 @@ public class ProjectService {
     projectRepository.save(project);
   }
 
-  public boolean updateOrInsertProjectAttribute(String projectId, AttributeEntity[] attributes,
-                                                TokenContent tokenContent) {
+  public boolean updateOrInsertProjectAttribute(
+      String projectId, AttributeEntity[] attributes, TokenContent tokenContent) {
     Objects.requireNonNull(projectId);
     Objects.requireNonNull(attributes);
 
@@ -298,20 +318,21 @@ public class ProjectService {
     project.setAs(attributeEntities);
 
     project = projectRepository.save(project);
-    taskOperations.createTask("CFG_MONITOR",
-                              ConstDef.EVENT_TYPE_CFG_SYNC,
-                              null,
-                              ConstDef.EVENT_TARGET_TYPE_PROJECT,
-                              project.getId(),
-                              ConstDef.DAY_SECONDS,
-                              null,
-                              null,
-                              ConstDef.EVENT_TASK_OPTION_OVERWRITE);
+    taskOperations.createTask(
+        "CFG_MONITOR",
+        ConstDef.EVENT_TYPE_CFG_SYNC,
+        null,
+        ConstDef.EVENT_TARGET_TYPE_PROJECT,
+        project.getId(),
+        ConstDef.DAY_SECONDS,
+        null,
+        null,
+        ConstDef.EVENT_TASK_OPTION_OVERWRITE);
     return true;
   }
 
-  public boolean removeProjectAttribute(String projectId, String attributes,
-                                        TokenContent tokenContent) {
+  public boolean removeProjectAttribute(
+      String projectId, String attributes, TokenContent tokenContent) {
     Objects.requireNonNull(projectId);
     Objects.requireNonNull(attributes);
 
@@ -324,24 +345,27 @@ public class ProjectService {
     // to remove and ignore any one doesn't exist
     Set<String> attributeSet = new HashSet<>(parseArray(attributes));
     Optional.ofNullable(project.getAs())
-            .ifPresent(attributeEntities -> attributeEntities.removeIf(attributeEntity -> attributeSet.contains(attributeEntity.getAn())));
+        .ifPresent(
+            attributeEntities ->
+                attributeEntities.removeIf(
+                    attributeEntity -> attributeSet.contains(attributeEntity.getAn())));
 
     project = projectRepository.save(project);
-    taskOperations.createTask("CFG_MONITOR",
-                              ConstDef.EVENT_TYPE_CFG_SYNC,
-                              null,
-                              ConstDef.EVENT_TARGET_TYPE_PROJECT,
-                              project.getId(),
-                              ConstDef.DAY_SECONDS,
-                              null,
-                              null,
-                              ConstDef.EVENT_TASK_OPTION_OVERWRITE);
+    taskOperations.createTask(
+        "CFG_MONITOR",
+        ConstDef.EVENT_TYPE_CFG_SYNC,
+        null,
+        ConstDef.EVENT_TARGET_TYPE_PROJECT,
+        project.getId(),
+        ConstDef.DAY_SECONDS,
+        null,
+        null,
+        ConstDef.EVENT_TASK_OPTION_OVERWRITE);
     return true;
   }
 
-  public boolean updateOrInsertProjectConfiguration(String projectId,
-                                                    ConfigurationEntity[] configurations,
-                                                    TokenContent tokenContent) {
+  public boolean updateOrInsertProjectConfiguration(
+      String projectId, ConfigurationEntity[] configurations, TokenContent tokenContent) {
     Objects.requireNonNull(projectId);
     Objects.requireNonNull(configurations);
 
@@ -367,20 +391,21 @@ public class ProjectService {
     project.setCs(configurationEntities);
 
     project = projectRepository.save(project);
-    taskOperations.createTask("CFG_MONITOR",
-                              ConstDef.EVENT_TYPE_CFG_SYNC,
-                              null,
-                              ConstDef.EVENT_TARGET_TYPE_PROJECT,
-                              project.getId(),
-                              ConstDef.DAY_SECONDS,
-                              null,
-                              null,
-                              ConstDef.EVENT_TASK_OPTION_OVERWRITE);
+    taskOperations.createTask(
+        "CFG_MONITOR",
+        ConstDef.EVENT_TYPE_CFG_SYNC,
+        null,
+        ConstDef.EVENT_TARGET_TYPE_PROJECT,
+        project.getId(),
+        ConstDef.DAY_SECONDS,
+        null,
+        null,
+        ConstDef.EVENT_TASK_OPTION_OVERWRITE);
     return true;
   }
 
-  public boolean removeProjectConfiguration(String projectId, String configurations,
-                                            TokenContent tokenContent) {
+  public boolean removeProjectConfiguration(
+      String projectId, String configurations, TokenContent tokenContent) {
     Objects.requireNonNull(projectId);
     Objects.requireNonNull(configurations);
 
@@ -393,23 +418,27 @@ public class ProjectService {
     // to remove and ignore any one doesn't exist
     Set<String> configurationSet = new HashSet<>(parseArray(configurations));
     Optional.ofNullable(project.getCs())
-            .ifPresent(configurationEntities -> configurationEntities.removeIf(configurationEntity -> configurationSet.contains(configurationEntity.getCn())));
+        .ifPresent(
+            configurationEntities ->
+                configurationEntities.removeIf(
+                    configurationEntity -> configurationSet.contains(configurationEntity.getCn())));
 
     project = projectRepository.save(project);
-    taskOperations.createTask("CFG_MONITOR",
-                              ConstDef.EVENT_TYPE_CFG_SYNC,
-                              null,
-                              ConstDef.EVENT_TARGET_TYPE_PROJECT,
-                              project.getId(),
-                              ConstDef.DAY_SECONDS,
-                              null,
-                              null,
-                              ConstDef.EVENT_TASK_OPTION_OVERWRITE);
+    taskOperations.createTask(
+        "CFG_MONITOR",
+        ConstDef.EVENT_TYPE_CFG_SYNC,
+        null,
+        ConstDef.EVENT_TARGET_TYPE_PROJECT,
+        project.getId(),
+        ConstDef.DAY_SECONDS,
+        null,
+        null,
+        ConstDef.EVENT_TASK_OPTION_OVERWRITE);
     return true;
   }
 
-  public boolean updateOrInsertProjectMember(String projectId, ProjectDTO newProjectDTO,
-                                             TokenContent tokenContent) {
+  public boolean updateOrInsertProjectMember(
+      String projectId, ProjectDTO newProjectDTO, TokenContent tokenContent) {
     Objects.requireNonNull(projectId);
     Objects.requireNonNull(newProjectDTO);
 
@@ -421,8 +450,8 @@ public class ProjectService {
 
     List<UserAndRole> userListOfDB =
         Optional.ofNullable(project.getUser()).orElse(new ArrayList<UserAndRole>());
-    for (UserAndRole newUser : Optional.ofNullable(newProjectDTO.getUser())
-                                       .orElse(Collections.emptyList())) {
+    for (UserAndRole newUser :
+        Optional.ofNullable(newProjectDTO.getUser()).orElse(Collections.emptyList())) {
       if (Objects.isNull(newUser.getName()) || newUser.getName().isEmpty()) {
         log.warn("can not work with an empty name");
         return false;
@@ -451,8 +480,8 @@ public class ProjectService {
     return true;
   }
 
-  public boolean removeProjectMember(String projectId, String removedUser,
-                                     TokenContent tokenContent) {
+  public boolean removeProjectMember(
+      String projectId, String removedUser, TokenContent tokenContent) {
     Objects.requireNonNull(projectId);
     Objects.requireNonNull(removedUser);
 
@@ -463,8 +492,10 @@ public class ProjectService {
     }
 
     Optional.ofNullable(project.getUser())
-            .ifPresent(userAndRoles -> userAndRoles.removeIf(userAndRole -> Objects.equals(removedUser,
-                                                                                           userAndRole.getName())));
+        .ifPresent(
+            userAndRoles ->
+                userAndRoles.removeIf(
+                    userAndRole -> Objects.equals(removedUser, userAndRole.getName())));
     project = projectRepository.save(project);
     return true;
   }

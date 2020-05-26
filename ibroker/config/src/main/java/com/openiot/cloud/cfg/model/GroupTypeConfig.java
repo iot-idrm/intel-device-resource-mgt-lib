@@ -63,17 +63,21 @@ public class GroupTypeConfig {
     }
 
     public static Configuration from(Optional<ConfigurationEntity> ce) {
-      return ce.map(entity -> {
-        Configuration c = new Configuration();
+      return ce.map(
+              entity -> {
+                Configuration c = new Configuration();
 
-        Optional.ofNullable(entity.getCn()).ifPresent(cn -> c.setN(cn));
-        Optional.ofNullable(entity.getCv()).ifPresent(cv -> {
-          c.setD(cv);
-          c.setS("s");
-        });
+                Optional.ofNullable(entity.getCn()).ifPresent(cn -> c.setN(cn));
+                Optional.ofNullable(entity.getCv())
+                    .ifPresent(
+                        cv -> {
+                          c.setD(cv);
+                          c.setS("s");
+                        });
 
-        return c;
-      }).orElse(null);
+                return c;
+              })
+          .orElse(null);
     }
   }
 
@@ -107,14 +111,16 @@ public class GroupTypeConfig {
     }
 
     public static DataSource from(Optional<DataSourceEntity> de) {
-      return de.map(entity -> {
-        DataSource ds = new DataSource();
+      return de.map(
+              entity -> {
+                DataSource ds = new DataSource();
 
-        Optional.ofNullable(entity.getDsn()).ifPresent(dsn -> ds.setN(dsn));
-        Optional.ofNullable(entity.getDst()).ifPresent(dst -> ds.setT(dst));
+                Optional.ofNullable(entity.getDsn()).ifPresent(dsn -> ds.setN(dsn));
+                Optional.ofNullable(entity.getDst()).ifPresent(dst -> ds.setT(dst));
 
-        return ds;
-      }).orElse(null);
+                return ds;
+              })
+          .orElse(null);
     }
   }
 
@@ -182,20 +188,29 @@ public class GroupTypeConfig {
   }
 
   public static GroupTypeConfig from(Optional<GroupType> group) {
-    return group.map(g -> {
-      GroupTypeConfig groupTypeConfig = new GroupTypeConfig();
+    return group
+        .map(
+            g -> {
+              GroupTypeConfig groupTypeConfig = new GroupTypeConfig();
 
-      groupTypeConfig.setN(g.getN());
-      groupTypeConfig.setD(g.getD());
+              groupTypeConfig.setN(g.getN());
+              groupTypeConfig.setD(g.getD());
 
-      Optional.ofNullable(g.getCs())
-              .ifPresent(cs -> cs.forEach(c -> groupTypeConfig.setCsItem(Configuration.from(Optional.of(c)))));
+              Optional.ofNullable(g.getCs())
+                  .ifPresent(
+                      cs ->
+                          cs.forEach(
+                              c -> groupTypeConfig.setCsItem(Configuration.from(Optional.of(c)))));
 
-      Optional.ofNullable(g.getDss())
-              .ifPresent(dss -> dss.forEach(ds -> groupTypeConfig.setDssItem(DataSource.from(Optional.of(ds)))));
+              Optional.ofNullable(g.getDss())
+                  .ifPresent(
+                      dss ->
+                          dss.forEach(
+                              ds -> groupTypeConfig.setDssItem(DataSource.from(Optional.of(ds)))));
 
-      return groupTypeConfig;
-    }).orElse(null);
+              return groupTypeConfig;
+            })
+        .orElse(null);
   }
 
   public String toJsonString() {

@@ -11,6 +11,11 @@ import com.openiot.cloud.base.profiling.DurationCounterManage;
 import com.openiot.cloud.base.profiling.DurationCounterOfUrlBuilder.CounterOfUrl;
 import com.openiot.cloud.base.profiling.SimpleAlarmHandler;
 import com.openiot.cloud.httpproxy.security.TokenClient;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.iotivity.cloud.base.connector.ConnectorPool;
 import org.iotivity.cloud.util.Log;
 import org.slf4j.Logger;
@@ -28,34 +33,24 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jms.annotation.EnableJms;
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @EnableJms
 @EnableCaching
-@SpringBootApplication(exclude = {ErrorMvcAutoConfiguration.class},
+@SpringBootApplication(
+    exclude = {ErrorMvcAutoConfiguration.class},
     scanBasePackages = {"com.openiot.cloud.sdk.service", "com.openiot.cloud.httpproxy"})
 public class Application extends SpringBootServletInitializer {
   private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
-  @Autowired
-  private DurationCounterManage counterManage;
+  @Autowired private DurationCounterManage counterManage;
 
-  @Autowired
-  private List<CounterOfUrl> counterOfUrls;
+  @Autowired private List<CounterOfUrl> counterOfUrls;
 
-  @Autowired
-  private DurationCounterConfiguration urlConfiguration;
+  @Autowired private DurationCounterConfiguration urlConfiguration;
 
-  @Autowired
-  private DurationCounterConfiguration methodConfiguration;
+  @Autowired private DurationCounterConfiguration methodConfiguration;
 
-  @Autowired
-  TokenClient cacheService;
+  @Autowired TokenClient cacheService;
 
   @EventListener
   public void onApplicationReady(final ApplicationReadyEvent event) {
@@ -85,7 +80,8 @@ public class Application extends SpringBootServletInitializer {
       }
 
       if (routingTable == null || routingTable.isEmpty()) {
-        logger.error("routing table is empty or invalid, either way there is no usable routing item");
+        logger.error(
+            "routing table is empty or invalid, either way there is no usable routing item");
         return null;
       }
 
@@ -99,8 +95,8 @@ public class Application extends SpringBootServletInitializer {
         }
       }
 
-      logger.info("set up connections with remote services "
-          + ConfigurableRoutingTable.dump(routingTable));
+      logger.info(
+          "set up connections with remote services " + ConfigurableRoutingTable.dump(routingTable));
     } catch (Exception e) {
       logger.error("meet an exception when trying to make COAP connections", e);
     }
@@ -116,22 +112,29 @@ public class Application extends SpringBootServletInitializer {
   void initCountersForUrls() {
     Map<String, DurationCounterConfiguration> configurationMap =
         Stream.of(urlConfiguration, methodConfiguration)
-              .collect(Collectors.toMap(config -> config.getTag(), config -> config));
+            .collect(Collectors.toMap(config -> config.getTag(), config -> config));
 
-    counterOfUrls.stream().map(counterOfUrl -> {
-      String configurationName = counterOfUrl.getConfigName();
-      if (configurationMap.containsKey(configurationName)) {
-        DurationCounterConfiguration configuration = configurationMap.get(configurationName);
-        return new DurationCounter(counterOfUrl.getUrl(),
-                                   configuration,
-                                   new SimpleAlarmHandler(configuration.getAlarmOutputPath()));
-      } else {
-        return null;
-      }
-    }).filter(counter -> counter != null).forEach(counter -> {
-      logger.debug("add " + counter.getName() + " into counter manage");
-      counterManage.putCounter(counter.getName(), counter);
-    });
+    counterOfUrls.stream()
+        .map(
+            counterOfUrl -> {
+              String configurationName = counterOfUrl.getConfigName();
+              if (configurationMap.containsKey(configurationName)) {
+                DurationCounterConfiguration configuration =
+                    configurationMap.get(configurationName);
+                return new DurationCounter(
+                    counterOfUrl.getUrl(),
+                    configuration,
+                    new SimpleAlarmHandler(configuration.getAlarmOutputPath()));
+              } else {
+                return null;
+              }
+            })
+        .filter(counter -> counter != null)
+        .forEach(
+            counter -> {
+              logger.debug("add " + counter.getName() + " into counter manage");
+              counterManage.putCounter(counter.getName(), counter);
+            });
 
     counterManage.initialize();
   }

@@ -18,8 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CustomizedWebMvcConfigurer implements WebMvcConfigurer {
 
-  @Autowired
-  private HttpProxyCustomLogging logger;
+  @Autowired private HttpProxyCustomLogging logger;
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
@@ -29,12 +28,13 @@ public class CustomizedWebMvcConfigurer implements WebMvcConfigurer {
   @Bean
   public ConfigurableServletWebServerFactory webServerFactory() {
     TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
-    factory.addConnectorCustomizers(new TomcatConnectorCustomizer() {
-      @Override
-      public void customize(Connector connector) {
-        connector.setProperty("relaxedQueryChars", "|{}[]");
-      }
-    });
+    factory.addConnectorCustomizers(
+        new TomcatConnectorCustomizer() {
+          @Override
+          public void customize(Connector connector) {
+            connector.setProperty("relaxedQueryChars", "|{}[]");
+          }
+        });
     return factory;
   }
 }

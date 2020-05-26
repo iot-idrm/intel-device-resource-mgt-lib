@@ -6,12 +6,10 @@ package com.openiot.cloud.base.service.model;
 
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
-import lombok.*;
 import java.util.*;
+import lombok.*;
 
-/**
- * should be as same as com.openiot.cloud.provisionex.service.dto.ProjectDTO;
- */
+/** should be as same as com.openiot.cloud.provisionex.service.dto.ProjectDTO; */
 @Data
 public class ProjectDTO {
   private String id;

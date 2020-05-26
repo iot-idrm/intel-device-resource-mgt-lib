@@ -4,9 +4,9 @@
 
 package com.openiot.cloud.base.influx.model;
 
-import lombok.Data;
 import java.time.Instant;
 import java.util.Map;
+import lombok.Data;
 
 @Data
 public class Series {

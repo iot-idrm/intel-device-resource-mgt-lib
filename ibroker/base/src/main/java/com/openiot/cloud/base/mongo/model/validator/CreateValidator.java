@@ -4,5 +4,4 @@
 
 package com.openiot.cloud.base.mongo.model.validator;
 
-public interface CreateValidator {
-}
+public interface CreateValidator {}

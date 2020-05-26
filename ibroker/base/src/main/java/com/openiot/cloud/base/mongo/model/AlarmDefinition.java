@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.Alarm.TargetType;
+import java.util.List;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import java.util.List;
 
 @Document(collection = "AlarmDefinition")
 @JsonInclude(Include.NON_NULL)

@@ -4,11 +4,16 @@
 
 package com.openiot.cloud.ibroker.base.protocols.ilink;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.openiot.cloud.base.ilink.*;
 import com.openiot.cloud.ibroker.mq.OptJmsReqHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import org.iotivity.cloud.base.protocols.MessageBuilder;
 import org.iotivity.cloud.base.protocols.coap.CoapDecoder;
 import org.iotivity.cloud.base.protocols.coap.CoapEncoder;
@@ -22,10 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -47,8 +48,8 @@ public class ILinkCOAPOverTCPMessageTest {
     String payload =
         "it is a long payload with some 1234 and {}*&^% and it is not a COAP_OVER_TCP payload";
     ILinkMessage request =
-        new ILinkMessage(LeadingByte.REQUEST.valueOf(),
-                         (byte) MessageType.COAP_OVER_TCP.valueOf()).setIlinkMessageId("request".getBytes());
+        new ILinkMessage(LeadingByte.REQUEST.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf())
+            .setIlinkMessageId("request".getBytes());
     request.setPayload(payload.getBytes());
 
     assertThat(request.getIlinkMessageId()).hasSize(4).isEqualTo("uest".getBytes());
@@ -61,11 +62,10 @@ public class ILinkCOAPOverTCPMessageTest {
     CoapEncoder ce = new CoapEncoder();
     CoapDecoder cd = new CoapDecoder();
 
-    CoapMessage cm = (CoapMessage) MessageBuilder.createRequest(RequestMethod.GET,
-                                                                "/ibroker/test",
-                                                                null,
-                                                                ContentFormat.APPLICATION_CBOR,
-                                                                null);
+    CoapMessage cm =
+        (CoapMessage)
+            MessageBuilder.createRequest(
+                RequestMethod.GET, "/ibroker/test", null, ContentFormat.APPLICATION_CBOR, null);
 
     ByteBuf bb = Unpooled.buffer();
     assertThat(bb).isNotNull();
@@ -88,11 +88,10 @@ public class ILinkCOAPOverTCPMessageTest {
   public void testCase3() throws Exception {
     System.out.println("testCase3");
 
-    CoapMessage cm = (CoapMessage) MessageBuilder.createRequest(RequestMethod.GET,
-                                                                "/ibroker/test",
-                                                                null,
-                                                                ContentFormat.APPLICATION_CBOR,
-                                                                null);
+    CoapMessage cm =
+        (CoapMessage)
+            MessageBuilder.createRequest(
+                RequestMethod.GET, "/ibroker/test", null, ContentFormat.APPLICATION_CBOR, null);
 
     ByteBuf bb = Unpooled.buffer();
     CoapEncoder ce = new CoapEncoder();
@@ -128,7 +127,8 @@ public class ILinkCOAPOverTCPMessageTest {
     ILinkMessage messageD = (ILinkMessage) out.get(0);
 
     assertThat(messageD).isNotNull();
-    assertThat(MessageType.fromValue(messageD.getMessageType())).isEqualTo(MessageType.COAP_OVER_TCP);
+    assertThat(MessageType.fromValue(messageD.getMessageType()))
+        .isEqualTo(MessageType.COAP_OVER_TCP);
     assertThat(messageD.getPayloadSize()).isEqualTo((message.getPayloadSize()));
     System.out.println("testCase3 done");
   }
@@ -136,18 +136,20 @@ public class ILinkCOAPOverTCPMessageTest {
   @Test
   public void testCase4() throws Exception {
     CoapEncoder ce = new CoapEncoder();
-    CoapMessage cm = (CoapMessage) MessageBuilder.createRequest(RequestMethod.GET,
-                                                                "/ibroker/test?query=something",
-                                                                null);
+    CoapMessage cm =
+        (CoapMessage)
+            MessageBuilder.createRequest(RequestMethod.GET, "/ibroker/test?query=something", null);
     ByteBuf bbCoap = Unpooled.buffer();
     ReflectionTestUtils.invokeMethod(ce, "encode", null, cm, bbCoap);
     byte[] cmBytes = new byte[bbCoap.readableBytes()];
     bbCoap.getBytes(bbCoap.readerIndex(), cmBytes);
 
     ILinkEncoder ie = new ILinkEncoder();
-    ILinkMessage request = new ILinkMessage(LeadingByte.RESPONSE.valueOf(),
-                                            (byte) MessageType.COAP_OVER_TCP.valueOf());
-    request.setIlinkMessageId("8339".getBytes()).setPayload(cmBytes);;
+    ILinkMessage request =
+        new ILinkMessage(
+            LeadingByte.RESPONSE.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf());
+    request.setIlinkMessageId("8339".getBytes()).setPayload(cmBytes);
+    ;
     System.out.println("testCase4 " + request.toString());
     assertThat(request.getPayloadSize()).isGreaterThan(0);
 
@@ -163,18 +165,19 @@ public class ILinkCOAPOverTCPMessageTest {
 
     ILinkMessage requestD = (ILinkMessage) out.get(0);
     System.out.println("testCase4 " + requestD.toString());
-    assertThat(ILinkCoapOverTcpMessageHandler.decodeAsCoapMessage(requestD.getPayload())
-                                             .getUriPath()).isNotEmpty()
-                                                           .isEqualTo("/ibroker/test?query=something");
+    assertThat(
+            ILinkCoapOverTcpMessageHandler.decodeAsCoapMessage(requestD.getPayload()).getUriPath())
+        .isNotEmpty()
+        .isEqualTo("/ibroker/test?query=something");
   }
 
   @Test
   public void testCase5() throws Exception {
     ILinkMessage request =
-        new ILinkMessage(LeadingByte.REQUEST.valueOf(),
-                         (byte) MessageType.COAP_OVER_TCP.valueOf()).setAgentId("agentID-1")
-                                                                    .setTag("tag-1")
-                                                                    .setIlinkMessageId("8339".getBytes());
+        new ILinkMessage(LeadingByte.REQUEST.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf())
+            .setAgentId("agentID-1")
+            .setTag("tag-1")
+            .setIlinkMessageId("8339".getBytes());
     System.out.println("testCase5 " + request.toString());
 
     ILinkEncoder ie = new ILinkEncoder();

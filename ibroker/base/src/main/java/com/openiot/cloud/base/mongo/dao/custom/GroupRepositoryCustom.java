@@ -6,21 +6,29 @@ package com.openiot.cloud.base.mongo.dao.custom;
 
 import com.openiot.cloud.base.mongo.model.Group;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
-import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 
 public interface GroupRepositoryCustom {
   // TODO: collections should not use Optional
-  List<Group> filter(Optional<String> projectId, Optional<List<String>> names,
-                     Optional<List<String>> gtNames, Optional<List<String>> dpNames,
-                     Optional<List<String>> dsInternalIds, Optional<String> dsrUrl,
-                     Optional<List<String>> devIds, Optional<Map<String, String>> resMap,
-                     Optional<List<String>> withAttr, Optional<List<String>> withCfg,
-                     Optional<List<String>> withDss, Optional<Map<String, String>> attrMap,
-                     Optional<Map<String, String>> cfgMap, Optional<List<String>> fields,
-                     Pageable pageRequest);
+  List<Group> filter(
+      Optional<String> projectId,
+      Optional<List<String>> names,
+      Optional<List<String>> gtNames,
+      Optional<List<String>> dpNames,
+      Optional<List<String>> dsInternalIds,
+      Optional<String> dsrUrl,
+      Optional<List<String>> devIds,
+      Optional<Map<String, String>> resMap,
+      Optional<List<String>> withAttr,
+      Optional<List<String>> withCfg,
+      Optional<List<String>> withDss,
+      Optional<Map<String, String>> attrMap,
+      Optional<Map<String, String>> cfgMap,
+      Optional<List<String>> fields,
+      Pageable pageRequest);
 
   // ------ RETURN GROUP
   Group findOneByName(String name);

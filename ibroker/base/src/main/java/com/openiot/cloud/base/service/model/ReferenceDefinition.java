@@ -64,7 +64,20 @@ public class ReferenceDefinition {
 
   @Override
   public String toString() {
-    return "ReferenceDefinition{" + "devId='" + devId + '\'' + ", resUrl='" + resUrl + '\''
-        + ", propName='" + propName + '\'' + ", from=" + from + ", to=" + to + '}';
+    return "ReferenceDefinition{"
+        + "devId='"
+        + devId
+        + '\''
+        + ", resUrl='"
+        + resUrl
+        + '\''
+        + ", propName='"
+        + propName
+        + '\''
+        + ", from="
+        + from
+        + ", to="
+        + to
+        + '}';
   }
 }

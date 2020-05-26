@@ -4,9 +4,10 @@
 
 package com.openiot.cloud.base.help;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.openiot.cloud.base.Application;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;

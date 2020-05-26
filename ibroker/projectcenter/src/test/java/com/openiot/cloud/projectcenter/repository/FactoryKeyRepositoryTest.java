@@ -4,8 +4,9 @@
 
 package com.openiot.cloud.projectcenter.repository;
 
-import com.openiot.cloud.projectcenter.repository.document.FactoryKey;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.openiot.cloud.projectcenter.repository.document.FactoryKey;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,8 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(properties = {"spring.data.mongodb.database=test_openiot"})
 @RunWith(SpringRunner.class)
 public class FactoryKeyRepositoryTest {
-  @Autowired
-  private FactoryKeyRepository factoryKeyRepository;
+  @Autowired private FactoryKeyRepository factoryKeyRepository;
 
   @Before
   public void setup() throws Exception {

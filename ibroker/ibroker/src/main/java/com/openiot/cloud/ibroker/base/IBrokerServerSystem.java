@@ -17,14 +17,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
+import java.util.ArrayList;
+import java.util.List;
 import org.iotivity.cloud.base.device.Device;
 import org.iotivity.cloud.base.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class IBrokerServerSystem {
@@ -32,24 +32,23 @@ public class IBrokerServerSystem {
   protected static AttributeKey<Device> keyDevice = AttributeKey.newInstance("device");
   private List<Server> mServerList = new ArrayList<>();
 
-  @Autowired
-  private IAgentCache dc;
+  @Autowired private IAgentCache dc;
 
-  @Autowired
-  private ILinkCoapOverTcpMessageHandler ilinkCoapMsgHandler;
+  @Autowired private ILinkCoapOverTcpMessageHandler ilinkCoapMsgHandler;
 
-  @Autowired
-  private ILinkIntelIAgentMessageHandler iagentMsgHandler;
+  @Autowired private ILinkIntelIAgentMessageHandler iagentMsgHandler;
 
   @Sharable
   public class PersistentPacketReceiver extends SimpleChannelInboundHandler<ILinkMessage> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-      logger.info(String.format("channel #%s active with %s %s",
-                                ctx.channel().id().asShortText(),
-                                ctx.channel().remoteAddress(),
-                                ctx.channel().config().getOptions()));
+      logger.info(
+          String.format(
+              "channel #%s active with %s %s",
+              ctx.channel().id().asShortText(),
+              ctx.channel().remoteAddress(),
+              ctx.channel().config().getOptions()));
 
       // TODO: maybe we should check if the agent is in the agent cache here,
       // to refuse the new connection or to disconnect the old connection
@@ -60,20 +59,23 @@ public class IBrokerServerSystem {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-      logger.info(String.format("channel #%s inactive with %s",
-                                ctx.channel().id().asShortText(),
-                                ctx.channel().remoteAddress()));
+      logger.info(
+          String.format(
+              "channel #%s inactive with %s",
+              ctx.channel().id().asShortText(), ctx.channel().remoteAddress()));
       Device device = ctx.channel().attr(keyDevice).get();
       String agentId = ((IAgent) device).getAgentId();
       // in case, there are two or more channels with the same agent
       //
-      if (agentId != null && !agentId.isEmpty() && dc.containsKey(agentId)
+      if (agentId != null
+          && !agentId.isEmpty()
+          && dc.containsKey(agentId)
           && dc.getAgent(agentId)
-               .getCtx()
-               .channel()
-               .id()
-               .asShortText()
-               .equals(ctx.channel().id().asShortText())) {
+              .getCtx()
+              .channel()
+              .id()
+              .asShortText()
+              .equals(ctx.channel().id().asShortText())) {
         dc.removeAgent(agentId, true);
       }
 
@@ -87,28 +89,31 @@ public class IBrokerServerSystem {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, ILinkMessage msg) {
       if (msg == null) {
-        logger.error(String.format("channel #%s receives an invalid msg",
-                                   ctx.channel().id().asShortText()));
+        logger.error(
+            String.format("channel #%s receives an invalid msg", ctx.channel().id().asShortText()));
         return;
       }
 
       // Find proper device and raise event.
       Device srcDevice = ctx.channel().attr(keyDevice).get();
       if (srcDevice == null) {
-        logger.error(String.format("channel #%s unable to find device",
-                                   ctx.channel().id().asShortText()));
+        logger.error(
+            String.format("channel #%s unable to find device", ctx.channel().id().asShortText()));
         ReferenceCountUtil.release(msg);
         return;
       }
 
       String deviceAgentId = ((IAgent) srcDevice).getAgentId();
-      if (msg.getAgentId() != null && deviceAgentId != null
+      if (msg.getAgentId() != null
+          && deviceAgentId != null
           && !deviceAgentId.equals(msg.getAgentId())) {
-        logger.warn(String.format("channel #%s(%s) receives messages %s from another device %s",
-                                  ctx.channel().id().asShortText(),
-                                  ((IAgent) srcDevice).getAgentId(),
-                                  msg,
-                                  msg.getAgentId()));
+        logger.warn(
+            String.format(
+                "channel #%s(%s) receives messages %s from another device %s",
+                ctx.channel().id().asShortText(),
+                ((IAgent) srcDevice).getAgentId(),
+                msg,
+                msg.getAgentId()));
         ctx.channel().disconnect();
         return;
       }
@@ -121,9 +126,8 @@ public class IBrokerServerSystem {
         return;
       }
 
-      logger.info(String.format("channel #%s receive a msg %s",
-                                ctx.channel().id().asShortText(),
-                                msg));
+      logger.info(
+          String.format("channel #%s receive a msg %s", ctx.channel().id().asShortText(), msg));
 
       try {
         switch (mt) {
@@ -146,9 +150,10 @@ public class IBrokerServerSystem {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-      logger.error(String.format("channel #%s has an exception %s,",
-                                 ctx.channel().id().asShortText(),
-                                 cause.getLocalizedMessage()));
+      logger.error(
+          String.format(
+              "channel #%s has an exception %s,",
+              ctx.channel().id().asShortText(), cause.getLocalizedMessage()));
       logger.error(BaseUtil.getStackTrace(cause));
       ctx.channel().disconnect();
       ctx.channel().close();

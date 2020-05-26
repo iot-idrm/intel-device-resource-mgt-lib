@@ -15,23 +15,21 @@ import com.openiot.cloud.projectcenter.service.dto.GatewayDTO;
 import com.openiot.cloud.projectcenter.utils.AES128CBC;
 import com.openiot.cloud.projectcenter.utils.MD5;
 import com.openiot.cloud.projectcenter.utils.RandomKeyGen;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Objects;
 
 @Slf4j
 @Component
 public class ProvisionSslHandler {
-  @Autowired
-  private GatewayService gatewayService;
-  @Autowired
-  private FactoryKeyService factoryKeyService;
+  @Autowired private GatewayService gatewayService;
+  @Autowired private FactoryKeyService factoryKeyService;
   // Default factory key
   @Value("${provision.factory-key:hello iagent}")
   private String DEFAULT_FACTORY_KEY;
@@ -48,7 +46,9 @@ public class ProvisionSslHandler {
 
     String serialNumber = (String) request.getFlexHeaderValue("sn");
     byte[] payload = request.getPayload();
-    if (Objects.isNull(serialNumber) || serialNumber.length() == 0 || Objects.isNull(payload)
+    if (Objects.isNull(serialNumber)
+        || serialNumber.length() == 0
+        || Objects.isNull(payload)
         || payload.length == 0) {
       log.error("{} is an invalid provision message", request);
       response.setResponseCode(ConstDef.FH_V_FAIL);
@@ -89,8 +89,8 @@ public class ProvisionSslHandler {
       if (gateway != null) {
         // still not working if there are two same serial number
         if (Objects.equals(gateway.getHwSn(), gateway.getNewHwSn())) {
-          log.error("The gateway {} has a new serial number same with its old serial number",
-                    gateway);
+          log.error(
+              "The gateway {} has a new serial number same with its old serial number", gateway);
           response.setResponseCode(ConstDef.FH_V_FAIL);
           response.setTag(ConstDef.FH_V_PRO);
           return response;

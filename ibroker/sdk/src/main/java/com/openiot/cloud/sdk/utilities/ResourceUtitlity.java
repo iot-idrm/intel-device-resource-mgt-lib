@@ -8,9 +8,9 @@ import com.openiot.cloud.base.mongo.dao.ResTypeRepository;
 import com.openiot.cloud.base.mongo.model.Resource;
 import com.openiot.cloud.base.mongo.model.ResourceType;
 import com.openiot.cloud.sdk.service.ApplicationContextProvider;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.util.List;
 
 /**
  * The utility to access resources in openiot cloud.<br>
@@ -22,8 +22,7 @@ import java.util.List;
  */
 @Component
 public class ResourceUtitlity {
-  @Autowired
-  ResTypeRepository rtRepo;
+  @Autowired ResTypeRepository rtRepo;
 
   public static ResourceUtitlity getInstance() {
     return ApplicationContextProvider.getBean(ResourceUtitlity.class);

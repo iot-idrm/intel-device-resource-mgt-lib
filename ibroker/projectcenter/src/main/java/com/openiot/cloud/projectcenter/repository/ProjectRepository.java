@@ -5,8 +5,8 @@
 package com.openiot.cloud.projectcenter.repository;
 
 import com.openiot.cloud.projectcenter.repository.document.Project;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ProjectRepository extends MongoRepository<Project, String> {
   List<Project> findByName(String name);

@@ -11,25 +11,26 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.validator.CheckName;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
 import com.openiot.cloud.base.mongo.model.validator.UpdateValidator;
+import java.util.Date;
+import java.util.List;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import java.util.Date;
-import java.util.List;
 
 @Document(collection = "EventMonitor")
 @JsonInclude(Include.NON_EMPTY)
 public class EventMonitor {
-  @Id
-  ObjectId id;
+  @Id ObjectId id;
 
   @Field("name")
   @JsonProperty("name")
   @NotNull(groups = CreateValidator.class)
-  @CheckName(value = EventMonitor.class, message = "need an unique name",
+  @CheckName(
+      value = EventMonitor.class,
+      message = "need an unique name",
       groups = CreateValidator.class)
   // Event Monitor name
   String name;
@@ -128,8 +129,19 @@ public class EventMonitor {
 
   @Override
   public String toString() {
-    return "EventMonitor [id=" + id + ", name=" + name + ", project=" + project + ", eventTypes="
-        + eventTypes + ", desc=" + desc + ", regTime=" + regTime + "]";
+    return "EventMonitor [id="
+        + id
+        + ", name="
+        + name
+        + ", project="
+        + project
+        + ", eventTypes="
+        + eventTypes
+        + ", desc="
+        + desc
+        + ", regTime="
+        + regTime
+        + "]";
   }
 
   @Override
@@ -146,33 +158,22 @@ public class EventMonitor {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     EventMonitor other = (EventMonitor) obj;
     if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
-      return false;
+      if (other.name != null) return false;
+    } else if (!name.equals(other.name)) return false;
     if (eventTypes == null) {
-      if (other.eventTypes != null)
-        return false;
-    } else if (!eventTypes.equals(other.eventTypes))
-      return false;
+      if (other.eventTypes != null) return false;
+    } else if (!eventTypes.equals(other.eventTypes)) return false;
     if (project == null) {
-      if (other.project != null)
-        return false;
-    } else if (!project.equals(other.project))
-      return false;
+      if (other.project != null) return false;
+    } else if (!project.equals(other.project)) return false;
     if (regTime == null) {
-      if (other.regTime != null)
-        return false;
-    } else if (!regTime.equals(other.regTime))
-      return false;
+      if (other.regTime != null) return false;
+    } else if (!regTime.equals(other.regTime)) return false;
     return true;
   }
 
@@ -184,7 +185,8 @@ public class EventMonitor {
 
     @Field("targetType")
     @JsonProperty("targetType")
-    @Pattern(regexp = ConstDef.EVENT_TARGET_TYPE_DEVICE + "|" + ConstDef.EVENT_TARGET_TYPE_GROUP,
+    @Pattern(
+        regexp = ConstDef.EVENT_TARGET_TYPE_DEVICE + "|" + ConstDef.EVENT_TARGET_TYPE_GROUP,
         message = "has to one of those: DEVICE, GROUP",
         groups = {CreateValidator.class, UpdateValidator.class})
     // task target type
@@ -241,8 +243,15 @@ public class EventMonitor {
 
     @Override
     public String toString() {
-      return "EventType [eventType = " + eventType + "targetType=" + targetType + ", targetId="
-          + targetId + ", lifeTime=" + lifeTime + "]";
+      return "EventType [eventType = "
+          + eventType
+          + "targetType="
+          + targetType
+          + ", targetId="
+          + targetId
+          + ", lifeTime="
+          + lifeTime
+          + "]";
     }
 
     @Override
@@ -258,36 +267,24 @@ public class EventMonitor {
 
     @Override
     public boolean equals(Object obj) {
-      if (this == obj)
-        return true;
-      if (obj == null)
-        return false;
-      if (getClass() != obj.getClass())
-        return false;
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (getClass() != obj.getClass()) return false;
       EventType other = (EventType) obj;
       if (targetId == null) {
-        if (other.targetId != null)
-          return false;
-      } else if (!targetId.equals(other.targetId))
-        return false;
+        if (other.targetId != null) return false;
+      } else if (!targetId.equals(other.targetId)) return false;
       if (targetType == null) {
-        if (other.targetType != null)
-          return false;
-      } else if (!targetType.equals(other.targetType))
-        return false;
+        if (other.targetType != null) return false;
+      } else if (!targetType.equals(other.targetType)) return false;
       if (eventType == null) {
-        if (other.eventType != null)
-          return false;
-      } else if (!eventType.equals(other.eventType))
-        return false;
+        if (other.eventType != null) return false;
+      } else if (!eventType.equals(other.eventType)) return false;
       if (lifeTime == null) {
-        if (other.lifeTime != null)
-          return false;
+        if (other.lifeTime != null) return false;
       } else {
-        if (other.lifeTime == null)
-          return false;
-        else if (lifeTime.intValue() != other.lifeTime.intValue())
-          return false;
+        if (other.lifeTime == null) return false;
+        else if (lifeTime.intValue() != other.lifeTime.intValue()) return false;
       }
 
       return true;

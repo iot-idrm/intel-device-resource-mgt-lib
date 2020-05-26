@@ -8,22 +8,19 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.service.model.UserAndRole;
+import java.util.List;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.List;
-
 
 @Document(ConstDef.C_PROJECT)
 @Data
 public class Project {
-  @Id
-  private String id;
+  @Id private String id;
   private String name;
   private String group_title;
-  @CreatedDate
-  private Long time_created;
+  @CreatedDate private Long time_created;
   private String description;
   private String location;
   private List<UserAndRole> user;

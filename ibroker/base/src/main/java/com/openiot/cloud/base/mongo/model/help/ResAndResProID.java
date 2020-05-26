@@ -10,9 +10,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
-import org.springframework.data.mongodb.core.mapping.Field;
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
+import javax.validation.constraints.NotNull;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @JsonInclude(Include.NON_NULL)
 public class ResAndResProID {
@@ -33,7 +33,8 @@ public class ResAndResProID {
   String pt;
 
   @JsonCreator
-  public ResAndResProID(@JsonProperty(ConstDef.F_DEVID) String di,
+  public ResAndResProID(
+      @JsonProperty(ConstDef.F_DEVID) String di,
       @JsonProperty(ConstDef.F_RESURI) String resUri,
       @JsonProperty(ConstDef.F_PROPNAME) String pt) {
     this.di = di;
@@ -67,18 +68,26 @@ public class ResAndResProID {
 
   @Override
   public String toString() {
-    return "ResAndResProID{" + "di='" + di + '\'' + ", resUri='" + resUri + '\'' + ", pt='" + pt
-        + '\'' + '}';
+    return "ResAndResProID{"
+        + "di='"
+        + di
+        + '\''
+        + ", resUri='"
+        + resUri
+        + '\''
+        + ", pt='"
+        + pt
+        + '\''
+        + '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     ResAndResProID that = (ResAndResProID) o;
-    return Objects.equals(di, that.di) && Objects.equals(resUri, that.resUri)
+    return Objects.equals(di, that.di)
+        && Objects.equals(resUri, that.resUri)
         && Objects.equals(pt, that.pt);
   }
 

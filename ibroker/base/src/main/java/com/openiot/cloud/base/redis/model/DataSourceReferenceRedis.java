@@ -5,9 +5,9 @@
 package com.openiot.cloud.base.redis.model;
 
 import com.openiot.cloud.base.help.ConstDef;
-import org.springframework.data.redis.core.ZSetOperations;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.data.redis.core.ZSetOperations;
 
 public class DataSourceReferenceRedis {
 

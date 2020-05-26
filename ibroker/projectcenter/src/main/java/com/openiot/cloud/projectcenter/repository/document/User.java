@@ -13,8 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(ConstDef.C_USER)
 @Data
 public class User {
-  @Id
-  private String id;
+  @Id private String id;
   // id is same with name
   private String name;
   private String nickname;

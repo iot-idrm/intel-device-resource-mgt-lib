@@ -15,9 +15,9 @@ import com.openiot.cloud.base.mongo.model.Group;
 import com.openiot.cloud.base.mongo.model.Group.MemberResRef;
 import com.openiot.cloud.base.mongo.model.ResProperty;
 import com.openiot.cloud.base.mongo.model.Resource;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.*;
 
 /*
  * device.cfg in a form likes: { --> Device "attr": { "": "" }, "cfg": { "": "" }, "ct" : "", "di":
@@ -71,14 +71,18 @@ public class DeviceConfig {
     }
 
     static PropsEntity from(Optional<ResProperty> resPro) {
-      return resPro.map(p -> {
-        PropsEntity pEntity = new PropsEntity();
+      return resPro
+          .map(
+              p -> {
+                PropsEntity pEntity = new PropsEntity();
 
-        Optional.ofNullable(p.getName()).ifPresent(n -> pEntity.setName(n));
-        Optional.ofNullable(p.getUserCfgs())
-                .ifPresent(cfgs -> cfgs.forEach(cfg -> pEntity.setPcfg(cfg.getCn(), cfg.getCv())));
-        return pEntity;
-      }).orElse(null);
+                Optional.ofNullable(p.getName()).ifPresent(n -> pEntity.setName(n));
+                Optional.ofNullable(p.getUserCfgs())
+                    .ifPresent(
+                        cfgs -> cfgs.forEach(cfg -> pEntity.setPcfg(cfg.getCn(), cfg.getCv())));
+                return pEntity;
+              })
+          .orElse(null);
     }
   }
 
@@ -187,44 +191,75 @@ public class DeviceConfig {
 
     @Override
     public String toString() {
-      return "LinksEntity [attr=" + attr + ", cfg=" + cfg + ", href=" + href + ", props=" + props
-          + ", grp=" + grp + ", dl=" + dl + "]";
+      return "LinksEntity [attr="
+          + attr
+          + ", cfg="
+          + cfg
+          + ", href="
+          + href
+          + ", props="
+          + props
+          + ", grp="
+          + grp
+          + ", dl="
+          + dl
+          + "]";
     }
 
-    static LinksEntity from(Optional<Resource> resource, Optional<List<ResProperty>> properties,
-                            Optional<List<Group>> resGroups) {
-      return resource.map(res -> {
-        logger.debug("--> res in LinksEntity from " + res);
+    static LinksEntity from(
+        Optional<Resource> resource,
+        Optional<List<ResProperty>> properties,
+        Optional<List<Group>> resGroups) {
+      return resource
+          .map(
+              res -> {
+                logger.debug("--> res in LinksEntity from " + res);
 
-        LinksEntity lEntity = new LinksEntity();
+                LinksEntity lEntity = new LinksEntity();
 
-        lEntity.setHref(res.getUrl());
+                lEntity.setHref(res.getUrl());
 
-        Optional.ofNullable(res.getConfig()).ifPresent(rescfg -> {
-          logger.debug("--> rescfg in LinksEntity from " + rescfg);
-          logger.debug("--> lEntity in LinksEntity from " + lEntity);
+                Optional.ofNullable(res.getConfig())
+                    .ifPresent(
+                        rescfg -> {
+                          logger.debug("--> rescfg in LinksEntity from " + rescfg);
+                          logger.debug("--> lEntity in LinksEntity from " + lEntity);
 
-          lEntity.setDl(rescfg.getDataLife());
+                          lEntity.setDl(rescfg.getDataLife());
 
-          Optional.ofNullable(rescfg.getAttributes())
-                  .ifPresent(attrs -> attrs.forEach(item -> lEntity.setAttr(item.getAn(),
-                                                                            item.getAv())));
+                          Optional.ofNullable(rescfg.getAttributes())
+                              .ifPresent(
+                                  attrs ->
+                                      attrs.forEach(
+                                          item -> lEntity.setAttr(item.getAn(), item.getAv())));
 
-          Optional.ofNullable(rescfg.getUserCfgs())
-                  .ifPresent(cfgs -> cfgs.forEach(item -> lEntity.setCfg(item.getCn(),
-                                                                         item.getCv())));
-        });
+                          Optional.ofNullable(rescfg.getUserCfgs())
+                              .ifPresent(
+                                  cfgs ->
+                                      cfgs.forEach(
+                                          item -> lEntity.setCfg(item.getCn(), item.getCv())));
+                        });
 
-        MemberResRef mbr = new MemberResRef(res.getDevId(), res.getUrl());
-        resGroups.ifPresent(resGs -> resGs.stream()
-                                          .filter(resG -> resG.getMr().contains(mbr))
-                                          .forEach(resG -> lEntity.setGrpItem(resG.getN())));
+                MemberResRef mbr = new MemberResRef(res.getDevId(), res.getUrl());
+                resGroups.ifPresent(
+                    resGs ->
+                        resGs.stream()
+                            .filter(resG -> resG.getMr().contains(mbr))
+                            .forEach(resG -> lEntity.setGrpItem(resG.getN())));
 
-        properties.ifPresent(props -> props.stream().filter(prop -> {
-          return prop.getDevId().equals(res.getDevId()) && prop.getRes().equals(res.getUrl());
-        }).forEach(prop -> lEntity.setPropItem(PropsEntity.from(Optional.of(prop)))));
-        return lEntity;
-      }).orElse(null);
+                properties.ifPresent(
+                    props ->
+                        props.stream()
+                            .filter(
+                                prop -> {
+                                  return prop.getDevId().equals(res.getDevId())
+                                      && prop.getRes().equals(res.getUrl());
+                                })
+                            .forEach(
+                                prop -> lEntity.setPropItem(PropsEntity.from(Optional.of(prop)))));
+                return lEntity;
+              })
+          .orElse(null);
     }
   }
 
@@ -357,41 +392,71 @@ public class DeviceConfig {
 
   @Override
   public String toString() {
-    return "DeviceConfig [di=" + di + ", dl=" + dl + ", rn=" + rn + ", attr=" + attr + ", cfg="
-        + cfg + ", grp=" + grp + ", links=" + links + "]";
+    return "DeviceConfig [di="
+        + di
+        + ", dl="
+        + dl
+        + ", rn="
+        + rn
+        + ", attr="
+        + attr
+        + ", cfg="
+        + cfg
+        + ", grp="
+        + grp
+        + ", links="
+        + links
+        + "]";
   }
 
-  public static DeviceConfig from(Optional<Device> device, Optional<List<Resource>> resources,
-                                  Optional<List<ResProperty>> properties,
-                                  Optional<List<Group>> devGroups,
-                                  Optional<List<Group>> resGroups) {
-    return device.map(d -> {
-      DeviceConfig devCfg = new DeviceConfig();
+  public static DeviceConfig from(
+      Optional<Device> device,
+      Optional<List<Resource>> resources,
+      Optional<List<ResProperty>> properties,
+      Optional<List<Group>> devGroups,
+      Optional<List<Group>> resGroups) {
+    return device
+        .map(
+            d -> {
+              DeviceConfig devCfg = new DeviceConfig();
 
-      devCfg.setDi(d.getId());
+              devCfg.setDi(d.getId());
 
-      Optional.ofNullable(d.getPrj()).ifPresent(prj -> {
-        devCfg.setProject(prj);
-      });
-      Optional.ofNullable(d.getConfig()).ifPresent(config -> {
-        devCfg.setRn(config.getRefNum());
-        devCfg.setDl(config.getDataLife());
+              Optional.ofNullable(d.getPrj())
+                  .ifPresent(
+                      prj -> {
+                        devCfg.setProject(prj);
+                      });
+              Optional.ofNullable(d.getConfig())
+                  .ifPresent(
+                      config -> {
+                        devCfg.setRn(config.getRefNum());
+                        devCfg.setDl(config.getDataLife());
 
-        Optional.ofNullable(config.getAttributes())
-                .ifPresent(attrs -> attrs.forEach(item -> devCfg.setAttr(item.getAn(),
-                                                                         item.getAv())));
-        Optional.ofNullable(config.getUserCfgs())
-                .ifPresent(cfgs -> cfgs.forEach(item -> devCfg.setCfg(item.getCn(), item.getCv())));
-      });
+                        Optional.ofNullable(config.getAttributes())
+                            .ifPresent(
+                                attrs ->
+                                    attrs.forEach(
+                                        item -> devCfg.setAttr(item.getAn(), item.getAv())));
+                        Optional.ofNullable(config.getUserCfgs())
+                            .ifPresent(
+                                cfgs ->
+                                    cfgs.forEach(
+                                        item -> devCfg.setCfg(item.getCn(), item.getCv())));
+                      });
 
-      devGroups.ifPresent(dgs -> dgs.forEach(dg -> devCfg.setGrpItem(dg.getN())));
+              devGroups.ifPresent(dgs -> dgs.forEach(dg -> devCfg.setGrpItem(dg.getN())));
 
-      resources.ifPresent(reses -> reses.forEach(res -> devCfg.setLinkItem(LinksEntity.from(Optional.of(res),
-                                                                                            properties,
-                                                                                            resGroups))));
+              resources.ifPresent(
+                  reses ->
+                      reses.forEach(
+                          res ->
+                              devCfg.setLinkItem(
+                                  LinksEntity.from(Optional.of(res), properties, resGroups))));
 
-      return devCfg;
-    }).orElse(null);
+              return devCfg;
+            })
+        .orElse(null);
   }
 
   public String toJsonString() {

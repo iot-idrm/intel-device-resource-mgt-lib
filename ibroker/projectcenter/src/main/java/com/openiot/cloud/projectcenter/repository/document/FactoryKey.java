@@ -12,8 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(ConstDef.C_FACTORYKEY)
 @Data
 public class FactoryKey {
-  @Id
-  private String id;
+  @Id private String id;
   private String keyName;
   private String keyType;
   private String keyValue;

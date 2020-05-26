@@ -4,10 +4,13 @@
 
 package com.openiot.cloud.projectcenter.controller.http;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openiot.cloud.base.common.model.TokenContent;
 import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
+import com.openiot.cloud.base.service.model.UserAndRole;
 import com.openiot.cloud.projectcenter.Application;
 import com.openiot.cloud.projectcenter.controller.ao.AuthenticationAO;
 import com.openiot.cloud.projectcenter.controller.ao.AuthorizationAO;
@@ -17,9 +20,9 @@ import com.openiot.cloud.projectcenter.repository.document.Project;
 import com.openiot.cloud.projectcenter.repository.document.User;
 import com.openiot.cloud.projectcenter.service.UserService;
 import com.openiot.cloud.projectcenter.utils.ApiJwtTokenUtil;
-import com.openiot.cloud.base.service.model.UserAndRole;
+import java.util.LinkedList;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,26 +34,19 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.util.LinkedList;
-import java.util.List;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {Application.class},
+@SpringBootTest(
+    classes = {Application.class},
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AuthHttpHandlerTest {
-  @Autowired
-  private ProjectRepository projectRepository;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private ApiJwtTokenUtil jwtTokenUtil;
-  @Autowired
-  private TestRestTemplate restTemplate;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @Autowired
-  private UserService userService;
+  @Autowired private ProjectRepository projectRepository;
+  @Autowired private UserRepository userRepository;
+  @Autowired private ApiJwtTokenUtil jwtTokenUtil;
+  @Autowired private TestRestTemplate restTemplate;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private UserService userService;
 
   private Project project1 = null;
   private User admin1 = null;
@@ -62,10 +58,11 @@ public class AuthHttpHandlerTest {
 
   @Value("${jwt.header}")
   private String tokenHeader;
+
   @Value("${jwt.tokenHead}")
   private String tokenHead;
-  @LocalServerPort
-  private int port;
+
+  @LocalServerPort private int port;
 
   @Before
   public void init() throws Exception {
@@ -130,7 +127,6 @@ public class AuthHttpHandlerTest {
     assertThat(jwtTokenUtil.validateToken(token)).isTrue();
     assertThat(jwtTokenUtil.getPidFromToken(token)).isEqualTo(project1.getId());
 
-
     request.setUsername(admin1.getName());
     request.setPassword("not_a_right_pasword");
     response = restTemplate.postForEntity(builder.build().toString(), request, byte[].class);
@@ -146,10 +142,9 @@ public class AuthHttpHandlerTest {
     HttpEntity<String> entity = new HttpEntity<>(tokenAdmin, headers);
 
     ResponseEntity<AuthorizationAO> response = null;
-    response = restTemplate.exchange(baseUrl + "api/user/refresh",
-                                     HttpMethod.POST,
-                                     entity,
-                                     AuthorizationAO.class);
+    response =
+        restTemplate.exchange(
+            baseUrl + "api/user/refresh", HttpMethod.POST, entity, AuthorizationAO.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     tokenAdmin = response.getBody().getToken();
     assertThat(jwtTokenUtil.validateToken(tokenAdmin)).isTrue();
@@ -168,31 +163,27 @@ public class AuthHttpHandlerTest {
     request.setToken(tokenAdmin);
     request.setPrj(project1.getId());
     HttpEntity<AuthorizationAO> entity = new HttpEntity<>(request, headers);
-    ResponseEntity<AuthorizationAO> response = restTemplate.exchange(builder.build().toString(),
-                                                                     HttpMethod.POST,
-                                                                     entity,
-                                                                     AuthorizationAO.class);
+    ResponseEntity<AuthorizationAO> response =
+        restTemplate.exchange(
+            builder.build().toString(), HttpMethod.POST, entity, AuthorizationAO.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     tokenAdmin = response.getBody().getToken();
     assertThat(jwtTokenUtil.validateToken(tokenAdmin)).isTrue();
     assertThat(response.getBody().getPrj()).isEqualTo(project1.getId());
 
-
     // select a null project
     request = new AuthorizationAO();
     request.setToken(tokenAdmin);
     entity = new HttpEntity<>(request, headers);
-    response = restTemplate.exchange(builder.build().toString(),
-                                     HttpMethod.POST,
-                                     entity,
-                                     AuthorizationAO.class);
+    response =
+        restTemplate.exchange(
+            builder.build().toString(), HttpMethod.POST, entity, AuthorizationAO.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     tokenAdmin = response.getBody().getToken();
     assertThat(jwtTokenUtil.validateToken(tokenAdmin)).isTrue();
     assertThat(response.getBody().getPrj()).isNull();
-
 
     // select an invalid project
     request.setPrj("not_existed_project");

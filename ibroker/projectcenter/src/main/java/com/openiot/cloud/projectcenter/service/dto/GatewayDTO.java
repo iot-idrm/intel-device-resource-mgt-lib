@@ -12,8 +12,10 @@ import lombok.Data;
 public class GatewayDTO {
   @JsonProperty(ConstDef.F_PROV_IAGENTID)
   private String iAgentId;
+
   @JsonProperty(ConstDef.F_PROV_SERIALNUM)
   private String hwSn;
+
   private String provKey;
   private long provTime;
   private boolean reset;

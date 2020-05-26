@@ -9,7 +9,6 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.dao.GroupRepository;
 import com.openiot.cloud.base.mongo.dao.ResProRepository;
 import com.openiot.cloud.base.mongo.model.Group;
-import com.openiot.cloud.base.mongo.model.ResProperty;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
 import com.openiot.cloud.base.mongo.model.help.ResAndResProID;
@@ -17,6 +16,11 @@ import com.openiot.cloud.base.redis.dao.DataSourceRedisRepository;
 import com.openiot.cloud.base.redis.model.DataSourceReferenceRedis;
 import com.openiot.cloud.base.redis.model.ReferenceDefinitionRedis;
 import com.openiot.cloud.base.service.model.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +28,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class DataSourceService {
   private static final Logger logger = LoggerFactory.getLogger(DataSourceService.class);
-  @Autowired
-  private DataSourceRedisRepository dataSourceRedisRepository;
-  @Autowired
-  private GroupRepository groupRepository;
-  @Autowired
-  private ResProRepository propertyRepository;
+  @Autowired private DataSourceRedisRepository dataSourceRedisRepository;
+  @Autowired private GroupRepository groupRepository;
+  @Autowired private ResProRepository propertyRepository;
 
   // TODO: a service model for group
   // a temporary method until we have a service model for group
@@ -66,13 +62,15 @@ public class DataSourceService {
       for (DataSourceEntity.Reference definition : dataSourceMongo.getDsdefs()) {
         ResAndResProID resProID = definition.getDsri();
         if (resProID != null) {
-          dataSourceReferenceRedis.addDefinitionItem(new ReferenceDefinitionRedis(groupName,
-                                                                                  dataSourceMongo.getDsn(),
-                                                                                  resProID.getDi(),
-                                                                                  resProID.getResUri(),
-                                                                                  resProID.getPt(),
-                                                                                  definition.getDsrf(),
-                                                                                  definition.getDsrt()));
+          dataSourceReferenceRedis.addDefinitionItem(
+              new ReferenceDefinitionRedis(
+                  groupName,
+                  dataSourceMongo.getDsn(),
+                  resProID.getDi(),
+                  resProID.getResUri(),
+                  resProID.getPt(),
+                  definition.getDsrf(),
+                  definition.getDsrt()));
         }
       }
       dataSourceRedisRepository.save(dataSourceReferenceRedis);
@@ -112,13 +110,15 @@ public class DataSourceService {
     DataSourceReferenceRedis dataSourceReferenceRedis =
         new DataSourceReferenceRedis(groupName, dataSource.getName());
     for (ReferenceDefinition definition : dataSource.getReferenceList()) {
-      dataSourceReferenceRedis.addDefinitionItem(new ReferenceDefinitionRedis(groupName,
-                                                                              dataSource.getName(),
-                                                                              definition.getDevId(),
-                                                                              definition.getResUrl(),
-                                                                              definition.getPropName(),
-                                                                              definition.getFrom(),
-                                                                              definition.getTo()));
+      dataSourceReferenceRedis.addDefinitionItem(
+          new ReferenceDefinitionRedis(
+              groupName,
+              dataSource.getName(),
+              definition.getDevId(),
+              definition.getResUrl(),
+              definition.getPropName(),
+              definition.getFrom(),
+              definition.getTo()));
     }
     dataSourceRedisRepository.save(dataSourceReferenceRedis);
     // TODO: start event
@@ -130,10 +130,9 @@ public class DataSourceService {
    * invalid > 0 true valid > 0 false invalid >0 >0 * valid if from <= to >0 >0 * invalid if from >
    * to
    */
-  private List<ReferenceDefinition>
-      verifyAndModifyRefernces(List<ReferenceDefinition> referenceList) {
-    if (referenceList == null || referenceList.isEmpty())
-      return referenceList;
+  private List<ReferenceDefinition> verifyAndModifyRefernces(
+      List<ReferenceDefinition> referenceList) {
+    if (referenceList == null || referenceList.isEmpty()) return referenceList;
 
     List<ReferenceDefinition> newReferences = new ArrayList<ReferenceDefinition>();
 
@@ -156,8 +155,8 @@ public class DataSourceService {
     return newReferences;
   }
 
-  public DataSource findDataSourceByGroupNameAndDataSourceName(String groupName,
-                                                               String dataSourceName) {
+  public DataSource findDataSourceByGroupNameAndDataSourceName(
+      String groupName, String dataSourceName) {
     List<DataSourceEntity> dataSourceMongoList =
         groupRepository.findDssByGroupNameAndDsName(groupName, dataSourceName);
     if (dataSourceMongoList == null || dataSourceMongoList.isEmpty()) {
@@ -180,10 +179,8 @@ public class DataSourceService {
    * @param to, in epoch milliseconds
    * @return
    */
-  public List<ReferenceDefinition>
-      findReferenceByGroupNameAndDataSourceNameAndTimeBetween(String groupName,
-                                                              String dataSourceName, long from,
-                                                              long to) {
+  public List<ReferenceDefinition> findReferenceByGroupNameAndDataSourceNameAndTimeBetween(
+      String groupName, String dataSourceName, long from, long to) {
     List<ReferenceDefinitionRedis> definitionRedisList =
         dataSourceRedisRepository.findDefinitionByTimeBetween(groupName, dataSourceName, from, to);
 
@@ -192,12 +189,15 @@ public class DataSourceService {
     }
 
     return definitionRedisList.stream()
-                              .map(definitionRedis -> new ReferenceDefinition(definitionRedis.getDevId(),
-                                                                              definitionRedis.getResUrl(),
-                                                                              definitionRedis.getPropName(),
-                                                                              definitionRedis.getFrom(),
-                                                                              definitionRedis.getTo()))
-                              .collect(Collectors.toList());
+        .map(
+            definitionRedis ->
+                new ReferenceDefinition(
+                    definitionRedis.getDevId(),
+                    definitionRedis.getResUrl(),
+                    definitionRedis.getPropName(),
+                    definitionRedis.getFrom(),
+                    definitionRedis.getTo()))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -207,18 +207,19 @@ public class DataSourceService {
    * @param dataSourceName
    * @return
    */
-  public ReferenceDefinition
-      findLatestReferenceByGroupNameAndDataSourceName(String groupName, String dataSourceName) {
+  public ReferenceDefinition findLatestReferenceByGroupNameAndDataSourceName(
+      String groupName, String dataSourceName) {
     ReferenceDefinitionRedis definitionRedis =
         dataSourceRedisRepository.findLatestDefinition(groupName, dataSourceName);
     if (definitionRedis == null) {
       return null;
     }
-    return new ReferenceDefinition(definitionRedis.getDevId(),
-                                   definitionRedis.getResUrl(),
-                                   definitionRedis.getPropName(),
-                                   definitionRedis.getFrom(),
-                                   definitionRedis.getTo());
+    return new ReferenceDefinition(
+        definitionRedis.getDevId(),
+        definitionRedis.getResUrl(),
+        definitionRedis.getPropName(),
+        definitionRedis.getFrom(),
+        definitionRedis.getTo());
   }
 
   public List<String> findAllDataSourcesWithRef() {
@@ -229,11 +230,11 @@ public class DataSourceService {
     while (groupPage.hasContent()) {
       List<String> pageDss =
           groupPage.stream()
-                   .filter(grp -> grp.getDss() != null && !grp.getDss().isEmpty())
-                   .flatMap(grp -> grp.getDss().stream())
-                   .filter(ds -> ds.getLatestReference() != null)
-                   .map(DataSourceEntity::getDsintId)
-                   .collect(Collectors.toList());
+              .filter(grp -> grp.getDss() != null && !grp.getDss().isEmpty())
+              .flatMap(grp -> grp.getDss().stream())
+              .filter(ds -> ds.getLatestReference() != null)
+              .map(DataSourceEntity::getDsintId)
+              .collect(Collectors.toList());
       allDss.addAll(pageDss);
       pageRequest = pageRequest.next();
       groupPage = groupRepository.findAll(pageRequest);
@@ -269,16 +270,15 @@ public class DataSourceService {
               continue;
             }
 
-            dataSourceRedisRepository.save(new ReferenceDefinitionRedis(group.getN(),
-                                                                        dataSource.getDsn(),
-                                                                        definition.getDsri()
-                                                                                  .getDi(),
-                                                                        definition.getDsri()
-                                                                                  .getResUri(),
-                                                                        definition.getDsri()
-                                                                                  .getPt(),
-                                                                        definition.getDsrf(),
-                                                                        definition.getDsrt()));
+            dataSourceRedisRepository.save(
+                new ReferenceDefinitionRedis(
+                    group.getN(),
+                    dataSource.getDsn(),
+                    definition.getDsri().getDi(),
+                    definition.getDsri().getResUri(),
+                    definition.getDsri().getPt(),
+                    definition.getDsrf(),
+                    definition.getDsrt()));
           }
         }
       }
@@ -302,31 +302,42 @@ public class DataSourceService {
     dataSource.setUnit(dataSourceMongo.getUnit());
 
     Optional.ofNullable(dataSourceMongo.getAttributeList())
-            .map(attributeList -> attributeList.stream()
-                                               .map(attribute -> new GeneralKeyValuePair(attribute.getAn(),
-                                                                                         attribute.getAv()))
-                                               .collect(Collectors.toList()))
-            .ifPresent(keyValuePairList -> dataSource.setAttributeList(keyValuePairList));
+        .map(
+            attributeList ->
+                attributeList.stream()
+                    .map(attribute -> new GeneralKeyValuePair(attribute.getAn(), attribute.getAv()))
+                    .collect(Collectors.toList()))
+        .ifPresent(keyValuePairList -> dataSource.setAttributeList(keyValuePairList));
     Optional.ofNullable(dataSourceMongo.getDsdefs())
-            .map(referenceList -> referenceList.stream().map(reference -> {
-              ResAndResProID resProId = reference.getDsri();
-              return new ReferenceDefinition(resProId.getDi(),
-                                             resProId.getResUri(),
-                                             resProId.getPt(),
-                                             reference.getDsrf(),
-                                             reference.getDsrt());
-            }).collect(Collectors.toList()))
-            .ifPresent(definitionList -> dataSource.setReferenceList(definitionList));
-    Optional.ofNullable(dataSourceMongo.getOperate()).ifPresent(op -> {
-      dataSource.setOperate(new Operate(op.getType(),
-                                        op.getBackground_state(),
-                                        op.getDi(),
-                                        op.getUrl(),
-                                        op.getPn(),
-                                        op.getSched(),
-                                        op.getState_cmds(),
-                                        op.getRepeat()));
-    });
+        .map(
+            referenceList ->
+                referenceList.stream()
+                    .map(
+                        reference -> {
+                          ResAndResProID resProId = reference.getDsri();
+                          return new ReferenceDefinition(
+                              resProId.getDi(),
+                              resProId.getResUri(),
+                              resProId.getPt(),
+                              reference.getDsrf(),
+                              reference.getDsrt());
+                        })
+                    .collect(Collectors.toList()))
+        .ifPresent(definitionList -> dataSource.setReferenceList(definitionList));
+    Optional.ofNullable(dataSourceMongo.getOperate())
+        .ifPresent(
+            op -> {
+              dataSource.setOperate(
+                  new Operate(
+                      op.getType(),
+                      op.getBackground_state(),
+                      op.getDi(),
+                      op.getUrl(),
+                      op.getPn(),
+                      op.getSched(),
+                      op.getState_cmds(),
+                      op.getRepeat()));
+            });
 
     return dataSource;
   }
@@ -345,31 +356,43 @@ public class DataSourceService {
     dataSourceMongo.setUnit(dataSource.getUnit());
 
     Optional.ofNullable(dataSource.getAttributeList())
-            .map(attributeList -> attributeList.stream()
-                                               .map(attribute -> new AttributeEntity(attribute.getKey(),
-                                                                                     attribute.getValue()
-                                                                                              .toString()))
-                                               .collect(Collectors.toList()))
-            .ifPresent(attributeEntityList -> dataSourceMongo.setAttributeList(attributeEntityList));
+        .map(
+            attributeList ->
+                attributeList.stream()
+                    .map(
+                        attribute ->
+                            new AttributeEntity(
+                                attribute.getKey(), attribute.getValue().toString()))
+                    .collect(Collectors.toList()))
+        .ifPresent(attributeEntityList -> dataSourceMongo.setAttributeList(attributeEntityList));
 
     Optional.ofNullable(dataSource.getReferenceList())
-            .map(referenceList -> referenceList.stream()
-                                               .map(reference -> new DataSourceEntity.Reference(reference.getDevId(),
-                                                                                                reference.getResUrl(),
-                                                                                                reference.getPropName(),
-                                                                                                reference.getFrom(),
-                                                                                                reference.getTo()))
-                                               .collect(Collectors.toList()))
-            .ifPresent(referenceList -> dataSourceMongo.setDsdefs(referenceList));
+        .map(
+            referenceList ->
+                referenceList.stream()
+                    .map(
+                        reference ->
+                            new DataSourceEntity.Reference(
+                                reference.getDevId(),
+                                reference.getResUrl(),
+                                reference.getPropName(),
+                                reference.getFrom(),
+                                reference.getTo()))
+                    .collect(Collectors.toList()))
+        .ifPresent(referenceList -> dataSourceMongo.setDsdefs(referenceList));
     Optional.ofNullable(dataSource.getOperate())
-            .ifPresent(op -> dataSourceMongo.setOperate(new DataSourceEntity.OperateEntity(op.getType(),
-                                                                                           op.getBackground_state(),
-                                                                                           op.getDi(),
-                                                                                           op.getUrl(),
-                                                                                           op.getPn(),
-                                                                                           op.getSched(),
-                                                                                           op.getState_cmds(),
-                                                                                           op.getRepeat())));
+        .ifPresent(
+            op ->
+                dataSourceMongo.setOperate(
+                    new DataSourceEntity.OperateEntity(
+                        op.getType(),
+                        op.getBackground_state(),
+                        op.getDi(),
+                        op.getUrl(),
+                        op.getPn(),
+                        op.getSched(),
+                        op.getState_cmds(),
+                        op.getRepeat())));
 
     return dataSourceMongo;
   }

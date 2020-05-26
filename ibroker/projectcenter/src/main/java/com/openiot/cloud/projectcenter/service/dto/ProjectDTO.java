@@ -7,8 +7,8 @@ package com.openiot.cloud.projectcenter.service.dto;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.service.model.UserAndRole;
-import lombok.Data;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class ProjectDTO {

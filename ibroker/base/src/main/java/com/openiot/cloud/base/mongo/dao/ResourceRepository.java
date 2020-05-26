@@ -6,10 +6,10 @@ package com.openiot.cloud.base.mongo.dao;
 
 import com.openiot.cloud.base.mongo.dao.custom.ResourceRepositoryCustom;
 import com.openiot.cloud.base.mongo.model.Resource;
+import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
 @Repository
 public interface ResourceRepository

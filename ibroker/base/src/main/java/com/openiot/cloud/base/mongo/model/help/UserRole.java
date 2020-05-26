@@ -8,7 +8,9 @@ import lombok.ToString;
 
 @ToString
 public enum UserRole {
-  SYS_ADMIN("ROLE_SYS_ADMIN"), ADMIN("ROLE_ADMIN"), USER("ROLE_USER");
+  SYS_ADMIN("ROLE_SYS_ADMIN"),
+  ADMIN("ROLE_ADMIN"),
+  USER("ROLE_USER");
   private String value;
 
   UserRole(String value) {

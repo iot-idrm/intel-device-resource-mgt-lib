@@ -6,29 +6,26 @@ package com.openiot.cloud.projectcenter.service;
 
 import com.openiot.cloud.base.common.model.TokenContent;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
+import com.openiot.cloud.base.service.model.UserAndRole;
 import com.openiot.cloud.projectcenter.service.dto.AuthenticationDTO;
 import com.openiot.cloud.projectcenter.service.dto.AuthorizationDTO;
 import com.openiot.cloud.projectcenter.service.dto.ProjectDTO;
 import com.openiot.cloud.projectcenter.service.dto.UserDTO;
 import com.openiot.cloud.projectcenter.utils.ApiJwtTokenUtil;
-import com.openiot.cloud.base.service.model.UserAndRole;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @Service
 public class AuthenticationService {
-  @Autowired
-  private ApiJwtTokenUtil jwtTokenUtil;
-  @Autowired
-  private UserService userService;
-  @Autowired
-  private ProjectService projectService;
+  @Autowired private ApiJwtTokenUtil jwtTokenUtil;
+  @Autowired private UserService userService;
+  @Autowired private ProjectService projectService;
 
   @Value("${jwt.tokenHead}")
   private String tokenHead;
@@ -187,11 +184,13 @@ public class AuthenticationService {
     } else {
       UserAndRole userAndRole =
           Optional.ofNullable(projectDTO.getUser())
-                  .map(userAndRoles -> userAndRoles.stream()
-                                                   .filter(ur -> ur.getName().equals(userName))
-                                                   .findFirst()
-                                                   .orElse(null))
-                  .orElse(null);
+              .map(
+                  userAndRoles ->
+                      userAndRoles.stream()
+                          .filter(ur -> ur.getName().equals(userName))
+                          .findFirst()
+                          .orElse(null))
+              .orElse(null);
       // role is checked
       tokenContent.setRole(userAndRole.getRole());
       // project is checked
@@ -204,6 +203,7 @@ public class AuthenticationService {
 
   /**
    * ignore the poject information in the authorizationDTO
+   *
    * @param oldToken
    * @return
    */

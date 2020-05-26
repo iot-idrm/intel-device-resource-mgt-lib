@@ -4,17 +4,21 @@
 
 package com.openiot.cloud.projectcenter.controller.http;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
+import com.openiot.cloud.base.service.model.UserAndRole;
 import com.openiot.cloud.projectcenter.Application;
 import com.openiot.cloud.projectcenter.repository.ProjectRepository;
 import com.openiot.cloud.projectcenter.repository.UserRepository;
 import com.openiot.cloud.projectcenter.repository.document.Project;
 import com.openiot.cloud.projectcenter.repository.document.User;
 import com.openiot.cloud.projectcenter.service.UserService;
-import com.openiot.cloud.base.service.model.UserAndRole;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,28 +28,20 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {Application.class},
+@SpringBootTest(
+    classes = {Application.class},
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {"mongo.db = test_openiot"})
 public class ApiUserHttpHandlerTest {
-  @Autowired
-  private TestRestTemplate testRestTemplate;
-  @Autowired
-  private ObjectMapper objectMapper;
-  @Autowired
-  private UserRepository repositoryUsers;
-  @Autowired
-  private ProjectRepository repositoryProject;
-  @LocalServerPort
-  private int localServerPort;
-  @Autowired
-  private UserService userService;
+  @Autowired private TestRestTemplate testRestTemplate;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private UserRepository repositoryUsers;
+  @Autowired private ProjectRepository repositoryProject;
+  @LocalServerPort private int localServerPort;
+  @Autowired private UserService userService;
 
   // in the project honeydew
   // in the project boysenberry
@@ -81,16 +77,20 @@ public class ApiUserHttpHandlerTest {
     projectHoneydew = new Project();
     projectHoneydew.setId("honeydew");
     projectHoneydew.setName("honeydew");
-    projectHoneydew.setUser(Stream.of(new UserAndRole(adminCherry.getName(), UserRole.ADMIN),
-                                      new UserAndRole(userGrape.getName(), UserRole.USER))
-                                  .collect(Collectors.toList()));
+    projectHoneydew.setUser(
+        Stream.of(
+                new UserAndRole(adminCherry.getName(), UserRole.ADMIN),
+                new UserAndRole(userGrape.getName(), UserRole.USER))
+            .collect(Collectors.toList()));
 
     projectBoysenberry = new Project();
     projectBoysenberry.setId("boysenberry");
     projectBoysenberry.setName("boysenberry");
-    projectBoysenberry.setUser(Stream.of(new UserAndRole(adminCherry.getName(), UserRole.ADMIN),
-                                         new UserAndRole(userGrape.getName(), UserRole.USER))
-                                     .collect(Collectors.toList()));
+    projectBoysenberry.setUser(
+        Stream.of(
+                new UserAndRole(adminCherry.getName(), UserRole.ADMIN),
+                new UserAndRole(userGrape.getName(), UserRole.USER))
+            .collect(Collectors.toList()));
 
     repositoryProject.saveAll(Arrays.asList(projectHoneydew, projectBoysenberry));
 
@@ -113,8 +113,9 @@ public class ApiUserHttpHandlerTest {
     user.setName("name");
     user.setRole(UserRole.SYS_ADMIN);
 
-    assertThat(new ObjectMapper().readValue(new ObjectMapper().writeValueAsString(user),
-                                            User.class)).isEqualTo(user);
+    assertThat(
+            new ObjectMapper().readValue(new ObjectMapper().writeValueAsString(user), User.class))
+        .isEqualTo(user);
   }
 
   @Test
@@ -122,7 +123,7 @@ public class ApiUserHttpHandlerTest {
     log.info("intel@123 -> {}", userService.encryptPassword("intel@123"));
     log.info("intel@123 -> {}", userService.encryptPassword("intel@123"));
     log.info("intel@123 -> {}", userService.encryptPassword("intel@123"));
-    assertThat(userService.encryptPassword("watermelon")).isEqualTo(userService.encryptPassword("watermelon"));
-
+    assertThat(userService.encryptPassword("watermelon"))
+        .isEqualTo(userService.encryptPassword("watermelon"));
   }
 }

@@ -4,8 +4,9 @@
 
 package com.openiot.cloud.ibroker.base.device;
 
-import com.openiot.cloud.base.mongo.model.help.ShortSession;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.openiot.cloud.base.mongo.model.help.ShortSession;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +17,19 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class IAgentTest {
 
-  @Autowired
-  private IAgentCache ac;
+  @Autowired private IAgentCache ac;
 
   @Test
   public void TestCase1() throws Exception {
     IAgent agent = new IAgent(null);
 
     ShortSession[] ssList =
-        new ShortSession[] {new ShortSession("1234", "1234"), new ShortSession("2345", "2345"),
-            new ShortSession("3456", "3456"), new ShortSession("4567", "4567"),};
+        new ShortSession[] {
+          new ShortSession("1234", "1234"),
+          new ShortSession("2345", "2345"),
+          new ShortSession("3456", "3456"),
+          new ShortSession("4567", "4567"),
+        };
 
     agent.cacheConnectedDevice(ssList);
 

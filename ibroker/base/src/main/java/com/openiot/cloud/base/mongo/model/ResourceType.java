@@ -8,19 +8,17 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.help.Untouchable;
 import com.openiot.cloud.base.mongo.model.OcfRTDefinition.PropDefEntry;
 import com.openiot.cloud.base.mongo.model.OcfRTDefinition.ResDefEntry;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = ConstDef.C_RESTYPE)
 public class ResourceType {
 
-  @Untouchable
-  @Id
-  String id;
+  @Untouchable @Id String id;
 
   @Untouchable
   @Field(ConstDef.F_NAME)
@@ -162,9 +160,21 @@ public class ResourceType {
 
     @Override
     public String toString() {
-      return "PropertyType [shortName=" + shortName + ", name=" + name + ", mandatory=" + mandatory
-          + ", access=" + access + ", type=" + type + ", unit=" + unit + ", decription="
-          + decription + "]";
+      return "PropertyType [shortName="
+          + shortName
+          + ", name="
+          + name
+          + ", mandatory="
+          + mandatory
+          + ", access="
+          + access
+          + ", type="
+          + type
+          + ", unit="
+          + unit
+          + ", decription="
+          + decription
+          + "]";
     }
 
     public static PropertyType from(PropDefEntry rtPropDef) {
@@ -188,8 +198,22 @@ public class ResourceType {
 
   @Override
   public String toString() {
-    return "ResourceType{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", title='" + title
-        + '\'' + ", description='" + description + '\'' + ", propTypes=" + propTypes + '}';
+    return "ResourceType{"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", title='"
+        + title
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", propTypes="
+        + propTypes
+        + '}';
   }
 
   public static ResourceType from(OcfRTDefinition rtDef) {
@@ -208,19 +232,24 @@ public class ResourceType {
     Optional.ofNullable(rtResDef.getDescription()).ifPresent(desc -> rt.setDescription(desc));
 
     Optional.ofNullable(rtResDef.getProperties())
-            .filter(propsDef -> !propsDef.isEmpty())
-            .map(propsDef -> propsDef.stream()
-                                     .map(propDef -> PropertyType.from(propDef))
-                                     .collect(Collectors.toList()))
-            .ifPresent(propTypes -> rt.setPropTypes(propTypes));
+        .filter(propsDef -> !propsDef.isEmpty())
+        .map(
+            propsDef ->
+                propsDef.stream()
+                    .map(propDef -> PropertyType.from(propDef))
+                    .collect(Collectors.toList()))
+        .ifPresent(propTypes -> rt.setPropTypes(propTypes));
 
     Optional.ofNullable(rtDef.getRequired())
-            .filter(requiredProps -> !requiredProps.isEmpty())
-            .ifPresent(requiredProps -> {
+        .filter(requiredProps -> !requiredProps.isEmpty())
+        .ifPresent(
+            requiredProps -> {
               Optional.ofNullable(rt.getPropTypes())
-                      .ifPresent(propTypes -> propTypes.stream()
-                                                       .filter(propType -> requiredProps.contains(propType.getName()))
-                                                       .forEach(propType -> propType.setMandatory(true)));
+                  .ifPresent(
+                      propTypes ->
+                          propTypes.stream()
+                              .filter(propType -> requiredProps.contains(propType.getName()))
+                              .forEach(propType -> propType.setMandatory(true)));
             });
 
     return rt;

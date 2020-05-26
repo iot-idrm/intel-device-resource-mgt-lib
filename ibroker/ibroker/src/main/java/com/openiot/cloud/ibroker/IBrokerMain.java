@@ -7,6 +7,8 @@ package com.openiot.cloud.ibroker;
 import com.openiot.cloud.base.mq.MessageQueue;
 import com.openiot.cloud.ibroker.proxy.dp.GenericCoapTCPServiceClient;
 import com.openiot.cloud.ibroker.proxy.rd.RDProxy;
+import java.util.UUID;
+import java.util.concurrent.Executors;
 import org.iotivity.cloud.base.protocols.IRequest;
 import org.iotivity.cloud.base.resource.ResourceManager;
 import org.slf4j.Logger;
@@ -16,11 +18,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import java.util.UUID;
-import java.util.concurrent.Executors;
 
-@SpringBootApplication(scanBasePackages = {"com.openiot.cloud.sdk.service",
-    "com.openiot.cloud.ibroker", "com.openiot.cloud.base"})
+@SpringBootApplication(
+    scanBasePackages = {
+      "com.openiot.cloud.sdk.service",
+      "com.openiot.cloud.ibroker",
+      "com.openiot.cloud.base"
+    })
 @EnableScheduling
 public class IBrokerMain {
   private static final Logger logger = LoggerFactory.getLogger(IBrokerMain.class);
@@ -39,9 +43,10 @@ public class IBrokerMain {
   }
 
   @Bean
-  public ResourceManager resourcesForCoapOverTcp(RDProxy resourceDirectoryResource,
-                                                 GenericCoapTCPServiceClient dataPointResource,
-                                                 GenericCoapTCPServiceClient metaResource) {
+  public ResourceManager resourcesForCoapOverTcp(
+      RDProxy resourceDirectoryResource,
+      GenericCoapTCPServiceClient dataPointResource,
+      GenericCoapTCPServiceClient metaResource) {
     ResourceManager rm = new ResourceManager();
     rm.addResource(resourceDirectoryResource);
     rm.addResource(metaResource);

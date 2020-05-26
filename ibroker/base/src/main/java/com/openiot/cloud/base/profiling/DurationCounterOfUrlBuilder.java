@@ -7,11 +7,11 @@ package com.openiot.cloud.base.profiling;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.core.io.ClassPathResource;
 
 public class DurationCounterOfUrlBuilder {
   public static class CounterOfUrl {
@@ -19,8 +19,8 @@ public class DurationCounterOfUrlBuilder {
     private String configName;
 
     @JsonCreator
-    public CounterOfUrl(@JsonProperty("url") String url,
-        @JsonProperty("config") String configName) {
+    public CounterOfUrl(
+        @JsonProperty("url") String url, @JsonProperty("config") String configName) {
       this.url = url;
       this.configName = configName;
     }

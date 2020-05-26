@@ -27,8 +27,8 @@ public class AttributeEntity {
   long ats;
 
   @JsonCreator
-  public AttributeEntity(@JsonProperty(ConstDef.F_ATTRNAME) String an,
-      @JsonProperty(ConstDef.F_ATTRVALUE) String av) {
+  public AttributeEntity(
+      @JsonProperty(ConstDef.F_ATTRNAME) String an, @JsonProperty(ConstDef.F_ATTRVALUE) String av) {
     super();
     this.an = an;
     this.av = av;
@@ -74,18 +74,13 @@ public class AttributeEntity {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     AttributeEntity other = (AttributeEntity) obj;
     if (an == null) {
-      if (other.an != null)
-        return false;
-    } else if (!an.equals(other.an))
-      return false;
+      if (other.an != null) return false;
+    } else if (!an.equals(other.an)) return false;
     return true;
   }
 }

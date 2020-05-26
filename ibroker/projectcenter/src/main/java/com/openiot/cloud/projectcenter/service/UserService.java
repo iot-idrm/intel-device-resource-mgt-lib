@@ -7,42 +7,40 @@ package com.openiot.cloud.projectcenter.service;
 import com.openiot.cloud.base.common.model.TokenContent;
 import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.mongo.model.help.UserRole;
+import com.openiot.cloud.base.service.model.UserAndRole;
 import com.openiot.cloud.projectcenter.repository.ProjectRepository;
 import com.openiot.cloud.projectcenter.repository.UserRepository;
 import com.openiot.cloud.projectcenter.repository.document.Project;
 import com.openiot.cloud.projectcenter.repository.document.User;
 import com.openiot.cloud.projectcenter.service.dto.UserDTO;
-import com.openiot.cloud.base.service.model.UserAndRole;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.Md5Crypt;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private ProjectRepository projectRepository;
+  @Autowired private UserRepository userRepository;
+  @Autowired private ProjectRepository projectRepository;
 
   public UserDTO findByName(String name) {
     Objects.requireNonNull(name);
-    return userRepository.findByName(name)
-                         .stream()
-                         .filter(user -> Objects.equals(name, user.getName()))
-                         .findFirst()
-                         .map(user -> {
-                           UserDTO userDTO = new UserDTO();
-                           BeanUtils.copyProperties(user, userDTO);
-                           return userDTO;
-                         })
-                         .orElse(null);
+    return userRepository.findByName(name).stream()
+        .filter(user -> Objects.equals(name, user.getName()))
+        .findFirst()
+        .map(
+            user -> {
+              UserDTO userDTO = new UserDTO();
+              BeanUtils.copyProperties(user, userDTO);
+              return userDTO;
+            })
+        .orElse(null);
   }
 
   public String encryptPassword(String rawPassword) {
@@ -53,46 +51,45 @@ public class UserService {
   public boolean mathPassword(UserDTO userDTO, String rawPassword) {
     Objects.requireNonNull(userDTO);
 
-    if (Objects.isNull(rawPassword))
-      return false;
+    if (Objects.isNull(rawPassword)) return false;
 
-    return userRepository.findByName(userDTO.getName())
-                         .stream()
-                         .filter(user -> Objects.equals(userDTO.getName(), user.getName()))
-                         .findFirst()
-                         .map(user -> {
-                           return encryptPassword(rawPassword).equals(user.getPassword());
-                         })
-                         .orElse(false);
+    return userRepository.findByName(userDTO.getName()).stream()
+        .filter(user -> Objects.equals(userDTO.getName(), user.getName()))
+        .findFirst()
+        .map(
+            user -> {
+              return encryptPassword(rawPassword).equals(user.getPassword());
+            })
+        .orElse(false);
   }
 
   public void save(UserDTO userDTO) {
     Objects.requireNonNull(userDTO);
 
     User updatedUser =
-        userRepository.findByName(userDTO.getName())
-                      .stream()
-                      .filter(user -> Objects.equals(userDTO.getName(), user.getName()))
-                      .findFirst()
-                      .map(user -> {
-                        BeanUtils.copyProperties(userDTO, user);
-                        return user;
-                      })
-                      .orElseGet(() -> {
-                        User user = new User();
-                        BeanUtils.copyProperties(userDTO, user);
-                        return user;
-                      });
+        userRepository.findByName(userDTO.getName()).stream()
+            .filter(user -> Objects.equals(userDTO.getName(), user.getName()))
+            .findFirst()
+            .map(
+                user -> {
+                  BeanUtils.copyProperties(userDTO, user);
+                  return user;
+                })
+            .orElseGet(
+                () -> {
+                  User user = new User();
+                  BeanUtils.copyProperties(userDTO, user);
+                  return user;
+                });
     userRepository.save(updatedUser);
   }
 
   public boolean isSysAdmin(String userName) {
-    return userRepository.findByName(userName)
-                         .stream()
-                         .filter(user -> Objects.equals(UserRole.SYS_ADMIN, user.getRole()))
-                         .findFirst()
-                         .map(user -> Boolean.TRUE)
-                         .orElse(Boolean.FALSE);
+    return userRepository.findByName(userName).stream()
+        .filter(user -> Objects.equals(UserRole.SYS_ADMIN, user.getRole()))
+        .findFirst()
+        .map(user -> Boolean.TRUE)
+        .orElse(Boolean.FALSE);
   }
 
   public boolean createUser(UserDTO userDTO, TokenContent tokenContent) {
@@ -179,18 +176,21 @@ public class UserService {
       if (project != null) {
         Set<String> userNames =
             Optional.ofNullable(project.getUser())
-                    .map(userAndRoles -> userAndRoles.stream()
-                                                     .map(UserAndRole::getName)
-                                                     .collect(Collectors.toSet()))
-                    .orElse(Collections.emptySet());
+                .map(
+                    userAndRoles ->
+                        userAndRoles.stream().map(UserAndRole::getName).collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
         users = userRepository.findByNameIn(userNames);
       }
     }
 
-    return users.stream().map(user -> {
-      UserDTO userDTO = new UserDTO();
-      BeanUtils.copyProperties(user, userDTO);
-      return userDTO;
-    }).collect(Collectors.toList());
+    return users.stream()
+        .map(
+            user -> {
+              UserDTO userDTO = new UserDTO();
+              BeanUtils.copyProperties(user, userDTO);
+              return userDTO;
+            })
+        .collect(Collectors.toList());
   }
 }

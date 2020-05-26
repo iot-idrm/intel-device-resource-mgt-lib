@@ -17,14 +17,11 @@ import org.springframework.stereotype.Component;
 public class AlarmService {
   public static final Logger logger = LoggerFactory.getLogger(AlarmService.class);
 
-  @Autowired
-  private AlarmRequestHandler alarmHandler;
+  @Autowired private AlarmRequestHandler alarmHandler;
 
-  @Autowired
-  private IConnect iConnect;
+  @Autowired private IConnect iConnect;
 
-  @Autowired
-  private IConnectService iConnectService;
+  @Autowired private IConnectService iConnectService;
 
   @EventListener
   public void onApplicationReady(final ApplicationReadyEvent event) {

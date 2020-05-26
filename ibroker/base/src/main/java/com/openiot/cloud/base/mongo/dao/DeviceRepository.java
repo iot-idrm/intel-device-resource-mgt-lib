@@ -6,9 +6,9 @@ package com.openiot.cloud.base.mongo.dao;
 
 import com.openiot.cloud.base.mongo.dao.custom.DeviceRepositoryCustom;
 import com.openiot.cloud.base.mongo.model.Device;
+import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
 @Repository
 public interface DeviceRepository extends MongoRepository<Device, String>, DeviceRepositoryCustom {

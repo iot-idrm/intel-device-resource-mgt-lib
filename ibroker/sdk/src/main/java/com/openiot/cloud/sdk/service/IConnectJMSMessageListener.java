@@ -6,18 +6,16 @@ package com.openiot.cloud.sdk.service;
 
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.sdk.utilities.UrlUtil;
+import java.util.Map;
+import java.util.Objects;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.activemq.command.ActiveMQMapMessage;
-import org.apache.activemq.command.ActiveMQMessage;
-import org.apache.activemq.command.ActiveMQTextMessage;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 class IConnectJMSMessageListener implements MessageListener {
@@ -42,9 +40,10 @@ class IConnectJMSMessageListener implements MessageListener {
 
           request = new IConnectRequest();
           request.setMessageID(message.getJMSCorrelationID());
-          request.setResponseSender(Objects.nonNull(message.getJMSReplyTo())
-              ? new JMSResponseSender(message.getJMSReplyTo())
-              : null);
+          request.setResponseSender(
+              Objects.nonNull(message.getJMSReplyTo())
+                  ? new JMSResponseSender(message.getJMSReplyTo())
+                  : null);
 
           // everything is in properties and applicationProperties
           Map<String, Object> properties = bytesMessage.getProperties();
@@ -68,8 +67,10 @@ class IConnectJMSMessageListener implements MessageListener {
 
           // PAYLOAD_FORMAT
           buffer = ((UTF8Buffer) properties.get(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT));
-          request.setFormat(Objects.isNull(buffer) || buffer.isEmpty() ? null
-              : MediaType.valueOf(buffer.toString()));
+          request.setFormat(
+              Objects.isNull(buffer) || buffer.isEmpty()
+                  ? null
+                  : MediaType.valueOf(buffer.toString()));
 
           // PAYLOAD
           buffer = ((UTF8Buffer) properties.get(ConstDef.JMS_MSG_KEY_PAYLOAD));
@@ -88,13 +89,15 @@ class IConnectJMSMessageListener implements MessageListener {
 
           request = new IConnectRequest();
           request.setMessageID(message.getJMSCorrelationID());
-          request.setResponseSender(Objects.nonNull(message.getJMSReplyTo())
-              ? new JMSResponseSender(message.getJMSReplyTo())
-              : null);
+          request.setResponseSender(
+              Objects.nonNull(message.getJMSReplyTo())
+                  ? new JMSResponseSender(message.getJMSReplyTo())
+                  : null);
 
           request.setAction(HttpMethod.valueOf(mapMessage.getString(ConstDef.JMS_MSG_KEY_ACTION)));
           request.setUrl(mapMessage.getString(ConstDef.JMS_MSG_KEY_URI));
-          request.setFormat(MediaType.valueOf(mapMessage.getString(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT)));
+          request.setFormat(
+              MediaType.valueOf(mapMessage.getString(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT)));
           request.setPayload(mapMessage.getBytes(ConstDef.JMS_MSG_KEY_PAYLOAD));
 
           Map<String, Object> extraParams =

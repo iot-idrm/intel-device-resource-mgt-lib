@@ -8,9 +8,9 @@ package com.openiot.cloud.projectcenter.server;
 
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.internal.SystemPropertyUtil;
-import javax.net.ssl.*;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import javax.net.ssl.*;
 
 /**
  * Creates a bogus {@link SSLContext}. A client-side context created by this factory accepts any

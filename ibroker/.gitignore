@@ -1,10 +1,15 @@
-**/*.iml
+.vscode
+*workspace
+
+**/node_modules/
+**/package-lock.json
+**/dist
+
+**/.classpath
+**/.factorypath
+**/.project
 **/.settings
+**/target
 
-target/
-*.class
-*.log
-*.jar
-*.war
+*log*
 
-.idea/**

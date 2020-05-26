@@ -17,6 +17,9 @@ import com.openiot.cloud.ibroker.base.device.IAgentCache;
 import com.openiot.cloud.ibroker.base.protocols.ilink.ILinkCoapOverTcpMessageHandler;
 import com.openiot.cloud.ibroker.utils.DeviceLite;
 import com.openiot.cloud.ibroker.utils.ResHierLite;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 import org.iotivity.cloud.base.connector.ConnectorPool;
 import org.iotivity.cloud.base.device.Device;
 import org.iotivity.cloud.base.device.IRequestChannel;
@@ -24,9 +27,7 @@ import org.iotivity.cloud.base.device.IResponseEventHandler;
 import org.iotivity.cloud.base.exception.ClientException;
 import org.iotivity.cloud.base.protocols.IRequest;
 import org.iotivity.cloud.base.protocols.IResponse;
-import org.iotivity.cloud.base.protocols.Message;
 import org.iotivity.cloud.base.protocols.MessageBuilder;
-import org.iotivity.cloud.base.protocols.coap.CoapRequest;
 import org.iotivity.cloud.base.protocols.coap.CoapResponse;
 import org.iotivity.cloud.base.protocols.enums.ContentFormat;
 import org.iotivity.cloud.base.protocols.enums.RequestMethod;
@@ -36,9 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Objects;
 
 @Component
 public class RDProxy extends Resource {
@@ -99,8 +97,9 @@ public class RDProxy extends Resource {
 
       /** after "POST /rd [JSON PAYLOAD]", there will be response back */
       byte[] token = coapResponse.getToken();
-      ILinkMessage ilinkResponse = new ILinkMessage(LeadingByte.RESPONSE.valueOf(),
-                                                    (byte) MessageType.COAP_OVER_TCP.valueOf());
+      ILinkMessage ilinkResponse =
+          new ILinkMessage(
+              LeadingByte.RESPONSE.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf());
       ILinkCoapOverTcpMessageHandler.restoreMessageIDAndToken(token, coapResponse, ilinkResponse);
       ILinkCoapOverTcpMessageHandler.encodeCoapMessageAsPayload(coapResponse, ilinkResponse);
       ilinkResponse.setAgentId(srcDevice.getDeviceId());
@@ -108,8 +107,7 @@ public class RDProxy extends Resource {
     }
   }
 
-  @Autowired
-  private IAgentCache dc;
+  @Autowired private IAgentCache dc;
 
   public RDProxy() {
     super(Arrays.asList(ConstDef.RD_URI_SEGMENT));
@@ -148,10 +146,8 @@ public class RDProxy extends Resource {
     logger.debug("send request to {} via COAP+TCP", ConstDef.RD_URI);
     IRequestChannel requestChannel = ConnectorPool.getConnection(ConstDef.RD_URI);
     if (requestChannel != null) {
-      requestChannel.sendRequest(request,
-                                 new RDReceiveHandler(srcDevice,
-                                                      request.getMethod(),
-                                                      request.getUriPath()));
+      requestChannel.sendRequest(
+          request, new RDReceiveHandler(srcDevice, request.getMethod(), request.getUriPath()));
     } else {
       IResponse response =
           MessageBuilder.createResponse(request, ResponseStatus.SERVICE_UNAVAILABLE);
@@ -160,8 +156,7 @@ public class RDProxy extends Resource {
   }
 
   public IRequest reportDeviceDisconnected(IAgent notReachedDevice) {
-    if (notReachedDevice == null)
-      return null;
+    if (notReachedDevice == null) return null;
 
     String uriPath = "/rd/session";
     String agentId = notReachedDevice.getAgentId();
@@ -170,11 +165,13 @@ public class RDProxy extends Resource {
     ShortSession[] removedAgent = new ShortSession[] {new ShortSession(agentId, null)};
     ObjectMapper objMapper = new ObjectMapper();
     try {
-      IRequest message = MessageBuilder.createRequest(RequestMethod.DELETE,
-                                                      uriPath,
-                                                      null,
-                                                      ContentFormat.APPLICATION_JSON,
-                                                      objMapper.writeValueAsBytes(removedAgent));
+      IRequest message =
+          MessageBuilder.createRequest(
+              RequestMethod.DELETE,
+              uriPath,
+              null,
+              ContentFormat.APPLICATION_JSON,
+              objMapper.writeValueAsBytes(removedAgent));
       return message;
     } catch (JsonProcessingException e) {
       e.printStackTrace();
@@ -183,48 +180,52 @@ public class RDProxy extends Resource {
   }
 
   public void syncDeviceConnectedStatus(String iagentId, String deviceId) {
-    IRequest request = MessageBuilder.createRequest(RequestMethod.GET,
-                                                    "/rd/device",
-                                                    "id=" + deviceId,
-                                                    ContentFormat.APPLICATION_JSON,
-                                                    null);
+    IRequest request =
+        MessageBuilder.createRequest(
+            RequestMethod.GET,
+            "/rd/device",
+            "id=" + deviceId,
+            ContentFormat.APPLICATION_JSON,
+            null);
     IRequestChannel requestChannel = ConnectorPool.getConnection(ConstDef.RD_URI);
     if (Objects.nonNull(requestChannel)) {
-      requestChannel.sendRequest(request, response -> {
-        if (!ResponseStatus.CONTENT.equals(response.getStatus())) {
-          logger.info("can not get content about device {} from rd", deviceId);
-          return;
-        }
+      requestChannel.sendRequest(
+          request,
+          response -> {
+            if (!ResponseStatus.CONTENT.equals(response.getStatus())) {
+              logger.info("can not get content about device {} from rd", deviceId);
+              return;
+            }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        try {
-          DeviceLite[] device = objectMapper.readValue(response.getPayload(), DeviceLite[].class);
-          if (device.length == 0 || device[0].isC()) {
-            logger.info("{} is connected, same status with the ibroker record", deviceId);
-            return;
-          }
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try {
+              DeviceLite[] device =
+                  objectMapper.readValue(response.getPayload(), DeviceLite[].class);
+              if (device.length == 0 || device[0].isC()) {
+                logger.info("{} is connected, same status with the ibroker record", deviceId);
+                return;
+              }
 
-          // only send sync message if with different connected status
-          ResHierLite syncStatus = new ResHierLite();
-          syncStatus.setAid(iagentId);
-          syncStatus.setDi(deviceId);
-          syncStatus.setDt(device[0].getDt());
-          syncStatus.setSt(device[0].getSt());
-          IRequest syncRequest =
-              MessageBuilder.createRequest(RequestMethod.POST,
-                                           "/rd",
-                                           null,
-                                           ContentFormat.APPLICATION_JSON,
-                                           objectMapper.writeValueAsBytes(new ResHierLite[] {
-                                               syncStatus}));
-          logger.info("set {} as online", deviceId);
-          requestChannel.sendRequest(syncRequest, null);
-        } catch (IOException e) {
-          logger.warn("deserialization failure", e);
-        }
-
-      });
+              // only send sync message if with different connected status
+              ResHierLite syncStatus = new ResHierLite();
+              syncStatus.setAid(iagentId);
+              syncStatus.setDi(deviceId);
+              syncStatus.setDt(device[0].getDt());
+              syncStatus.setSt(device[0].getSt());
+              IRequest syncRequest =
+                  MessageBuilder.createRequest(
+                      RequestMethod.POST,
+                      "/rd",
+                      null,
+                      ContentFormat.APPLICATION_JSON,
+                      objectMapper.writeValueAsBytes(new ResHierLite[] {syncStatus}));
+              logger.info("set {} as online", deviceId);
+              requestChannel.sendRequest(syncRequest, null);
+            } catch (IOException e) {
+              logger.warn("deserialization failure", e);
+            }
+          });
     }
   }
 }

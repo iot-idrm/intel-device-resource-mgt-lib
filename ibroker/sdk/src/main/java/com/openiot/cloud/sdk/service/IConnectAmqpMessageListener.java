@@ -7,14 +7,14 @@ package com.openiot.cloud.sdk.service;
 import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.sdk.utilities.UrlUtil;
+import java.util.Map;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 import org.apache.qpid.amqp_1_0.jms.BytesMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import java.util.Map;
 
 class IConnectAmqpMessageListener implements MessageListener {
   private static Logger logger = LoggerFactory.getLogger(IConnectAmqpMessageListener.class);
@@ -32,8 +32,12 @@ class IConnectAmqpMessageListener implements MessageListener {
       try {
         // if (!(message instanceof BytesMessage)) {
         if (!BytesMessage.class.isAssignableFrom(message.getClass())) {
-          logger.error(System.identityHashCode(message) + " " + message.getJMSCorrelationID()
-              + " unsupport message type: " + message.getClass());
+          logger.error(
+              System.identityHashCode(message)
+                  + " "
+                  + message.getJMSCorrelationID()
+                  + " unsupport message type: "
+                  + message.getClass());
           return;
         }
 
@@ -42,17 +46,20 @@ class IConnectAmqpMessageListener implements MessageListener {
         restMessage.readBytes(payload);
         String action = restMessage.getStringProperty(ConstDef.JMS_MSG_KEY_ACTION);
         IConnectRequest req =
-            IConnectRequest.create(action == null ? HttpMethod.GET : HttpMethod.valueOf(action),
-                                   restMessage.getStringProperty(ConstDef.JMS_MSG_KEY_URI),
-                                   MediaType.valueOf(restMessage.getStringProperty(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT)),
-                                   payload);
+            IConnectRequest.create(
+                action == null ? HttpMethod.GET : HttpMethod.valueOf(action),
+                restMessage.getStringProperty(ConstDef.JMS_MSG_KEY_URI),
+                MediaType.valueOf(restMessage.getStringProperty(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT)),
+                payload);
         req.setMessageID(restMessage.getJMSCorrelationID());
         // TOKEN INFO
         Map<Object, Object> extraParams = restMessage.getMapProperty(ConstDef.JMS_MSG_KEY_EXTRA);
         if (extraParams != null && !extraParams.isEmpty()) {
-          extraParams.entrySet().stream().forEach(e -> {
-            req.setTokenInfo((String) e.getKey(), (String) e.getValue());
-          });
+          extraParams.entrySet().stream()
+              .forEach(
+                  e -> {
+                    req.setTokenInfo((String) e.getKey(), (String) e.getValue());
+                  });
         }
 
         // logger.warn("receive rest requst [from:"+restMessage.getJMSReplyTo()+"
@@ -61,8 +68,8 @@ class IConnectAmqpMessageListener implements MessageListener {
         if (restMessage.getJMSReplyTo() != null)
           req.setResponseSender(new JMSResponseSender(restMessage.getJMSReplyTo()));
 
-        attached_service.onServiceRequest(getPathWithoutQueryParam(restMessage.getStringProperty(ConstDef.JMS_MSG_KEY_URI)),
-                                          req);
+        attached_service.onServiceRequest(
+            getPathWithoutQueryParam(restMessage.getStringProperty(ConstDef.JMS_MSG_KEY_URI)), req);
       } catch (Exception e) {
         logger.error("Exception: " + BaseUtil.getStackTrace(e));
       }

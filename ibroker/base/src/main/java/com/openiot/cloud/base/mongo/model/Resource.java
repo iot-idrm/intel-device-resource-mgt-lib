@@ -13,22 +13,18 @@ import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.help.Untouchable;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
+import java.util.List;
+import java.util.Optional;
+import javax.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import javax.validation.constraints.NotNull;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 
 @Document(collection = ConstDef.C_RES)
 @JsonInclude(Include.NON_EMPTY)
 public class Resource {
-  @Untouchable
-  @Id
-  @JsonIgnore
-  String id;
+  @Untouchable @Id @JsonIgnore String id;
 
   @Untouchable
   @Field(ConstDef.F_URL)
@@ -150,13 +146,32 @@ public class Resource {
 
   @Override
   public String toString() {
-    return "Resource [id=" + id + ", url=" + url + ", name=" + name + ", resTypes=" + resTypes
-        + ", devId=" + devId + ", config=" + config + ", devName=" + devName + ", grps=" + grps
+    return "Resource [id="
+        + id
+        + ", url="
+        + url
+        + ", name="
+        + name
+        + ", resTypes="
+        + resTypes
+        + ", devId="
+        + devId
+        + ", config="
+        + config
+        + ", devName="
+        + devName
+        + ", grps="
+        + grps
         + "]";
   }
 
-  public static Resource from(String url, String name, List<String> resTypes, String devId,
-                              Config config, List<String> grps) {
+  public static Resource from(
+      String url,
+      String name,
+      List<String> resTypes,
+      String devId,
+      Config config,
+      List<String> grps) {
     Resource res = new Resource();
     res.setDevId(devId);
     res.setUrl(url);
@@ -210,8 +225,13 @@ public class Resource {
 
     @Override
     public String toString() {
-      return "Config [dataLife=" + dataLife + ", attributes=" + attributes + ", userCfgs="
-          + userCfgs + "]";
+      return "Config [dataLife="
+          + dataLife
+          + ", attributes="
+          + attributes
+          + ", userCfgs="
+          + userCfgs
+          + "]";
     }
   }
 }

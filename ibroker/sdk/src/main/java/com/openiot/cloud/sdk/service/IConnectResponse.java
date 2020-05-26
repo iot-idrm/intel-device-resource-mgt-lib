@@ -4,14 +4,11 @@
 
 package com.openiot.cloud.sdk.service;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Objects;
 
 public class IConnectResponse {
   private static final Logger logger = LoggerFactory.getLogger(IConnectResponse.class);
@@ -24,8 +21,8 @@ public class IConnectResponse {
 
   // users tend to give format null when there is no payload
   // but following code might depends on the format value
-  public static IConnectResponse createFromRequest(IConnectRequest request, HttpStatus status,
-                                                   MediaType format, byte[] payload) {
+  public static IConnectResponse createFromRequest(
+      IConnectRequest request, HttpStatus status, MediaType format, byte[] payload) {
     IConnectResponse resp = new IConnectResponse();
     resp.setMessageID(request.getMessageID());
     resp.setStatus(status);
@@ -77,8 +74,7 @@ public class IConnectResponse {
   }
 
   private String dumpByteArray(byte[] data) {
-    if (Objects.isNull(data) || data.length == 0)
-      return "";
+    if (Objects.isNull(data) || data.length == 0) return "";
     StringBuilder builder = new StringBuilder();
     for (byte b : data) {
       if (builder.length() != 0) {
@@ -95,7 +91,14 @@ public class IConnectResponse {
   @Override
   public String toString() {
     String strPayload = dumpByteArray(payload);
-    return "IConnectResponse [messageID=" + messageID + ", status=" + status + ", format=" + format
-        + ", payload=" + strPayload + "]";
+    return "IConnectResponse [messageID="
+        + messageID
+        + ", status="
+        + status
+        + ", format="
+        + format
+        + ", payload="
+        + strPayload
+        + "]";
   }
 }

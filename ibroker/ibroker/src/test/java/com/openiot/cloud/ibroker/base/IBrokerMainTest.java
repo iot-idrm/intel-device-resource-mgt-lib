@@ -4,6 +4,10 @@
 
 package com.openiot.cloud.ibroker.base;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openiot.cloud.base.help.BaseUtil;
@@ -30,8 +34,13 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Log4JLoggerFactory;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import lombok.Data;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.iotivity.cloud.base.device.Device;
 import org.iotivity.cloud.base.protocols.IRequest;
 import org.iotivity.cloud.base.protocols.IResponse;
@@ -48,9 +57,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.mockito.ArgumentMatchers.isA;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doAnswer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,19 +65,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.StopWatch;
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {IBrokerMain.class})
 public class IBrokerMainTest {
   private static final Logger logger = LoggerFactory.getLogger(IBrokerMainTest.class);
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
   class IBrokerClient {
     private final Logger logger = LoggerFactory.getLogger(IBrokerClient.class);
@@ -97,8 +97,8 @@ public class IBrokerMainTest {
               try {
                 requestInformation.responseHandler.accept(response);
               } catch (Exception e) {
-                logger.warn("meet an exception during a response handling \n"
-                    + BaseUtil.getStackTrace(e));
+                logger.warn(
+                    "meet an exception during a response handling \n" + BaseUtil.getStackTrace(e));
               }
             } else {
               logger.warn(String.format("can not find a response handler for #%s response.", key));
@@ -161,8 +161,8 @@ public class IBrokerMainTest {
 
       @Override
       public void exceptionCaught(ChannelHandlerContext context, Throwable throwable) {
-        logger.debug("catch an exception " + throwable.getLocalizedMessage()
-            + ". record it and move on");
+        logger.debug(
+            "catch an exception " + throwable.getLocalizedMessage() + ". record it and move on");
         logger.debug(BaseUtil.getStackTrace(throwable));
       }
 
@@ -206,18 +206,25 @@ public class IBrokerMainTest {
       this.iBrokerAddress = iBrokerAddress;
       this.gatewayId = gatewayId;
       this.requestMap =
-          new ConcurrentRequestMap<>(capacity, 10, 25, (iLinkMessageId, requestInformation) -> {
-            logger.warn(String.format("the #%s request(%s) has been rejected",
-                                      iLinkMessageId,
-                                      requestInformation));
-            if (requestInformation != null && requestInformation.responseHandler != null) {
-              requestInformation.responseHandler.accept(ILinkMessageBuilder.createResponse(requestInformation.request,
-                                                                                           ConstDef.FH_V_FAIL));
-            }
-          });
-      this.defaultResponseHandler = response -> {
-        logger.info("the default response handler get " + response);
-      };
+          new ConcurrentRequestMap<>(
+              capacity,
+              10,
+              25,
+              (iLinkMessageId, requestInformation) -> {
+                logger.warn(
+                    String.format(
+                        "the #%s request(%s) has been rejected",
+                        iLinkMessageId, requestInformation));
+                if (requestInformation != null && requestInformation.responseHandler != null) {
+                  requestInformation.responseHandler.accept(
+                      ILinkMessageBuilder.createResponse(
+                          requestInformation.request, ConstDef.FH_V_FAIL));
+                }
+              });
+      this.defaultResponseHandler =
+          response -> {
+            logger.info("the default response handler get " + response);
+          };
     }
 
     // it is a synchronized function, you can not do anything more until a client connects the
@@ -229,16 +236,19 @@ public class IBrokerMainTest {
       bootstrap.channel(NioSocketChannel.class);
       bootstrap.option(ChannelOption.TCP_NODELAY, true);
       bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-      bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-        @Override
-        protected void initChannel(SocketChannel ch) throws Exception {
-          ch.pipeline().addLast(new ILinkEncoder(),
-                                new ILinkDecoder(),
-                                new LoggingHandler(LogLevel.DEBUG),
-                                new IdleStateHandler(180, 0, 0),
-                                new ClientHandler());
-        }
-      });
+      bootstrap.handler(
+          new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+              ch.pipeline()
+                  .addLast(
+                      new ILinkEncoder(),
+                      new ILinkDecoder(),
+                      new LoggingHandler(LogLevel.DEBUG),
+                      new IdleStateHandler(180, 0, 0),
+                      new ClientHandler());
+            }
+          });
 
       try {
         doConnection().get(30, TimeUnit.SECONDS);
@@ -264,22 +274,28 @@ public class IBrokerMainTest {
       }
 
       try {
-        logger.info("trying to connect the server " + this.iBrokerAddress + ":"
-            + ConstDef.ILINK_PORT);
-        ChannelFuture connectFuture = bootstrap.connect(this.iBrokerAddress, ConstDef.ILINK_PORT)
-                                               // make sure the connection has been established
-                                               .awaitUninterruptibly();
+        logger.info(
+            "trying to connect the server " + this.iBrokerAddress + ":" + ConstDef.ILINK_PORT);
+        ChannelFuture connectFuture =
+            bootstrap
+                .connect(this.iBrokerAddress, ConstDef.ILINK_PORT)
+                // make sure the connection has been established
+                .awaitUninterruptibly();
         if (connectFuture.isDone() && connectFuture.isSuccess()) {
           channel = connectFuture.channel();
-          connectFuture.channel().closeFuture().addListener(closeFuture -> {
-            logger.info("lost the connection");
-            if (!closeFuture.isCancelled() && !stopSign.get()) {
-              int shortBreak = r.nextInt(2000);
-              logger.info("gona to reconnect after " + shortBreak + " ms");
-              Executors.newSingleThreadScheduledExecutor()
-                       .schedule(() -> doConnection(), shortBreak, TimeUnit.MILLISECONDS);
-            }
-          });
+          connectFuture
+              .channel()
+              .closeFuture()
+              .addListener(
+                  closeFuture -> {
+                    logger.info("lost the connection");
+                    if (!closeFuture.isCancelled() && !stopSign.get()) {
+                      int shortBreak = r.nextInt(2000);
+                      logger.info("gona to reconnect after " + shortBreak + " ms");
+                      Executors.newSingleThreadScheduledExecutor()
+                          .schedule(() -> doConnection(), shortBreak, TimeUnit.MILLISECONDS);
+                    }
+                  });
         } else if (connectFuture.isCancelled()) {
           // close if the user wants to quit
           stop();
@@ -288,7 +304,7 @@ public class IBrokerMainTest {
             int shortBreak = r.nextInt(2000);
             logger.info("fail to connect, try again after " + shortBreak + " ms");
             Executors.newSingleThreadScheduledExecutor()
-                     .schedule(() -> doConnection(), shortBreak, TimeUnit.MILLISECONDS);
+                .schedule(() -> doConnection(), shortBreak, TimeUnit.MILLISECONDS);
           }
         }
         connectResult.complete(connectFuture.isSuccess());
@@ -314,14 +330,18 @@ public class IBrokerMainTest {
         return;
       }
 
-      if (!channel.isOpen() || !channel.isActive() || !channel.isWritable()
+      if (!channel.isOpen()
+          || !channel.isActive()
+          || !channel.isWritable()
           || !channel.isRegistered()) {
-        logger.warn(String.format("channel %s is not in a normal state open(%s),active(%s),writable(%s),registered(%s)",
-                                  channel.id().asShortText(),
-                                  channel.isOpen(),
-                                  channel.isActive(),
-                                  channel.isWritable(),
-                                  channel.isRegistered()));
+        logger.warn(
+            String.format(
+                "channel %s is not in a normal state open(%s),active(%s),writable(%s),registered(%s)",
+                channel.id().asShortText(),
+                channel.isOpen(),
+                channel.isActive(),
+                channel.isWritable(),
+                channel.isRegistered()));
         responseHandler.accept(ILinkMessageBuilder.createResponse(request, ConstDef.FH_V_FAIL));
         return;
       }
@@ -338,13 +358,15 @@ public class IBrokerMainTest {
 
       ChannelFuture channelFuture = channel.writeAndFlush(request);
       if (responseHandler != null) {
-        channelFuture.addListener(future -> {
-          if (!future.isSuccess()) {
-            logger.debug("send failed " + request);
-            requestMap.remove(key);
-            responseHandler.accept(ILinkMessageBuilder.createResponse(request, ConstDef.FH_V_FAIL));
-          }
-        });
+        channelFuture.addListener(
+            future -> {
+              if (!future.isSuccess()) {
+                logger.debug("send failed " + request);
+                requestMap.remove(key);
+                responseHandler.accept(
+                    ILinkMessageBuilder.createResponse(request, ConstDef.FH_V_FAIL));
+              }
+            });
       }
 
       return;
@@ -365,38 +387,45 @@ public class IBrokerMainTest {
     }
 
     CompletableFuture<Boolean> handShake() {
-      logger.debug(String.format("try to handshake with %s:%s",
-                                 iBrokerAddress,
-                                 ConstDef.ILINK_PORT));
+      logger.debug(
+          String.format("try to handshake with %s:%s", iBrokerAddress, ConstDef.ILINK_PORT));
       CompletableFuture<Boolean> handShakeFuture = new CompletableFuture<>();
 
       // handshake 1
       ILinkMessage handShake1Message = ILinkMessageBuilder.createHandShake1Request(gatewayId);
 
-      sendMessage(handShake1Message, response -> {
-        logger.debug("--> hand shake 1 response " + response + ","
-            + System.identityHashCode(response));
+      sendMessage(
+          handShake1Message,
+          response -> {
+            logger.debug(
+                "--> hand shake 1 response " + response + "," + System.identityHashCode(response));
 
-        assertThat(response.getLeadingByte()).isEqualTo((byte) LeadingByte.PLAIN.valueOf());
-        assertThat(response.getTag()).isEqualTo(ConstDef.FH_V_HAN1);
-        assertThat(response.getAgentId()).isEqualTo(gatewayId);
-        assertThat(response.getResponseCode()).isEqualTo(ConstDef.FH_V_REQ2HAN);
+            assertThat(response.getLeadingByte()).isEqualTo((byte) LeadingByte.PLAIN.valueOf());
+            assertThat(response.getTag()).isEqualTo(ConstDef.FH_V_HAN1);
+            assertThat(response.getAgentId()).isEqualTo(gatewayId);
+            assertThat(response.getResponseCode()).isEqualTo(ConstDef.FH_V_REQ2HAN);
 
-        if (response.getResponseCode() != ConstDef.FH_V_REQ2HAN) {
-          handShakeFuture.complete(false);
-        } else {
-          // handshake 2
-          ILinkMessage handShake2Message =
-              ILinkMessageBuilder.createHandShake2Request(gatewayId, response.getPayload());
-          sendMessage(handShake2Message, response2 -> {
-            logger.debug("--> hand shake 2 response " + response2 + ","
-                + System.identityHashCode(response2));
-            assertThat(response2.getLeadingByte()).isEqualTo((byte) LeadingByte.PLAIN.valueOf());
-            assertThat(response2.getResponseCode()).isEqualTo(ConstDef.FH_V_SUCC);
-            handShakeFuture.complete(response2.getResponseCode() == ConstDef.FH_V_SUCC);
+            if (response.getResponseCode() != ConstDef.FH_V_REQ2HAN) {
+              handShakeFuture.complete(false);
+            } else {
+              // handshake 2
+              ILinkMessage handShake2Message =
+                  ILinkMessageBuilder.createHandShake2Request(gatewayId, response.getPayload());
+              sendMessage(
+                  handShake2Message,
+                  response2 -> {
+                    logger.debug(
+                        "--> hand shake 2 response "
+                            + response2
+                            + ","
+                            + System.identityHashCode(response2));
+                    assertThat(response2.getLeadingByte())
+                        .isEqualTo((byte) LeadingByte.PLAIN.valueOf());
+                    assertThat(response2.getResponseCode()).isEqualTo(ConstDef.FH_V_SUCC);
+                    handShakeFuture.complete(response2.getResponseCode() == ConstDef.FH_V_SUCC);
+                  });
+            }
           });
-        }
-      });
       return handShakeFuture;
     }
 
@@ -404,9 +433,8 @@ public class IBrokerMainTest {
       boolean result = true;
       try {
         if (channel == null) {
-          logger.info(String.format("try to connect to %s:%s",
-                                    iBrokerAddress,
-                                    ConstDef.ILINK_PORT));
+          logger.info(
+              String.format("try to connect to %s:%s", iBrokerAddress, ConstDef.ILINK_PORT));
           start();
         }
 
@@ -418,8 +446,10 @@ public class IBrokerMainTest {
       return result;
     }
 
-    public void postRD(String deviceId, Map<String, String[]> resourceAndResourceType,
-                       Consumer<ILinkMessage> responseHandler) {
+    public void postRD(
+        String deviceId,
+        Map<String, String[]> resourceAndResourceType,
+        Consumer<ILinkMessage> responseHandler) {
       Map[] links = new Map[resourceAndResourceType.size()];
       int iOfLinks = 0;
       for (Map.Entry<String, String[]> entry : resourceAndResourceType.entrySet()) {
@@ -438,77 +468,87 @@ public class IBrokerMainTest {
 
       try {
         CoapMessage coapMessage =
-            (CoapMessage) MessageBuilder.createRequest(RequestMethod.POST,
-                                                       "/rd",
-                                                       null,
-                                                       ContentFormat.APPLICATION_TEXTPLAIN,
-                                                       objectMapper.writeValueAsBytes(resourceReport));
-        ILinkMessage request = ILinkMessageBuilder.createCOAPRequest(deviceId,
-                                                                     messageID.getAndIncrement(),
-                                                                     coapMessage);
+            (CoapMessage)
+                MessageBuilder.createRequest(
+                    RequestMethod.POST,
+                    "/rd",
+                    null,
+                    ContentFormat.APPLICATION_TEXTPLAIN,
+                    objectMapper.writeValueAsBytes(resourceReport));
+        ILinkMessage request =
+            ILinkMessageBuilder.createCOAPRequest(
+                deviceId, messageID.getAndIncrement(), coapMessage);
         sendMessage(request, responseHandler);
       } catch (JsonProcessingException e) {
         logger.warn("serialize the resource port failed");
-        ILinkMessage response = new ILinkMessage(LeadingByte.RESPONSE.valueOf(),
-                                                 (byte) MessageType.COAP_OVER_TCP.valueOf());
+        ILinkMessage response =
+            new ILinkMessage(
+                LeadingByte.RESPONSE.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf());
         response.setResponseCode(ConstDef.FH_V_FAIL);
         responseHandler.accept(response);
       }
     }
 
-    public void postDPTextPlainData(String deviceId, String resourceUrl, String propertyName,
-                                    long time, Number data,
-                                    Consumer<ILinkMessage> responseHandler) {
+    public void postDPTextPlainData(
+        String deviceId,
+        String resourceUrl,
+        String propertyName,
+        long time,
+        Number data,
+        Consumer<ILinkMessage> responseHandler) {
       String uriQuery = String.format("di=%s&ri=%s&pt=%s", deviceId, resourceUrl, propertyName);
-      IRequest coapRequest = MessageBuilder.createRequest(RequestMethod.PUT,
-                                                          "/dp/",
-                                                          uriQuery,
-                                                          ContentFormat.APPLICATION_TEXTPLAIN,
-                                                          data.toString().getBytes());
+      IRequest coapRequest =
+          MessageBuilder.createRequest(
+              RequestMethod.PUT,
+              "/dp/",
+              uriQuery,
+              ContentFormat.APPLICATION_TEXTPLAIN,
+              data.toString().getBytes());
       ((CoapRequest) coapRequest).setUser("__night-owl");
-      sendMessage(ILinkMessageBuilder.createCOAPRequest(deviceId,
-                                                        messageID.getAndIncrement(),
-                                                        (CoapMessage) coapRequest),
-                  responseHandler);
+      sendMessage(
+          ILinkMessageBuilder.createCOAPRequest(
+              deviceId, messageID.getAndIncrement(), (CoapMessage) coapRequest),
+          responseHandler);
     }
   }
 
-  @Mock
-  private ResourceManager fakeResourcesForCoapOverTcp;
-  @Mock
-  private DefaultJmsHandler fakeJmsHandler;
-  @Autowired
-  private ILinkCoapOverTcpMessageHandler iLinkCoapOverTcpMessageHandler;
+  @Mock private ResourceManager fakeResourcesForCoapOverTcp;
+  @Mock private DefaultJmsHandler fakeJmsHandler;
+  @Autowired private ILinkCoapOverTcpMessageHandler iLinkCoapOverTcpMessageHandler;
 
   @Before
   public void setup() throws Exception {
     ReflectionTestUtils.setField(iLinkCoapOverTcpMessageHandler, "jmsHandler", fakeJmsHandler);
-    ReflectionTestUtils.setField(iLinkCoapOverTcpMessageHandler,
-                                 "resourcesForCoapOverTcp",
-                                 fakeResourcesForCoapOverTcp);
+    ReflectionTestUtils.setField(
+        iLinkCoapOverTcpMessageHandler, "resourcesForCoapOverTcp", fakeResourcesForCoapOverTcp);
 
-    doAnswer(invocationOnMock -> {
-      Object[] arguments = invocationOnMock.getArguments();
-      Device device = (Device) arguments[0];
-      IRequest request = (IRequest) arguments[1];
-      IResponse response = MessageBuilder.createResponse(request, ResponseStatus.CREATED);
+    doAnswer(
+            invocationOnMock -> {
+              Object[] arguments = invocationOnMock.getArguments();
+              Device device = (Device) arguments[0];
+              IRequest request = (IRequest) arguments[1];
+              IResponse response = MessageBuilder.createResponse(request, ResponseStatus.CREATED);
 
-      logger.info("a response from fake COAP+TCP Handler {}", device);
-      device.sendResponse(response);
-      return null;
-    }).when(fakeResourcesForCoapOverTcp).onRequestReceived(isA(Device.class), isA(IRequest.class));
+              logger.info("a response from fake COAP+TCP Handler {}", device);
+              device.sendResponse(response);
+              return null;
+            })
+        .when(fakeResourcesForCoapOverTcp)
+        .onRequestReceived(isA(Device.class), isA(IRequest.class));
 
-    doAnswer(invocationOnMock -> {
-      Object[] arguments = invocationOnMock.getArguments();
-      Device device = (Device) arguments[0];
-      IRequest request = (IRequest) arguments[1];
-      IResponse response = MessageBuilder.createResponse(request, ResponseStatus.CREATED);
+    doAnswer(
+            invocationOnMock -> {
+              Object[] arguments = invocationOnMock.getArguments();
+              Device device = (Device) arguments[0];
+              IRequest request = (IRequest) arguments[1];
+              IResponse response = MessageBuilder.createResponse(request, ResponseStatus.CREATED);
 
-      logger.info("a response from fake JMS Handler {}", device);
-      device.sendResponse(response);
-      return null;
-    }).when(fakeJmsHandler)
-      .onDefaultRequestReceived(isA(Device.class), isA(IRequest.class), isA(ILinkMessage.class));
+              logger.info("a response from fake JMS Handler {}", device);
+              device.sendResponse(response);
+              return null;
+            })
+        .when(fakeJmsHandler)
+        .onDefaultRequestReceived(isA(Device.class), isA(IRequest.class), isA(ILinkMessage.class));
   }
 
   @Test
@@ -546,18 +586,19 @@ public class IBrokerMainTest {
     for (int i = 0; i < clientsAmount; i++) {
       int finalI = i;
       tasks[finalI] = new CompletableFuture<>();
-      executorService.submit(() -> {
-        IBrokerClient client = new IBrokerClient("127.0.0.1", "__night-owl-1" + finalI);
-        try {
-          client.startAndHandShakeAndAwait();
-        } catch (Exception e) {
-          e.printStackTrace();
-        } finally {
-          client.stop();
-        }
+      executorService.submit(
+          () -> {
+            IBrokerClient client = new IBrokerClient("127.0.0.1", "__night-owl-1" + finalI);
+            try {
+              client.startAndHandShakeAndAwait();
+            } catch (Exception e) {
+              e.printStackTrace();
+            } finally {
+              client.stop();
+            }
 
-        tasks[finalI].complete(true);
-      });
+            tasks[finalI].complete(true);
+          });
     }
 
     CompletableFuture.allOf(tasks).join();
@@ -574,17 +615,22 @@ public class IBrokerMainTest {
 
     // prepare a ilink+coap message
     CoapMessage coapMessage =
-        (CoapMessage) MessageBuilder.createRequest(RequestMethod.POST,
-                                                   "/rd",
-                                                   null,
-                                                   ContentFormat.APPLICATION_TEXTPLAIN,
-                                                   "[{\"aid\":\"__night-owl-13\",\"di\":\"__night-owl-13\",\"dt\":\"intel.iagent\",\"links\":[],\"st\":\"iagent\",\"status\":\"on\"}]".getBytes());
+        (CoapMessage)
+            MessageBuilder.createRequest(
+                RequestMethod.POST,
+                "/rd",
+                null,
+                ContentFormat.APPLICATION_TEXTPLAIN,
+                "[{\"aid\":\"__night-owl-13\",\"di\":\"__night-owl-13\",\"dt\":\"intel.iagent\",\"links\":[],\"st\":\"iagent\",\"status\":\"on\"}]"
+                    .getBytes());
     ILinkMessage postRdRequest = ILinkMessageBuilder.createCOAPRequest(deviceId, 1, coapMessage);
     CompletableFuture<ILinkMessage> sendRequestFuture = new CompletableFuture<>();
-    client.sendMessage(postRdRequest, response -> {
-      logger.info("response ");
-      sendRequestFuture.complete(response);
-    });
+    client.sendMessage(
+        postRdRequest,
+        response -> {
+          logger.info("response ");
+          sendRequestFuture.complete(response);
+        });
 
     // fire
     ILinkMessage postRdResponse = sendRequestFuture.join();
@@ -633,22 +679,27 @@ public class IBrokerMainTest {
       responseTasks[i] = new CompletableFuture();
       int finalI = i;
 
-      executor.submit(() -> {
-        client.postDPTextPlainData(deviceId,
-                                   (finalI & 0x1) == 0 ? switch1 : switch2,
-                                   "current",
-                                   Instant.now().toEpochMilli(),
-                                   r.nextInt(bigNumber << 2),
-                                   response -> {
-                                     logger.debug("the response is back " + response.toString());
-                                     responseTasks[finalI].complete(true);
-                                     if (response == null || (response.getFlexHeader() != null
-                                         && response.getFlexHeader().containsKey(ConstDef.FH_K_REP)
-                                         && response.getResponseCode() == ConstDef.FH_V_FAIL)) {
-                                       failed.incrementAndGet();
-                                     }
-                                   });
-      }).get();
+      executor
+          .submit(
+              () -> {
+                client.postDPTextPlainData(
+                    deviceId,
+                    (finalI & 0x1) == 0 ? switch1 : switch2,
+                    "current",
+                    Instant.now().toEpochMilli(),
+                    r.nextInt(bigNumber << 2),
+                    response -> {
+                      logger.debug("the response is back " + response.toString());
+                      responseTasks[finalI].complete(true);
+                      if (response == null
+                          || (response.getFlexHeader() != null
+                              && response.getFlexHeader().containsKey(ConstDef.FH_K_REP)
+                              && response.getResponseCode() == ConstDef.FH_V_FAIL)) {
+                        failed.incrementAndGet();
+                      }
+                    });
+              })
+          .get();
     }
 
     StopWatch stopWatch = new StopWatch("PUT/POST /dp");
@@ -657,8 +708,8 @@ public class IBrokerMainTest {
     CompletableFuture.allOf(responseTasks).get(45, TimeUnit.SECONDS);
     stopWatch.stop();
     logger.info(stopWatch.prettyPrint());
-    logger.debug("all responses are received, failed rated " + failed.get() * 1.0 / bigNumber * 100
-        + "%");
+    logger.debug(
+        "all responses are received, failed rated " + failed.get() * 1.0 / bigNumber * 100 + "%");
     client.stop();
   }
 
@@ -694,66 +745,71 @@ public class IBrokerMainTest {
       CompletableFuture<Boolean> currentClientResult = new CompletableFuture<>();
       clientTask.add(currentClientResult);
 
-      executor.submit(() -> {
-        IBrokerClient client = clients.get(finalClientId - 1);
-        StopWatch stopWatch = stopWatchList.get(finalClientId - 1);
-        String deviceId = deviceIdPrefix + finalClientId;
+      executor.submit(
+          () -> {
+            IBrokerClient client = clients.get(finalClientId - 1);
+            StopWatch stopWatch = stopWatchList.get(finalClientId - 1);
+            String deviceId = deviceIdPrefix + finalClientId;
 
-        // handshake
-        stopWatch.start("build a connection and handshake");
-        client.startAndHandShakeAndAwait();
-        stopWatch.stop();
+            // handshake
+            stopWatch.start("build a connection and handshake");
+            client.startAndHandShakeAndAwait();
+            stopWatch.stop();
 
-        // POST /rd
-        CompletableFuture<Boolean> postRDFuture = new CompletableFuture<>();
-        stopWatch.start("post /rd");
-        client.postRD(deviceId, resourceAndResourceType, response -> postRDFuture.complete(true));
-        stopWatch.stop();
-        try {
-          assertThat(postRDFuture.get(1, TimeUnit.SECONDS)).isTrue();
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-          assertThat(false).isTrue();
-          currentClientResult.complete(false);
-        }
+            // POST /rd
+            CompletableFuture<Boolean> postRDFuture = new CompletableFuture<>();
+            stopWatch.start("post /rd");
+            client.postRD(
+                deviceId, resourceAndResourceType, response -> postRDFuture.complete(true));
+            stopWatch.stop();
+            try {
+              assertThat(postRDFuture.get(1, TimeUnit.SECONDS)).isTrue();
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+              assertThat(false).isTrue();
+              currentClientResult.complete(false);
+            }
 
-        List<CompletableFuture<Boolean>> currentClientResponseResultList = new LinkedList<>();
+            List<CompletableFuture<Boolean>> currentClientResponseResultList = new LinkedList<>();
 
-        stopWatch.start("post " + bigNumber + " data to /dp");
-        for (int i = 0; i < bigNumber; i++) {
-          int finalI = clientAmount * (finalClientId - 1) + i;
+            stopWatch.start("post " + bigNumber + " data to /dp");
+            for (int i = 0; i < bigNumber; i++) {
+              int finalI = clientAmount * (finalClientId - 1) + i;
 
-          CompletableFuture<Boolean> currentResponseTask = new CompletableFuture<>();
-          currentClientResponseResultList.add(currentResponseTask);
+              CompletableFuture<Boolean> currentResponseTask = new CompletableFuture<>();
+              currentClientResponseResultList.add(currentResponseTask);
 
-          client.postDPTextPlainData(deviceId,
-                                     (finalI & 0x1) == 0 ? switch1 : switch2,
-                                     "current",
-                                     Instant.now().toEpochMilli(),
-                                     r.nextInt(bigNumber << 2),
-                                     response -> {
-                                       logger.debug("the response is back " + response.toString());
-                                       currentResponseTask.complete(true);
-                                     });
-        }
+              client.postDPTextPlainData(
+                  deviceId,
+                  (finalI & 0x1) == 0 ? switch1 : switch2,
+                  "current",
+                  Instant.now().toEpochMilli(),
+                  r.nextInt(bigNumber << 2),
+                  response -> {
+                    logger.debug("the response is back " + response.toString());
+                    currentResponseTask.complete(true);
+                  });
+            }
 
-        boolean responseFailed = false;
+            boolean responseFailed = false;
 
-        try {
-          CompletableFuture.allOf(currentClientResponseResultList.toArray(new CompletableFuture[currentClientResponseResultList.size()]))
-                           .get(20, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-          responseFailed = true;
-        }
-        logger.debug("#" + finalClientId + " client has received all responses");
+            try {
+              CompletableFuture.allOf(
+                      currentClientResponseResultList.toArray(
+                          new CompletableFuture[currentClientResponseResultList.size()]))
+                  .get(20, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+              responseFailed = true;
+            }
+            logger.debug("#" + finalClientId + " client has received all responses");
 
-        stopWatch.stop();
-        assertThat(currentClientResponseResultList.size()).isEqualTo(bigNumber);
-        currentClientResult.complete(true);
-      });
+            stopWatch.stop();
+            assertThat(currentClientResponseResultList.size()).isEqualTo(bigNumber);
+            currentClientResult.complete(true);
+          });
     }
 
     CompletableFuture.allOf(clientTask.toArray(new CompletableFuture[clientTask.size()]))
-                     .get(40, TimeUnit.SECONDS);
+        .get(40, TimeUnit.SECONDS);
     for (StopWatch stopWatch : stopWatchList) {
       logger.debug(stopWatch.prettyPrint());
     }

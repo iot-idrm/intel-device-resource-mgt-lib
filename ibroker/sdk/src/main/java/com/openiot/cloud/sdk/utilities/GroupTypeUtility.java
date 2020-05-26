@@ -12,21 +12,19 @@ import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
 import com.openiot.cloud.sdk.service.ApplicationContextProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
 
 @Component(value = "groupTypeUtility")
 public class GroupTypeUtility {
-  @Autowired
-  GroupTypeRepository grptRepo;
+  @Autowired GroupTypeRepository grptRepo;
 
-  @Autowired
-  GroupRepository grpRepo;
+  @Autowired GroupRepository grpRepo;
 
   public static GroupTypeUtility getInstance() {
     return ApplicationContextProvider.getBean(GroupTypeUtility.class);
@@ -84,20 +82,24 @@ public class GroupTypeUtility {
    * @return List of all group types that match all specified conditions.
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
-  public List<GroupType> getGroupTypeWith(String project, List<String> attrNames,
-                                          List<String> cfgNames, List<String> dssNames,
-                                          Map<String, String> attrsMap,
-                                          Map<String, String> cfgsMap) {
-    return grptRepo.filter(Optional.ofNullable(project),
-                           Optional.empty(),
-                           Optional.empty(),
-                           attrNames,
-                           cfgNames,
-                           dssNames,
-                           attrsMap,
-                           cfgsMap,
-                           GroupType.allFields(),
-                           new PageRequest(0, ConstDef.MAX_SIZE));
+  public List<GroupType> getGroupTypeWith(
+      String project,
+      List<String> attrNames,
+      List<String> cfgNames,
+      List<String> dssNames,
+      Map<String, String> attrsMap,
+      Map<String, String> cfgsMap) {
+    return grptRepo.filter(
+        Optional.ofNullable(project),
+        Optional.empty(),
+        Optional.empty(),
+        attrNames,
+        cfgNames,
+        dssNames,
+        attrsMap,
+        cfgsMap,
+        GroupType.allFields(),
+        new PageRequest(0, ConstDef.MAX_SIZE));
   }
 
   // TODO: UPDATE
@@ -112,21 +114,25 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean updateGroupTypeAttr(String gtName, Map<String, String> attrs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(attrs)
-                     .filter(as -> !as.isEmpty())
-                     .map(as -> as.entrySet()
-                                  .stream()
-                                  .map(entry -> new AttributeEntity(entry.getKey(),
-                                                                    entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(as -> {
-                       as.forEach(a -> gt.insertOrUpdateAs(a));
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(attrs)
+                  .filter(as -> !as.isEmpty())
+                  .map(
+                      as ->
+                          as.entrySet().stream()
+                              .map(entry -> new AttributeEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      as -> {
+                        as.forEach(a -> gt.insertOrUpdateAs(a));
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -140,21 +146,27 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean updateGroupTypeCfg(String gtName, Map<String, String> cfgs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(cfgs)
-                     .filter(cs -> !cs.isEmpty())
-                     .map(cs -> cs.entrySet()
-                                  .stream()
-                                  .map(entry -> new ConfigurationEntity(entry.getKey(),
-                                                                        entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(cs -> {
-                       cs.forEach(c -> gt.insertOrUpdateCs(c));
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(cfgs)
+                  .filter(cs -> !cs.isEmpty())
+                  .map(
+                      cs ->
+                          cs.entrySet().stream()
+                              .map(
+                                  entry ->
+                                      new ConfigurationEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      cs -> {
+                        cs.forEach(c -> gt.insertOrUpdateCs(c));
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -168,20 +180,30 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean updateGroupTypeDss(String gtName, Map<String, String> dtsrcs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(dtsrcs)
-                     .filter(dss -> !dss.isEmpty())
-                     .map(dss -> dss.entrySet().stream().map(entry -> {
-                       DataSourceEntity ds = new DataSourceEntity(entry.getKey(), entry.getValue());
-                       return ds;
-                     }).collect(Collectors.toList()))
-                     .map(dss -> {
-                       dss.forEach(ds -> gt.insertOrUpdateDss(ds));
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(dtsrcs)
+                  .filter(dss -> !dss.isEmpty())
+                  .map(
+                      dss ->
+                          dss.entrySet().stream()
+                              .map(
+                                  entry -> {
+                                    DataSourceEntity ds =
+                                        new DataSourceEntity(entry.getKey(), entry.getValue());
+                                    return ds;
+                                  })
+                              .collect(Collectors.toList()))
+                  .map(
+                      dss -> {
+                        dss.forEach(ds -> gt.insertOrUpdateDss(ds));
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -193,21 +215,25 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean replaceGroupTypeAttr(String gtName, Map<String, String> attrs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(attrs)
-                     .filter(as -> !as.isEmpty())
-                     .map(as -> as.entrySet()
-                                  .stream()
-                                  .map(entry -> new AttributeEntity(entry.getKey(),
-                                                                    entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(as -> {
-                       gt.setAs(as);
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(attrs)
+                  .filter(as -> !as.isEmpty())
+                  .map(
+                      as ->
+                          as.entrySet().stream()
+                              .map(entry -> new AttributeEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      as -> {
+                        gt.setAs(as);
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -219,21 +245,27 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean replaceGroupTypeCfg(String gtName, Map<String, String> cfgs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(cfgs)
-                     .filter(cs -> !cs.isEmpty())
-                     .map(cs -> cs.entrySet()
-                                  .stream()
-                                  .map(entry -> new ConfigurationEntity(entry.getKey(),
-                                                                        entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(cs -> {
-                       gt.setCs(cs);
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(cfgs)
+                  .filter(cs -> !cs.isEmpty())
+                  .map(
+                      cs ->
+                          cs.entrySet().stream()
+                              .map(
+                                  entry ->
+                                      new ConfigurationEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      cs -> {
+                        gt.setCs(cs);
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -245,20 +277,30 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean replaceGroupTypeDss(String gtName, Map<String, String> dtsrcs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(dtsrcs)
-                     .filter(dss -> !dss.isEmpty())
-                     .map(dss -> dss.entrySet().stream().map(entry -> {
-                       DataSourceEntity ds = new DataSourceEntity(entry.getKey(), entry.getValue());
-                       return ds;
-                     }).collect(Collectors.toList()))
-                     .map(dss -> {
-                       gt.setDss(dss);
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(dtsrcs)
+                  .filter(dss -> !dss.isEmpty())
+                  .map(
+                      dss ->
+                          dss.entrySet().stream()
+                              .map(
+                                  entry -> {
+                                    DataSourceEntity ds =
+                                        new DataSourceEntity(entry.getKey(), entry.getValue());
+                                    return ds;
+                                  })
+                              .collect(Collectors.toList()))
+                  .map(
+                      dss -> {
+                        gt.setDss(dss);
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -270,19 +312,25 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean deleteGroupTypeAttr(String gtName, List<String> attrs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(attrs)
-                     .filter(as -> !as.isEmpty())
-                     .map(as -> as.stream()
-                                  .map(attrName -> new AttributeEntity(attrName, null))
-                                  .collect(Collectors.toList()))
-                     .map(as -> {
-                       gt.getAs().removeAll(as);
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(attrs)
+                  .filter(as -> !as.isEmpty())
+                  .map(
+                      as ->
+                          as.stream()
+                              .map(attrName -> new AttributeEntity(attrName, null))
+                              .collect(Collectors.toList()))
+                  .map(
+                      as -> {
+                        gt.getAs().removeAll(as);
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -294,19 +342,25 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean deleteGroupTypeCfg(String gtName, List<String> cfgs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(cfgs)
-                     .filter(cs -> !cs.isEmpty())
-                     .map(cs -> cs.stream()
-                                  .map(cfgName -> new ConfigurationEntity(cfgName, null))
-                                  .collect(Collectors.toList()))
-                     .map(cs -> {
-                       gt.getCs().removeAll(cs);
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(cfgs)
+                  .filter(cs -> !cs.isEmpty())
+                  .map(
+                      cs ->
+                          cs.stream()
+                              .map(cfgName -> new ConfigurationEntity(cfgName, null))
+                              .collect(Collectors.toList()))
+                  .map(
+                      cs -> {
+                        gt.getCs().removeAll(cs);
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -318,20 +372,30 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean deleteGroupTypeDss(String gtName, Map<String, String> dtsrcs) {
-    return Optional.ofNullable(grptRepo.findOneByN(gtName)).map(gt -> {
-      return Optional.ofNullable(dtsrcs)
-                     .filter(dss -> !dss.isEmpty())
-                     .map(dss -> dss.entrySet().stream().map(entry -> {
-                       DataSourceEntity ds = new DataSourceEntity(entry.getKey(), entry.getValue());
-                       return ds;
-                     }).collect(Collectors.toList()))
-                     .map(dss -> {
-                       gt.getDss().removeAll(dss);
-                       grptRepo.save(gt);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grptRepo.findOneByN(gtName))
+        .map(
+            gt -> {
+              return Optional.ofNullable(dtsrcs)
+                  .filter(dss -> !dss.isEmpty())
+                  .map(
+                      dss ->
+                          dss.entrySet().stream()
+                              .map(
+                                  entry -> {
+                                    DataSourceEntity ds =
+                                        new DataSourceEntity(entry.getKey(), entry.getValue());
+                                    return ds;
+                                  })
+                              .collect(Collectors.toList()))
+                  .map(
+                      dss -> {
+                        gt.getDss().removeAll(dss);
+                        grptRepo.save(gt);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -342,9 +406,13 @@ public class GroupTypeUtility {
    * @see com.openiot.cloud.base.mongo.model.GroupType
    */
   public boolean deleteGroupTypeByName(String name) {
-    return Optional.ofNullable(name).map(n -> grptRepo.findOneByN(n)).map(g -> {
-      grptRepo.delete(g);
-      return true;
-    }).orElse(false);
+    return Optional.ofNullable(name)
+        .map(n -> grptRepo.findOneByN(n))
+        .map(
+            g -> {
+              grptRepo.delete(g);
+              return true;
+            })
+        .orElse(false);
   }
 }

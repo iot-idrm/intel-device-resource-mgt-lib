@@ -19,7 +19,8 @@ public class RoutingTableItem {
   String inetaddr; // service ipaddr + port
 
   @JsonCreator
-  public RoutingTableItem(@JsonProperty(ConstDef.RT_ITEM_URI) String uripath,
+  public RoutingTableItem(
+      @JsonProperty(ConstDef.RT_ITEM_URI) String uripath,
       @JsonProperty(ConstDef.RT_ITEM_INETADDR) String inetaddr) {
     super();
     this.uripath = uripath;
@@ -36,7 +37,13 @@ public class RoutingTableItem {
 
   @Override
   public String toString() {
-    return "RoutingTableItem{" + "uripath='" + uripath + '\'' + ", inetaddr='" + inetaddr + '\''
+    return "RoutingTableItem{"
+        + "uripath='"
+        + uripath
+        + '\''
+        + ", inetaddr='"
+        + inetaddr
+        + '\''
         + '}';
   }
 }

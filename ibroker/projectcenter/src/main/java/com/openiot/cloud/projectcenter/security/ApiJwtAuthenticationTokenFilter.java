@@ -9,6 +9,15 @@ import com.openiot.cloud.projectcenter.repository.ProjectRepository;
 import com.openiot.cloud.projectcenter.repository.UserRepository;
 import com.openiot.cloud.projectcenter.service.AuthenticationService;
 import com.openiot.cloud.projectcenter.utils.ApiJwtTokenUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,29 +29,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class ApiJwtAuthenticationTokenFilter extends OncePerRequestFilter {
   private static final Logger logger =
       LoggerFactory.getLogger(ApiJwtAuthenticationTokenFilter.class);
-  @Autowired
-  private ApiJwtTokenUtil jwtTokenUtil;
-  @Autowired
-  private AuthenticationService authenticationService;
+  @Autowired private ApiJwtTokenUtil jwtTokenUtil;
+  @Autowired private AuthenticationService authenticationService;
 
-  @Autowired
-  private ProjectRepository projectRepository;
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private ProjectRepository projectRepository;
+  @Autowired private UserRepository userRepository;
 
   @Value("${jwt.header}")
   private String tokenHeader;
@@ -51,15 +47,16 @@ public class ApiJwtAuthenticationTokenFilter extends OncePerRequestFilter {
   private String tokenHead;
 
   private static final List<AntPathRequestMatcher> passJWTAuthenticationList =
-      Stream.of(new AntPathRequestMatcher("/api/user", HttpMethod.POST.name()),
-                new AntPathRequestMatcher("/api/user", HttpMethod.GET.name()),
-                new AntPathRequestMatcher("/api/user/login"),
-                new AntPathRequestMatcher("/api/user/validation"))
-            .collect(Collectors.toList());
+      Stream.of(
+              new AntPathRequestMatcher("/api/user", HttpMethod.POST.name()),
+              new AntPathRequestMatcher("/api/user", HttpMethod.GET.name()),
+              new AntPathRequestMatcher("/api/user/login"),
+              new AntPathRequestMatcher("/api/user/validation"))
+          .collect(Collectors.toList());
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                  FilterChain filterChain)
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     if (passJWTAuthenticationList.stream().anyMatch(matcher -> matcher.matches(request))) {
       filterChain.doFilter(request, response);
@@ -67,8 +64,9 @@ public class ApiJwtAuthenticationTokenFilter extends OncePerRequestFilter {
     }
 
     if (SecurityContextHolder.getContext().getAuthentication() != null) {
-      logger.info("authFilter: authetication is not null in SecurityContext: "
-          + SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+      logger.info(
+          "authFilter: authetication is not null in SecurityContext: "
+              + SecurityContextHolder.getContext().getAuthentication().getPrincipal());
       filterChain.doFilter(request, response);
       return;
     }
@@ -98,9 +96,8 @@ public class ApiJwtAuthenticationTokenFilter extends OncePerRequestFilter {
           }
 
           UsernamePasswordAuthenticationToken authentication =
-              new UsernamePasswordAuthenticationToken(tokenContent.getUser(),
-                                                      null,
-                                                      grantedAuthorityList);
+              new UsernamePasswordAuthenticationToken(
+                  tokenContent.getUser(), null, grantedAuthorityList);
 
           authentication.setDetails(tokenContent);
 
@@ -117,8 +114,8 @@ public class ApiJwtAuthenticationTokenFilter extends OncePerRequestFilter {
       }
     } else {
       SecurityContextHolder.clearContext();
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                         "need an item for authentication in header");
+      response.sendError(
+          HttpServletResponse.SC_UNAUTHORIZED, "need an item for authentication in header");
       return;
     }
   }

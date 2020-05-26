@@ -5,14 +5,13 @@
 package com.openiot.cloud.base.service.model;
 
 import com.openiot.cloud.base.help.Untouchable;
-import lombok.Data;
 import java.util.LinkedList;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class DataSource {
-  @Untouchable
-  private String name;
+  @Untouchable private String name;
   private DataSourceType type;
   private String title;
   private String classInfo;

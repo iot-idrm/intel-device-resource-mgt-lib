@@ -4,8 +4,6 @@
 
 package com.openiot.cloud.base.profiling;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -15,6 +13,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.DiscardOldestPolicy;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DurationCounterManage {
 
@@ -39,23 +39,26 @@ public class DurationCounterManage {
     long delay = LocalDateTime.now(ZoneOffset.UTC).until(startUpTime, ChronoUnit.MILLIS);
     delay = Math.max(0, delay);
     logger.debug("startup time is " + startUpTime + " and delay is " + delay + " ms");
-    executor.schedule(() -> {
-      for (DurationCounter counter : counters.values()) {
-        counter.reset();
-      }
-      executor.schedule(this::checkAndDump, nextEndCounterMillis(), TimeUnit.MILLISECONDS);
-    }, delay, TimeUnit.MILLISECONDS);
+    executor.schedule(
+        () -> {
+          for (DurationCounter counter : counters.values()) {
+            counter.reset();
+          }
+          executor.schedule(this::checkAndDump, nextEndCounterMillis(), TimeUnit.MILLISECONDS);
+        },
+        delay,
+        TimeUnit.MILLISECONDS);
   }
 
   LocalDateTime findAProperStartUpTime() {
     LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
-    int minPeriodDuration = counters.values()
-                                    .stream()
-                                    .map(DurationCounter::getStatisticPeriodMillis)
-                                    .min((l1, l2) -> (int) (l1 - l2))
-                                    .get()
-                                    .intValue();
+    int minPeriodDuration =
+        counters.values().stream()
+            .map(DurationCounter::getStatisticPeriodMillis)
+            .min((l1, l2) -> (int) (l1 - l2))
+            .get()
+            .intValue();
 
     logger.debug("minimum period of all counters is " + minPeriodDuration + " ms");
 
@@ -82,11 +85,10 @@ public class DurationCounterManage {
   }
 
   long nextEndCounterMillis() {
-    return counters.values()
-                   .stream()
-                   .map(DurationCounter::periodRemainingMillis)
-                   .min((l1, l2) -> (int) (l1.longValue() - l2.longValue()))
-                   .get();
+    return counters.values().stream()
+        .map(DurationCounter::periodRemainingMillis)
+        .min((l1, l2) -> (int) (l1.longValue() - l2.longValue()))
+        .get();
   }
 
   void checkAndDump() {

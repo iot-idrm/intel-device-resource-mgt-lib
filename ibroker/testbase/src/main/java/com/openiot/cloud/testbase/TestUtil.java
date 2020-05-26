@@ -10,6 +10,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.openiot.cloud.base.help.ConstDef;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.iotivity.cloud.base.connector.ConnectorPool;
@@ -30,17 +41,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Component
@@ -49,8 +49,7 @@ public class TestUtil {
   @Value(value = "${test.timeout:10000}")
   Long timeout;
 
-  @Autowired
-  MongoTemplate mo;
+  @Autowired MongoTemplate mo;
 
   Map<String, List<String>> fileLines = new HashMap<String, List<String>>(); // for readLines
   Map<String, String> fileContent = new HashMap<String, String>(); // for readAll
@@ -58,8 +57,8 @@ public class TestUtil {
   public List<String> readLines(String fileName) {
     if (fileLines.get(fileName) == null) {
       try {
-        fileLines.put(fileName,
-                      Files.readAllLines(Paths.get(getClass().getResource(fileName).getFile())));
+        fileLines.put(
+            fileName, Files.readAllLines(Paths.get(getClass().getResource(fileName).getFile())));
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -71,9 +70,9 @@ public class TestUtil {
   public String readAll(String fileName) {
     if (fileContent.get(fileName) == null) {
       try {
-        fileContent.put(fileName,
-                        new String(Files.readAllBytes(Paths.get(getClass().getResource(fileName)
-                                                                          .getFile()))));
+        fileContent.put(
+            fileName,
+            new String(Files.readAllBytes(Paths.get(getClass().getResource(fileName).getFile()))));
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -148,8 +147,9 @@ public class TestUtil {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode obj = null;
     try {
-      obj = mapper.readTree(Files.newBufferedReader(Paths.get(getClass().getResource(fileName)
-                                                                        .getFile())));
+      obj =
+          mapper.readTree(
+              Files.newBufferedReader(Paths.get(getClass().getResource(fileName).getFile())));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -198,8 +198,9 @@ public class TestUtil {
     ObjectMapper mapper = new ObjectMapper();
     JsonNode obj = null;
     try {
-      obj = mapper.readTree(Files.newBufferedReader(Paths.get(getClass().getResource(fileName)
-                                                                        .getFile())));
+      obj =
+          mapper.readTree(
+              Files.newBufferedReader(Paths.get(getClass().getResource(fileName).getFile())));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -225,8 +226,9 @@ public class TestUtil {
       ObjectMapper mapper = new ObjectMapper();
       JsonNode obj = null;
       try {
-        obj = mapper.readTree(Files.newBufferedReader(Paths.get(getClass().getResource(fileName)
-                                                                          .getFile())));
+        obj =
+            mapper.readTree(
+                Files.newBufferedReader(Paths.get(getClass().getResource(fileName).getFile())));
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -234,10 +236,11 @@ public class TestUtil {
         return;
       } else if (obj.isArray()) {
         String collectionName = name;
-        obj.forEach(s -> {
-          DBObject toSave = (DBObject) JSON.parse(s.toString());
-          mo.save(toSave, collectionName);
-        });
+        obj.forEach(
+            s -> {
+              DBObject toSave = (DBObject) JSON.parse(s.toString());
+              mo.save(toSave, collectionName);
+            });
       } else {
         DBObject toSave = (DBObject) JSON.parse(obj.toString());
         mo.save(toSave, name);
@@ -265,10 +268,11 @@ public class TestUtil {
         return;
       } else if (obj.isArray()) {
         String collectionName = name;
-        obj.forEach(s -> {
-          DBObject toSave = (DBObject) JSON.parse(s.toString());
-          mo.save(toSave, collectionName);
-        });
+        obj.forEach(
+            s -> {
+              DBObject toSave = (DBObject) JSON.parse(s.toString());
+              mo.save(toSave, collectionName);
+            });
       } else {
         DBObject toSave = (DBObject) JSON.parse(obj.toString());
         mo.save(toSave, name);
@@ -300,38 +304,45 @@ public class TestUtil {
     }
   }
 
-  public IResponse sendIRequest(String conn, RequestMethod method, String uri, String query,
-                                byte[] payload) {
-    return sendIRequest(conn,
-                        MessageBuilder.createRequest(method,
-                                                     uri,
-                                                     query,
-                                                     ContentFormat.APPLICATION_JSON,
-                                                     payload));
+  public IResponse sendIRequest(
+      String conn, RequestMethod method, String uri, String query, byte[] payload) {
+    return sendIRequest(
+        conn,
+        MessageBuilder.createRequest(method, uri, query, ContentFormat.APPLICATION_JSON, payload));
   }
 
-  public IResponse sendIRequest(String conn, RequestMethod method, String uri, String query,
-                                String payloadFile) {
-    return sendIRequest(conn,
-                        MessageBuilder.createRequest(method,
-                                                     uri,
-                                                     query,
-                                                     ContentFormat.APPLICATION_JSON,
-                                                     getJson(payloadFile).toString().getBytes()));
+  public IResponse sendIRequest(
+      String conn, RequestMethod method, String uri, String query, String payloadFile) {
+    return sendIRequest(
+        conn,
+        MessageBuilder.createRequest(
+            method,
+            uri,
+            query,
+            ContentFormat.APPLICATION_JSON,
+            getJson(payloadFile).toString().getBytes()));
   }
 
-  public IResponse sendIRequest(String conn, RequestMethod method, String uri, String query,
-                                ContentFormat format, String payloadFile) {
-    return sendIRequest(conn,
-                        MessageBuilder.createRequest(method,
-                                                     uri,
-                                                     query,
-                                                     format,
-                                                     getJson(payloadFile).toString().getBytes()));
+  public IResponse sendIRequest(
+      String conn,
+      RequestMethod method,
+      String uri,
+      String query,
+      ContentFormat format,
+      String payloadFile) {
+    return sendIRequest(
+        conn,
+        MessageBuilder.createRequest(
+            method, uri, query, format, getJson(payloadFile).toString().getBytes()));
   }
 
-  public IResponse sendIRequest(String conn, RequestMethod method, String uri, String query,
-                                ContentFormat format, byte[] payload) {
+  public IResponse sendIRequest(
+      String conn,
+      RequestMethod method,
+      String uri,
+      String query,
+      ContentFormat format,
+      byte[] payload) {
     return sendIRequest(conn, MessageBuilder.createRequest(method, uri, query, format, payload));
   }
 }

@@ -8,10 +8,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
-
 
 // TODO: under discussion
 @Data

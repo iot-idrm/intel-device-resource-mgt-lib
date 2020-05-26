@@ -4,10 +4,13 @@
 
 package com.openiot.cloud.cfg;
 
-import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.dao.ConfigRepository;
 import com.openiot.cloud.base.mongo.model.Config;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +22,6 @@ import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class ConfigUploader {
@@ -35,7 +34,8 @@ public class ConfigUploader {
   private String amsUserCloudPort;
 
   @Value(
-      value = "${ams.update-config.parameter:?product_name=iagent&path_name=%s&target_type=%s&target_id=%s}")
+      value =
+          "${ams.update-config.parameter:?product_name=iagent&path_name=%s&target_type=%s&target_id=%s}")
   private String amsCfgPara;
 
   @Value(value = "${auth.addr}")
@@ -44,18 +44,15 @@ public class ConfigUploader {
   @Value(value = "${auth.port}")
   private String authCenterPort;
 
-  @Autowired
-  private ConfigRepository cfgRepo;
-  @Autowired
-  private RestTemplate restTemplate;
+  @Autowired private ConfigRepository cfgRepo;
+  @Autowired private RestTemplate restTemplate;
 
   private AtomicBoolean stop = new AtomicBoolean(false);
 
   // every 5 seconds
   @Scheduled(fixedRate = 1000 * 5)
   public synchronized void uploadToAms() {
-    if (stop.get())
-      return;
+    if (stop.get()) return;
 
     List<Config> toRemoved = new ArrayList<>();
     try {
@@ -102,28 +99,34 @@ public class ConfigUploader {
 
           String amsUrl = null;
           if (cf.getTargetType().equals(ConstDef.CFG_TT_DEVONGW)) {
-            amsUrl = String.format(amsUrlPattern,
-                                   amsUserCloudAddress,
-                                   amsUserCloudPort,
-                                   ConstDef.CFG_PTN_DEVCFG,
-                                   ConstDef.CFG_TT_DEVONGW,
-                                   URLEncoder.encode(cf.getTargetId(), "UTF-8"));
+            amsUrl =
+                String.format(
+                    amsUrlPattern,
+                    amsUserCloudAddress,
+                    amsUserCloudPort,
+                    ConstDef.CFG_PTN_DEVCFG,
+                    ConstDef.CFG_TT_DEVONGW,
+                    URLEncoder.encode(cf.getTargetId(), "UTF-8"));
           } else if (cf.getTargetType().equals(ConstDef.CFG_TT_GRP)) {
-            amsUrl = String.format(amsUrlPattern,
-                                   amsUserCloudAddress,
-                                   amsUserCloudPort,
-                                   ConstDef.CFG_PTN_GRPCFG,
-                                   ConstDef.CFG_TT_GRP,
-                                   URLEncoder.encode(cf.getTargetId(), "UTF-8"));
+            amsUrl =
+                String.format(
+                    amsUrlPattern,
+                    amsUserCloudAddress,
+                    amsUserCloudPort,
+                    ConstDef.CFG_PTN_GRPCFG,
+                    ConstDef.CFG_TT_GRP,
+                    URLEncoder.encode(cf.getTargetId(), "UTF-8"));
           } else if (cf.getTargetType().equals(ConstDef.CFG_TT_PRJ)) {
             // TODO need to confirm with Xin if the product name is mushroom_client and tt is
             // ONE-PROJECT
-            amsUrl = String.format(amsUrlPattern,
-                                   amsUserCloudAddress,
-                                   amsUserCloudPort,
-                                   ConstDef.CFG_PTN_PRJCFG,
-                                   ConstDef.CFG_TT_PRJ,
-                                   URLEncoder.encode(cf.getTargetId(), "UTF-8"));
+            amsUrl =
+                String.format(
+                    amsUrlPattern,
+                    amsUserCloudAddress,
+                    amsUserCloudPort,
+                    ConstDef.CFG_PTN_PRJCFG,
+                    ConstDef.CFG_TT_PRJ,
+                    URLEncoder.encode(cf.getTargetId(), "UTF-8"));
           } else {
             logger.warn("Skip for wrong config target type: {} ", cf);
             continue;
@@ -135,10 +138,11 @@ public class ConfigUploader {
             logger.info("successfully upload {} to {}", cf, amsUrl);
             toRemoved.add(cf);
           } else {
-            logger.warn("Fail to upload {} to {} with return code {}",
-                        cf,
-                        amsUrl,
-                        response.getStatusCode());
+            logger.warn(
+                "Fail to upload {} to {} with return code {}",
+                cf,
+                amsUrl,
+                response.getStatusCode());
             // continue uploading the next cfg instead of break
             continue;
           }

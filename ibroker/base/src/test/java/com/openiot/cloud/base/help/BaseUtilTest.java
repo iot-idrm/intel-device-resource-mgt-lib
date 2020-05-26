@@ -4,6 +4,8 @@
 
 package com.openiot.cloud.base.help;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,17 +15,16 @@ import com.openiot.cloud.base.mongo.model.Group;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Arrays;
+import java.util.Collections;
+import javax.validation.Validator;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import javax.validation.Validator;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.Collections;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
@@ -56,32 +57,28 @@ public class BaseUtilTest {
 
   private ObjectMapper mapper = new ObjectMapper();
 
-  @Autowired
-  private Validator validator;
+  @Autowired private Validator validator;
 
   @Test
   public void testCheckPayload() throws Exception {
     Foo foo = new Foo(null, "Lee");
     String json = mapper.writeValueAsString(foo);
 
-    BaseUtil.PayloadCheckResult result = BaseUtil.checkPayload(mapper.writeValueAsBytes(foo),
-                                                               Foo.class,
-                                                               validator,
-                                                               CreateValidator.class);
+    BaseUtil.PayloadCheckResult result =
+        BaseUtil.checkPayload(
+            mapper.writeValueAsBytes(foo), Foo.class, validator, CreateValidator.class);
     assertThat(result.isPass()).isFalse();
 
     foo = new Foo("", "Lee");
-    result = BaseUtil.checkPayload(mapper.writeValueAsBytes(foo),
-                                   Foo.class,
-                                   validator,
-                                   CreateValidator.class);
+    result =
+        BaseUtil.checkPayload(
+            mapper.writeValueAsBytes(foo), Foo.class, validator, CreateValidator.class);
     assertThat(result.isPass()).isFalse();
 
     Foo[] fooArray = new Foo[] {new Foo("A", "Lee"), new Foo("B", "ZOk"), new Foo("", null)};
-    result = BaseUtil.checkPayload(mapper.writeValueAsBytes(fooArray),
-                                   Foo[].class,
-                                   validator,
-                                   CreateValidator.class);
+    result =
+        BaseUtil.checkPayload(
+            mapper.writeValueAsBytes(fooArray), Foo[].class, validator, CreateValidator.class);
     assertThat(result.isPass()).isFalse();
   }
 
@@ -89,24 +86,27 @@ public class BaseUtilTest {
   public void testReplace() throws Exception {
     Device.Config configSrc = new Device.Config();
     configSrc.setDataLife(10);
-    configSrc.setAttributes(Arrays.asList(new AttributeEntity("honeydew", "123"),
-                                          new AttributeEntity("strawberry", "3.14")));
+    configSrc.setAttributes(
+        Arrays.asList(
+            new AttributeEntity("honeydew", "123"), new AttributeEntity("strawberry", "3.14")));
 
     Device.Config configDst = new Device.Config();
     configDst.setRefNum(1);
-    configDst.setAttributes(Arrays.asList(new AttributeEntity("fig", "23"),
-                                          new AttributeEntity("kiwi", "29")));
+    configDst.setAttributes(
+        Arrays.asList(new AttributeEntity("fig", "23"), new AttributeEntity("kiwi", "29")));
 
     // to replace an array
     configDst = (Device.Config) BaseUtil.replace(configSrc, configDst);
-    assertThat(configDst).hasFieldOrPropertyWithValue("refNum", 1)
-                         .hasFieldOrPropertyWithValue("dataLife", 10);
+    assertThat(configDst)
+        .hasFieldOrPropertyWithValue("refNum", 1)
+        .hasFieldOrPropertyWithValue("dataLife", 10);
     assertThat(configDst.getAttributes()).extracting("av").containsOnly("123", "3.14");
     assertThat(configDst.getUserCfgs()).isNull();
 
     // to replace an null array
-    configSrc.setUserCfgs(Arrays.asList(new ConfigurationEntity("pear", "17"),
-                                        new ConfigurationEntity("pineapple", "19")));
+    configSrc.setUserCfgs(
+        Arrays.asList(
+            new ConfigurationEntity("pear", "17"), new ConfigurationEntity("pineapple", "19")));
     configDst = (Device.Config) BaseUtil.replace(configSrc, configDst);
     assertThat(configDst.getAttributes()).extracting("av").containsOnly("123", "3.14");
     assertThat(configDst.getUserCfgs()).extracting("cn").containsOnly("pear", "pineapple");
@@ -124,10 +124,11 @@ public class BaseUtilTest {
 
     // a normal replace
     dst = (Device) BaseUtil.replace(src, dst);
-    assertThat(dst).hasFieldOrPropertyWithValue("id", "dev2")
-                   .hasFieldOrPropertyWithValue("deviceType", "mongo")
-                   .hasFieldOrPropertyWithValue("name", "dev1")
-                   .hasFieldOrPropertyWithValue("connected", Boolean.FALSE);
+    assertThat(dst)
+        .hasFieldOrPropertyWithValue("id", "dev2")
+        .hasFieldOrPropertyWithValue("deviceType", "mongo")
+        .hasFieldOrPropertyWithValue("name", "dev1")
+        .hasFieldOrPropertyWithValue("connected", Boolean.FALSE);
     assertThat(dst.getGrps()).containsOnly("grp1", "grp2", "grp3");
     assertThat(dst.getConfig()).hasFieldOrPropertyWithValue("dataLife", 10);
     assertThat(dst.getConfig().getAttributes()).extracting("av").containsOnly("123", "3.14");
@@ -177,8 +178,9 @@ public class BaseUtilTest {
     target.setAs(Arrays.asList(new AttributeEntity("papaya", "1")));
 
     BaseUtil.copyPropertiesIgnoreCollectionNull(source, target);
-    assertThat(target).hasFieldOrPropertyWithValue("n", "apple").hasFieldOrPropertyWithValue("d",
-                                                                                             null);
+    assertThat(target)
+        .hasFieldOrPropertyWithValue("n", "apple")
+        .hasFieldOrPropertyWithValue("d", null);
     assertThat(target.getMd()).isEqualTo(source.getMd());
     assertThat(target.getAs()).extracting("an").containsOnly("papaya");
   }
@@ -195,9 +197,10 @@ public class BaseUtilTest {
     target.setAs(Arrays.asList(new AttributeEntity("papaya", "1")));
 
     BaseUtil.copyPropertiesIgnoreCollectionNull(source, target);
-    assertThat(target).hasFieldOrPropertyWithValue("n", "apple")
-                      .hasFieldOrPropertyWithValue("d", null)
-                      .hasFieldOrPropertyWithValue("as", null);
+    assertThat(target)
+        .hasFieldOrPropertyWithValue("n", "apple")
+        .hasFieldOrPropertyWithValue("d", null)
+        .hasFieldOrPropertyWithValue("as", null);
 
     assertThat(target.getMd()).isEqualTo(source.getMd());
   }

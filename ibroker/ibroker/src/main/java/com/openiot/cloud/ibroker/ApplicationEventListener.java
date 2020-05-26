@@ -13,6 +13,8 @@ import com.openiot.cloud.ibroker.mq.IagentOnlineJmsReqHandler;
 import com.openiot.cloud.ibroker.mq.OptJmsReqHandler;
 import com.openiot.cloud.sdk.service.IConnect;
 import com.openiot.cloud.sdk.service.IConnectService;
+import java.net.InetSocketAddress;
+import java.util.Map;
 import org.iotivity.cloud.base.connector.ConnectorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,27 +30,20 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import java.net.InetSocketAddress;
-import java.util.Map;
 
 @Component
 public class ApplicationEventListener {
   private static final Logger logger = LoggerFactory.getLogger(ApplicationEventListener.class);
 
-  @Autowired
-  private IBrokerServerSystem iss;
+  @Autowired private IBrokerServerSystem iss;
 
-  @Autowired
-  private IagentOnlineJmsReqHandler iagentOnlineHandler;
+  @Autowired private IagentOnlineJmsReqHandler iagentOnlineHandler;
 
-  @Autowired
-  private OptJmsReqHandler optHandler;
+  @Autowired private OptJmsReqHandler optHandler;
 
-  @Autowired
-  private IConnect iConnect;
+  @Autowired private IConnect iConnect;
 
-  @Autowired
-  private IConnectService iConnectService;
+  @Autowired private IConnectService iConnectService;
 
   @EventListener
   public void onApplicationReady(final ApplicationReadyEvent event) {
@@ -127,7 +122,8 @@ public class ApplicationEventListener {
       }
 
       if (routingTable == null || routingTable.isEmpty()) {
-        logger.error("routing table is empty or invalid, either way there is no useable routing item");
+        logger.error(
+            "routing table is empty or invalid, either way there is no useable routing item");
         return null;
       }
 
@@ -135,11 +131,11 @@ public class ApplicationEventListener {
         ConnectorPool.addConnection(item.getKey(), item.getValue(), false);
       }
 
-      logger.info("set up connections with remote services "
-          + ConfigurableRoutingTable.dump(routingTable));
+      logger.info(
+          "set up connections with remote services " + ConfigurableRoutingTable.dump(routingTable));
     } catch (Exception e) {
-      logger.error("a exception has been thrown when parsing routing_table "
-          + e.getLocalizedMessage());
+      logger.error(
+          "a exception has been thrown when parsing routing_table " + e.getLocalizedMessage());
       logger.error(BaseUtil.getStackTrace(e));
     }
 

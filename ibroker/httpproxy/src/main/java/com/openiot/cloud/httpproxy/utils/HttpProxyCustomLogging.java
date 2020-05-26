@@ -10,6 +10,11 @@ import com.openiot.cloud.base.profiling.DurationCounterManage;
 import com.openiot.cloud.base.profiling.DurationCounterOfUrlBuilder.CounterOfUrl;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Optional;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -33,15 +33,13 @@ public class HttpProxyCustomLogging extends HandlerInterceptorAdapter {
   private static final String ATTRIBUTE_ID = "X-REQUEST-UUID";
   private static final String ATTRIBUTE_TEIMSTAMP = "X-REQUEST-TIMESTAMP";
 
-  @Autowired
-  private DurationCounterManage counterManage;
+  @Autowired private DurationCounterManage counterManage;
 
-  @Autowired
-  private List<CounterOfUrl> counterOfUrls;
+  @Autowired private List<CounterOfUrl> counterOfUrls;
 
   @Override
-  public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-                           Object object) {
+  public boolean preHandle(
+      HttpServletRequest request, HttpServletResponse response, Object object) {
     String requestUUID = (String) request.getAttribute(ATTRIBUTE_ID);
     if (requestUUID == null) {
       requestUUID = Long.toString(MessageIdMaker.getMessageIdAsInteger());
@@ -57,36 +55,37 @@ public class HttpProxyCustomLogging extends HandlerInterceptorAdapter {
     }
 
     HttpServletRequest requestCached = new ContentCachingRequestWrapper(request);
-    logger.info("[request] {} {} {} HEAD {}, uuid {}",
-                requestCached.getMethod(),
-                requestCached.getRequestURI(),
-                requestCached.getPathInfo(),
-                getHeadersInfo(request),
-                requestUUID);
+    logger.info(
+        "[request] {} {} {} HEAD {}, uuid {}",
+        requestCached.getMethod(),
+        requestCached.getRequestURI(),
+        requestCached.getPathInfo(),
+        getHeadersInfo(request),
+        requestUUID);
     return true;
   }
 
   @Override
-  public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-                              Object object, Exception e) {
+  public void afterCompletion(
+      HttpServletRequest request, HttpServletResponse response, Object object, Exception e) {
     Optional<String> requestUUID = Optional.ofNullable((String) request.getAttribute(ATTRIBUTE_ID));
     Optional<Long> requestTimestamp =
         Optional.ofNullable((Long) request.getAttribute(ATTRIBUTE_TEIMSTAMP));
 
     HttpServletRequest requestCached = new ContentCachingRequestWrapper(request);
     HttpServletResponse responseCached = new ContentCachingResponseWrapper(response);
-    String responseInfo = String.format("[response] %s %s %s",
-                                        responseCached.getStatus(),
-                                        responseCached.getContentType(),
-                                        getHeadersInfo(response));
+    String responseInfo =
+        String.format(
+            "[response] %s %s %s",
+            responseCached.getStatus(), responseCached.getContentType(), getHeadersInfo(response));
 
     long now = Instant.now(Clock.systemUTC()).toEpochMilli();
     long timeCost = now - requestTimestamp.orElse(now + 1);
 
-    logger.info(String.format(" %s, uuid %s, time cost %d",
-                              responseInfo,
-                              requestUUID.orElse("EMPTY_UUID"),
-                              timeCost));
+    logger.info(
+        String.format(
+            " %s, uuid %s, time cost %d",
+            responseInfo, requestUUID.orElse("EMPTY_UUID"), timeCost));
 
     addCount(requestCached.getRequestURI(), timeCost);
     return;

@@ -8,17 +8,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openiot.cloud.base.help.ConstDef;
+import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import java.util.List;
 
 @Document(collection = ConstDef.C_DEVTYPE)
 @JsonInclude(Include.NON_NULL)
 public class DeviceType {
 
-  @Id
-  String id;
+  @Id String id;
 
   @Field(ConstDef.F_NAME)
   @JsonProperty(ConstDef.F_NAME)

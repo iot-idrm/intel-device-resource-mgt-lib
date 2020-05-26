@@ -10,21 +10,19 @@ import com.openiot.cloud.base.mongo.dao.ResTypeRepository;
 import com.openiot.cloud.base.mongo.model.Group;
 import com.openiot.cloud.base.mongo.model.GroupType;
 import com.openiot.cloud.base.mongo.model.OcfRTDefinition.ResDefEntry;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+
 // import com.openiot.cloud.base.mongo.dao.TaskSrvRepository;
 // import com.openiot.cloud.base.mongo.model.TaskService;
 
 public class CheckNameValidator implements ConstraintValidator<CheckName, String> {
 
-  @Autowired
-  GroupRepository grpRepo;
-  @Autowired
-  GroupTypeRepository grptRepo;
-  @Autowired
-  ResTypeRepository rtRepo;
+  @Autowired GroupRepository grpRepo;
+  @Autowired GroupTypeRepository grptRepo;
+  @Autowired ResTypeRepository rtRepo;
 
   private Class<?> caseMode;
 

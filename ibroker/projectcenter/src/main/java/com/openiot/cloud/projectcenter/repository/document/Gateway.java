@@ -12,8 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(ConstDef.C_GATEWAY)
 @Data
 public class Gateway {
-  @Id
-  private String id;
+  @Id private String id;
   private String iAgentId;
   private String hwSn;
   private String provKey;

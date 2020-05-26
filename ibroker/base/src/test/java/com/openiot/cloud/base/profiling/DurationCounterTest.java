@@ -4,17 +4,18 @@
 
 package com.openiot.cloud.base.profiling;
 
-import com.openiot.cloud.base.Application;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.openiot.cloud.base.Application;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.StopWatch;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.IntStream;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
@@ -32,27 +33,29 @@ public class DurationCounterTest {
         new DurationCounter("fake", configuration, new SimpleAlarmHandler("/tmp/alarm"));
 
     assertThat(counter).isNotNull();
-    assertThat(counter.periodRemainingMillis()).isGreaterThan(0l)
-                                               .isLessThanOrEqualTo(configuration.getStatisticPeriodMillis());
+    assertThat(counter.periodRemainingMillis())
+        .isGreaterThan(0l)
+        .isLessThanOrEqualTo(configuration.getStatisticPeriodMillis());
 
     counter.count(100);
     counter.count(100);
-    assertThat(((Map<Long, Long>) ReflectionTestUtils.getField(counter,
-                                                               "executionTimeStatistic")).get(Long.valueOf(0))).isEqualTo(2);
+    assertThat(
+            ((Map<Long, Long>) ReflectionTestUtils.getField(counter, "executionTimeStatistic"))
+                .get(Long.valueOf(0)))
+        .isEqualTo(2);
 
     counter.count(1200);
     counter.count(2400);
     counter.count(5400);
 
-    assertThat(((Map<Long, Long>) ReflectionTestUtils.getField(counter,
-                                                               "executionTimeStatistic")).size()).isEqualTo(4);
+    assertThat(
+            ((Map<Long, Long>) ReflectionTestUtils.getField(counter, "executionTimeStatistic"))
+                .size())
+        .isEqualTo(4);
 
     System.out.println(counter.toString());
-    assertThat(counter.toString()).contains("title",
-                                            "date",
-                                            "period",
-                                            "duration",
-                                            "Count distribution");
+    assertThat(counter.toString())
+        .contains("title", "date", "period", "duration", "Count distribution");
   }
 
   @Test
@@ -64,13 +67,15 @@ public class DurationCounterTest {
     configuration.setThresholdOverTimes(3);
 
     int j = 10;
-    Function<Integer, Integer> accessLocalVariable = i -> {
-      return i + j;
-    };
+    Function<Integer, Integer> accessLocalVariable =
+        i -> {
+          return i + j;
+        };
 
-    Function<Integer, Integer> accessMemberFiled = i -> {
-      return i + (int) configuration.getStatisticPeriodMillis();
-    };
+    Function<Integer, Integer> accessMemberFiled =
+        i -> {
+          return i + (int) configuration.getStatisticPeriodMillis();
+        };
 
     StopWatch stopWatch = new StopWatch();
 

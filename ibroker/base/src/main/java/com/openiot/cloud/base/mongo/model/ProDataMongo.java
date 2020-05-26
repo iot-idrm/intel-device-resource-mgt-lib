@@ -14,8 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = ConstDef.C_PRODATA)
 public class ProDataMongo {
-  @Id
-  private String id;
+  @Id private String id;
 
   @Field(ConstDef.F_PROPERTY)
   private ObjectId propertyId;
@@ -62,8 +61,8 @@ public class ProDataMongo {
     this.fullurl = BaseUtil.formAFullUrl(devId, resUrl);
   }
 
-  public ProDataMongo(ObjectId propertyId, String devId, String resUrl, String propName, long time,
-      Object data) {
+  public ProDataMongo(
+      ObjectId propertyId, String devId, String resUrl, String propName, long time, Object data) {
     this.propertyId = propertyId;
     this.devId = devId;
     this.resUrl = resUrl;
@@ -74,8 +73,8 @@ public class ProDataMongo {
   }
 
   @Deprecated
-  public ProDataMongo(ObjectId propertyId, String fullurl, long time, String dataType, Object data,
-      String helper) {
+  public ProDataMongo(
+      ObjectId propertyId, String fullurl, long time, String dataType, Object data, String helper) {
     this.setPropertyId(propertyId);
     this.setFullurl(fullurl);
     this.setTime(time);
@@ -166,10 +165,35 @@ public class ProDataMongo {
 
   @Override
   public String toString() {
-    return "ProDataMongo{" + "id='" + id + '\'' + ", propertyId=" + propertyId + ", fullurl='"
-        + fullurl + '\'' + ", devId='" + devId + '\'' + ", resUrl='" + resUrl + '\''
-        + ", propName='" + propName + '\'' + ", time=" + time + ", data=" + data + ", dataType='"
-        + dataType + '\'' + ", helper='" + helper + '\'' + '}';
+    return "ProDataMongo{"
+        + "id='"
+        + id
+        + '\''
+        + ", propertyId="
+        + propertyId
+        + ", fullurl='"
+        + fullurl
+        + '\''
+        + ", devId='"
+        + devId
+        + '\''
+        + ", resUrl='"
+        + resUrl
+        + '\''
+        + ", propName='"
+        + propName
+        + '\''
+        + ", time="
+        + time
+        + ", data="
+        + data
+        + ", dataType='"
+        + dataType
+        + '\''
+        + ", helper='"
+        + helper
+        + '\''
+        + '}';
   }
 
   // TODO: change to UserDataMongo

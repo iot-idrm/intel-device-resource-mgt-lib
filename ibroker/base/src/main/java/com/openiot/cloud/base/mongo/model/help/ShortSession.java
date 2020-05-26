@@ -19,8 +19,8 @@ public class ShortSession {
   String s; // session id
 
   @JsonCreator
-  public ShortSession(@JsonProperty(ConstDef.Q_DEVID) String di,
-      @JsonProperty(ConstDef.Q_SESID) String s) {
+  public ShortSession(
+      @JsonProperty(ConstDef.Q_DEVID) String di, @JsonProperty(ConstDef.Q_SESID) String s) {
     super();
     this.di = di;
     this.s = s;

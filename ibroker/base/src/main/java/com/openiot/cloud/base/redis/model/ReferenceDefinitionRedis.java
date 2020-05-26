@@ -24,8 +24,14 @@ public class ReferenceDefinitionRedis implements ZSetOperations.TypedTuple<Objec
 
   public ReferenceDefinitionRedis() {}
 
-  public ReferenceDefinitionRedis(String groupName, String dataSourceName, String devId,
-      String resUrl, String propName, long from, long to) {
+  public ReferenceDefinitionRedis(
+      String groupName,
+      String dataSourceName,
+      String devId,
+      String resUrl,
+      String propName,
+      long from,
+      long to) {
     this.groupName = groupName;
     this.dataSourceName = dataSourceName;
     this.devId = devId;
@@ -110,9 +116,30 @@ public class ReferenceDefinitionRedis implements ZSetOperations.TypedTuple<Objec
 
   @Override
   public String toString() {
-    return "ReferenceDefinitionRedis{" + "groupName='" + groupName + '\'' + ", dataSourceName='"
-        + dataSourceName + '\'' + ", key='" + key + '\'' + ", devId='" + devId + '\'' + ", resUrl='"
-        + resUrl + '\'' + ", propName='" + propName + '\'' + ", from=" + from + ", to=" + to + '}';
+    return "ReferenceDefinitionRedis{"
+        + "groupName='"
+        + groupName
+        + '\''
+        + ", dataSourceName='"
+        + dataSourceName
+        + '\''
+        + ", key='"
+        + key
+        + '\''
+        + ", devId='"
+        + devId
+        + '\''
+        + ", resUrl='"
+        + resUrl
+        + '\''
+        + ", propName='"
+        + propName
+        + '\''
+        + ", from="
+        + from
+        + ", to="
+        + to
+        + '}';
   }
 
   @Override

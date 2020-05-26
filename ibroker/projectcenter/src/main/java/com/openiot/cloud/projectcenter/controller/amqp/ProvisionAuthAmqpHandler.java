@@ -15,6 +15,10 @@ import com.openiot.cloud.projectcenter.utils.RandomKeyGen;
 import com.openiot.cloud.sdk.service.IConnectRequest;
 import com.openiot.cloud.sdk.service.IConnectResponse;
 import com.openiot.cloud.sdk.service.IConnectServiceHandler;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONObject;
@@ -24,18 +28,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
 
 @Component
 @Slf4j
 public class ProvisionAuthAmqpHandler implements IConnectServiceHandler {
-  @Autowired
-  private ObjectMapper objectMapper;
-  @Autowired
-  private GatewayService gatewayService;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private GatewayService gatewayService;
 
   @Override
   public void onRequest(IConnectRequest request) {
@@ -46,77 +44,96 @@ public class ProvisionAuthAmqpHandler implements IConnectServiceHandler {
       if (Objects.equals(HttpMethod.POST, request.getAction())) {
         doAuth(request);
       } else {
-        IConnectResponse.createFromRequest(request,
-                                           HttpStatus.METHOD_NOT_ALLOWED,
-                                           MediaType.APPLICATION_JSON,
-                                           objectMapper.writeValueAsBytes(new ErrorMessage("only support POST")))
-                        .send();
+        IConnectResponse.createFromRequest(
+                request,
+                HttpStatus.METHOD_NOT_ALLOWED,
+                MediaType.APPLICATION_JSON,
+                objectMapper.writeValueAsBytes(new ErrorMessage("only support POST")))
+            .send();
       }
     } catch (IOException e) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.INTERNAL_SERVER_ERROR,
-                                         MediaType.APPLICATION_JSON,
-                                         new JSONObject().append("error",
-                                                                 "failed to serialize/deserialize with JSON")
-                                                         .toString()
-                                                         .getBytes())
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.INTERNAL_SERVER_ERROR,
+              MediaType.APPLICATION_JSON,
+              new JSONObject()
+                  .append("error", "failed to serialize/deserialize with JSON")
+                  .toString()
+                  .getBytes())
+          .send();
     }
   }
 
   void doAuth(IConnectRequest request) throws IOException {
-    Map<String, String> queryParams = UriComponentsBuilder.fromUriString(request.getUrl())
-                                                          .build()
-                                                          .getQueryParams()
-                                                          .toSingleValueMap();
-    if (queryParams.isEmpty() || !queryParams.containsKey(ConstDef.Q_IAGENTID)
+    Map<String, String> queryParams =
+        UriComponentsBuilder.fromUriString(request.getUrl())
+            .build()
+            .getQueryParams()
+            .toSingleValueMap();
+    if (queryParams.isEmpty()
+        || !queryParams.containsKey(ConstDef.Q_IAGENTID)
         || !queryParams.containsKey(ConstDef.Q_RANDOM)) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.BAD_REQUEST,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(new ErrorMessage("need the param \"aid\" and \"random\"")))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.BAD_REQUEST,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(
+                  new ErrorMessage("need the param \"aid\" and \"random\"")))
+          .send();
       return;
     }
 
     GatewayDTO gateway = gatewayService.findByIAgentId(queryParams.get(ConstDef.Q_IAGENTID));
     if (gateway == null) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.NOT_FOUND,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(new ErrorMessage(String.format("not found any one with iAgentId %s",
-                                                                                                       queryParams.get(ConstDef.Q_IAGENTID)))))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.NOT_FOUND,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(
+                  new ErrorMessage(
+                      String.format(
+                          "not found any one with iAgentId %s",
+                          queryParams.get(ConstDef.Q_IAGENTID)))))
+          .send();
       return;
     }
 
     // if the gateway is marked to reset, need to provision with 1804 again
     if (gateway.isReset()) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.FORBIDDEN,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(new ErrorMessage(String.format("%s is under reset, need provision again",
-                                                                                                       queryParams.get(ConstDef.Q_IAGENTID)))))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.FORBIDDEN,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(
+                  new ErrorMessage(
+                      String.format(
+                          "%s is under reset, need provision again",
+                          queryParams.get(ConstDef.Q_IAGENTID)))))
+          .send();
       return;
     }
 
     if (gateway.getNewHwSn() != null && !gateway.getNewHwSn().isEmpty()) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.FORBIDDEN,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(new ErrorMessage(String.format("%s is under replacement, need provision first",
-                                                                                                       queryParams.get(ConstDef.Q_IAGENTID)))))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.FORBIDDEN,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(
+                  new ErrorMessage(
+                      String.format(
+                          "%s is under replacement, need provision first",
+                          queryParams.get(ConstDef.Q_IAGENTID)))))
+          .send();
       return;
     }
 
     if (request.getPayload() == null || request.getPayload().length == 0) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.BAD_REQUEST,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(new ErrorMessage("need a not empty payload")))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.BAD_REQUEST,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(new ErrorMessage("need a not empty payload")))
+          .send();
       return;
     }
 
@@ -126,19 +143,20 @@ public class ProvisionAuthAmqpHandler implements IConnectServiceHandler {
     byte[] verifiedPayload = verifyAndCreateResp(request.getPayload(), key, iv, randomCode1Md5);
 
     if (verifiedPayload == null) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.BAD_REQUEST,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(new ErrorMessage(String.format("iAgent: %s authentication failed! Might because of the Base64 decoded key %s",
-                                                                                                       gateway.getIAgentId(),
-                                                                                                       Arrays.toString(key)))))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.BAD_REQUEST,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(
+                  new ErrorMessage(
+                      String.format(
+                          "iAgent: %s authentication failed! Might because of the Base64 decoded key %s",
+                          gateway.getIAgentId(), Arrays.toString(key)))))
+          .send();
     } else {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.OK,
-                                         MediaType.TEXT_PLAIN,
-                                         verifiedPayload)
-                      .send();
+      IConnectResponse.createFromRequest(
+              request, HttpStatus.OK, MediaType.TEXT_PLAIN, verifiedPayload)
+          .send();
     }
   }
 
@@ -161,8 +179,11 @@ public class ProvisionAuthAmqpHandler implements IConnectServiceHandler {
     // verify random code 1 MD5
     if (!Arrays.equals(random1, randomMd5)) {
       log.info(String.format("[Auth] randomMd5=%s", randomMd5));
-      log.warn("[Auth] Verify random code 1 Md5 Failed! " + Arrays.toString(random1) + " != "
-          + Arrays.toString(randomMd5));
+      log.warn(
+          "[Auth] Verify random code 1 Md5 Failed! "
+              + Arrays.toString(random1)
+              + " != "
+              + Arrays.toString(randomMd5));
       return null;
     }
 

@@ -4,5 +4,4 @@
 
 package com.openiot.cloud.base.mongo.dao.custom;
 
-public interface AlarmDefinitionRepositoryCustom {
-}
+public interface AlarmDefinitionRepositoryCustom {}

@@ -33,8 +33,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OptJmsReqHandler implements IConnectServiceHandler {
 
-  @Autowired
-  private IAgentCache dc;
+  @Autowired private IAgentCache dc;
 
   public static final Logger logger = LoggerFactory.getLogger(OptJmsReqHandler.class);
 
@@ -54,16 +53,17 @@ public class OptJmsReqHandler implements IConnectServiceHandler {
     // is it mine?
     IAgent ilinkDevice = dc.getAgent(targetEpId);
     if (ilinkDevice == null) {
-      logger.info(String.format("reject #%s request to /opt because of impossible agentId",
-                                messageId));
+      logger.info(
+          String.format("reject #%s request to /opt because of impossible agentId", messageId));
       IConnectResponse.createFromRequest(request, HttpStatus.NOT_FOUND, MediaType.TEXT_PLAIN, null)
-                      .send();
+          .send();
       return;
     } else if (ilinkDevice.getSessionFlag() != true) {
-      logger.warn(String.format("reject #%s request to /opt because of session not established",
-                                messageId));
+      logger.warn(
+          String.format(
+              "reject #%s request to /opt because of session not established", messageId));
       IConnectResponse.createFromRequest(request, HttpStatus.NOT_FOUND, MediaType.TEXT_PLAIN, null)
-                      .send();
+          .send();
       return;
     }
 
@@ -84,46 +84,49 @@ public class OptJmsReqHandler implements IConnectServiceHandler {
     ILinkCoapOverTcpMessageHandler.encodeCoapMessageAsPayload(cm, reqToDev);
     reqToDev.setIlinkMessageId(MessageIdMaker.IntegerToBytes(Integer.valueOf(messageId)));
     reqToDev.setAgentId(ilinkDevice.getAgentId());
-    ilinkDevice.sendMessage(reqToDev, (ILinkMessage respFromDev) -> {
-      try {
-        if (respFromDev.getResponseCode() == ConstDef.FH_V_FAIL) {
-          IConnectResponse.createFromRequest(request,
-                                             HttpStatus.SERVICE_UNAVAILABLE,
-                                             MediaType.APPLICATION_JSON,
-                                             "\"error\": \"the iAgent is not available\"".getBytes())
-                          .send();
-        } else {
-          // send response back to message queue
-          CoapResponse coapMessage =
-              (CoapResponse) ILinkCoapOverTcpMessageHandler.decodeAsCoapMessage(respFromDev.getPayload());
-          IConnectResponse.createFromRequest(request,
-                                             getHttpStatus(coapMessage.getStatus()),
-                                             getMediaType(coapMessage.getContentFormat()),
-                                             coapMessage.getPayload())
-                          .send();
-        }
-      } catch (Exception e) {
-        logger.error("meet an exception during /opt response handling");
-        logger.error(BaseUtil.getStackTrace(e));
-        IConnectResponse.createFromRequest(request,
-                                           HttpStatus.INTERNAL_SERVER_ERROR,
-                                           MediaType.APPLICATION_JSON,
-                                           "\"error\": \"meet an excepton \"".getBytes())
-                        .send();
-      }
-      return null;
-    });
+    ilinkDevice.sendMessage(
+        reqToDev,
+        (ILinkMessage respFromDev) -> {
+          try {
+            if (respFromDev.getResponseCode() == ConstDef.FH_V_FAIL) {
+              IConnectResponse.createFromRequest(
+                      request,
+                      HttpStatus.SERVICE_UNAVAILABLE,
+                      MediaType.APPLICATION_JSON,
+                      "\"error\": \"the iAgent is not available\"".getBytes())
+                  .send();
+            } else {
+              // send response back to message queue
+              CoapResponse coapMessage =
+                  (CoapResponse)
+                      ILinkCoapOverTcpMessageHandler.decodeAsCoapMessage(respFromDev.getPayload());
+              IConnectResponse.createFromRequest(
+                      request,
+                      getHttpStatus(coapMessage.getStatus()),
+                      getMediaType(coapMessage.getContentFormat()),
+                      coapMessage.getPayload())
+                  .send();
+            }
+          } catch (Exception e) {
+            logger.error("meet an exception during /opt response handling");
+            logger.error(BaseUtil.getStackTrace(e));
+            IConnectResponse.createFromRequest(
+                    request,
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    MediaType.APPLICATION_JSON,
+                    "\"error\": \"meet an excepton \"".getBytes())
+                .send();
+          }
+          return null;
+        });
   }
 
   private ContentFormat getContentFormat(String format) {
-    if (format == null)
-      return ContentFormat.APPLICATION_TEXTPLAIN;
-    if (format.equals(MediaType.APPLICATION_JSON.toString()))
-      return ContentFormat.APPLICATION_JSON;
+    if (format == null) return ContentFormat.APPLICATION_TEXTPLAIN;
+    if (format.equals(MediaType.APPLICATION_JSON.toString())) return ContentFormat.APPLICATION_JSON;
     if (format.equals(MediaType.APPLICATION_OCTET_STREAM.toString()))
       return ContentFormat.APPLICATION_OCTET_STREAM;
-    if (format.equals(MediaType.APPLICATION_XML.toString()))
-      return ContentFormat.APPLICATION_XML;
+    if (format.equals(MediaType.APPLICATION_XML.toString())) return ContentFormat.APPLICATION_XML;
     return ContentFormat.APPLICATION_TEXTPLAIN;
   }
 
@@ -165,8 +168,7 @@ public class OptJmsReqHandler implements IConnectServiceHandler {
   }
 
   private HttpStatus getHttpStatus(ResponseStatus status) {
-    if (status == null)
-      return HttpStatus.OK;
+    if (status == null) return HttpStatus.OK;
     switch (status) {
       case CREATED:
         return HttpStatus.CREATED;
@@ -217,14 +219,11 @@ public class OptJmsReqHandler implements IConnectServiceHandler {
   }
 
   private MediaType getMediaType(ContentFormat format) {
-    if (format == null)
-      return MediaType.TEXT_PLAIN;
-    if (format.equals(ContentFormat.APPLICATION_JSON))
-      return MediaType.APPLICATION_JSON;
+    if (format == null) return MediaType.TEXT_PLAIN;
+    if (format.equals(ContentFormat.APPLICATION_JSON)) return MediaType.APPLICATION_JSON;
     if (format.equals(ContentFormat.APPLICATION_OCTET_STREAM))
       return MediaType.APPLICATION_OCTET_STREAM;
-    if (format.equals(ContentFormat.APPLICATION_XML))
-      return MediaType.APPLICATION_XML;
+    if (format.equals(ContentFormat.APPLICATION_XML)) return MediaType.APPLICATION_XML;
     return MediaType.TEXT_PLAIN;
   }
 }

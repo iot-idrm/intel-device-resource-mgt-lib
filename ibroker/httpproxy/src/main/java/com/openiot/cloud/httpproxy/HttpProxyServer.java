@@ -4,9 +4,13 @@
 
 package com.openiot.cloud.httpproxy;
 
+import com.openiot.cloud.base.common.model.TokenContent;
 import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.help.ConstDef;
-import com.openiot.cloud.base.common.model.TokenContent;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.iotivity.cloud.base.connector.ConnectorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +20,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @RestController
 public class HttpProxyServer {
   private static final Logger logger = LoggerFactory.getLogger(HttpProxyServer.class);
-  @Autowired
-  private GenericCoapTcpServiceClient coapProxy;
-  @Autowired
-  private GenericMqClient jmsProxy;
+  @Autowired private GenericCoapTcpServiceClient coapProxy;
+  @Autowired private GenericMqClient jmsProxy;
   private static final String contextPath = "/fc";
 
   @GetMapping("/")
@@ -75,8 +73,8 @@ public class HttpProxyServer {
   }
 
   @RequestMapping(value = "/**", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-  public DeferredResult<ResponseEntity<?>>
-      defaultRequestHandle(RequestEntity<byte[]> request, @RequestHeader HttpHeaders headers) {
+  public DeferredResult<ResponseEntity<?>> defaultRequestHandle(
+      RequestEntity<byte[]> request, @RequestHeader HttpHeaders headers) {
     logger.info("an incoming request to {} ", request.getUrl());
 
     DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();

@@ -7,7 +7,6 @@ package com.openiot.cloud.base.mongo.dao;
 import com.openiot.cloud.base.mongo.dao.custom.EventMonitorRepositoryCustom;
 import com.openiot.cloud.base.mongo.model.EventMonitor;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
 
 public interface EventMonitorRepository
     extends MongoRepository<EventMonitor, String>, EventMonitorRepositoryCustom {

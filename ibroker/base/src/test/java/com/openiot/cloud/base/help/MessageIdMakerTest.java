@@ -4,15 +4,16 @@
 
 package com.openiot.cloud.base.help;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.openiot.cloud.base.ilink.ILinkMessage;
 import com.openiot.cloud.base.ilink.LeadingByte;
 import com.openiot.cloud.base.ilink.MessageType;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -45,6 +46,7 @@ public class MessageIdMakerTest {
     System.out.println(Arrays.toString(mid));
     System.out.println(Arrays.toString(msg.getIlinkMessageId()));
 
-    assertThat(MessageIdMaker.bytesToInteger(msg.getIlinkMessageId())).isEqualTo(MessageIdMaker.bytesToInteger(mid));
+    assertThat(MessageIdMaker.bytesToInteger(msg.getIlinkMessageId()))
+        .isEqualTo(MessageIdMaker.bytesToInteger(mid));
   }
 }

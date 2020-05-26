@@ -11,15 +11,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openiot.cloud.base.mongo.model.ResourceType.PropertyType;
 import com.openiot.cloud.base.mongo.model.validator.CheckName;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 // @formatter:off
 // [
@@ -128,7 +128,7 @@ public class OcfRTDefinition {
       Optional.ofNullable(propt.getDecription()).ifPresent(d -> pde.setDescription(d));
       Optional.ofNullable(propt.getType()).ifPresent(t -> pde.setType(t));
       Optional.ofNullable(propt.getAccess())
-              .ifPresent(acc -> pde.setReadOnly(acc.compareTo("r") == 0));
+          .ifPresent(acc -> pde.setReadOnly(acc.compareTo("r") == 0));
       return pde;
     }
   }
@@ -140,7 +140,9 @@ public class OcfRTDefinition {
   public static class ResDefEntry {
     @JsonProperty("rt")
     @NotNull(groups = {CreateValidator.class})
-    @CheckName(value = ResDefEntry.class, message = "need an unique name",
+    @CheckName(
+        value = ResDefEntry.class,
+        message = "need an unique name",
         groups = {CreateValidator.class})
     String rt;
 
@@ -157,34 +159,40 @@ public class OcfRTDefinition {
     String type;
 
     static ResDefEntry from(ResourceType rt) {
-      return Optional.ofNullable(rt.getName()).map(rtn -> {
-        ResDefEntry rde = new ResDefEntry();
-        // resource type name is necessary
-        rde.setRt(rtn);
+      return Optional.ofNullable(rt.getName())
+          .map(
+              rtn -> {
+                ResDefEntry rde = new ResDefEntry();
+                // resource type name is necessary
+                rde.setRt(rtn);
 
-        // others are optional
-        Optional.ofNullable(rt.getDescription()).ifPresent(d -> rde.setDescription(d));
+                // others are optional
+                Optional.ofNullable(rt.getDescription()).ifPresent(d -> rde.setDescription(d));
 
-        Optional.ofNullable(rt.getPropTypes())
-                .filter(propts -> !propts.isEmpty())
-                .map(propts -> propts.stream()
-                                     .map(propt -> PropDefEntry.from(propt))
-                                     .collect(Collectors.toList()))
-                .ifPresent(pdes -> rde.setProperties(pdes));
+                Optional.ofNullable(rt.getPropTypes())
+                    .filter(propts -> !propts.isEmpty())
+                    .map(
+                        propts ->
+                            propts.stream()
+                                .map(propt -> PropDefEntry.from(propt))
+                                .collect(Collectors.toList()))
+                    .ifPresent(pdes -> rde.setProperties(pdes));
 
-        Optional.ofNullable(rt.getPropTypes())
-                .filter(propts -> !propts.isEmpty())
-                .map(propts -> propts.stream()
-                                     .filter(propt -> !propt.getMandatory())
-                                     .map(propt -> propt.getName())
-                                     .collect(Collectors.toList()));
-        return rde;
-      }).orElse(null);
+                Optional.ofNullable(rt.getPropTypes())
+                    .filter(propts -> !propts.isEmpty())
+                    .map(
+                        propts ->
+                            propts.stream()
+                                .filter(propt -> !propt.getMandatory())
+                                .map(propt -> propt.getName())
+                                .collect(Collectors.toList()));
+                return rde;
+              })
+          .orElse(null);
     }
   }
 
-  @JsonIgnore
-  String id;
+  @JsonIgnore String id;
 
   @JsonProperty("definitions")
   @NotNull(groups = {CreateValidator.class})
@@ -201,26 +209,33 @@ public class OcfRTDefinition {
   String type;
 
   public static OcfRTDefinition from(ResourceType rt) {
-    return Optional.ofNullable(rt.getId()).map(id -> {
-      OcfRTDefinition rtDef = new OcfRTDefinition();
-      rtDef.setId(id);
+    return Optional.ofNullable(rt.getId())
+        .map(
+            id -> {
+              OcfRTDefinition rtDef = new OcfRTDefinition();
+              rtDef.setId(id);
 
-      Optional.ofNullable(rt.getTitle()).ifPresent(title -> rtDef.setTitle(title));
-      rtDef.setType("object");
+              Optional.ofNullable(rt.getTitle()).ifPresent(title -> rtDef.setTitle(title));
+              rtDef.setType("object");
 
-      Optional<ResDefEntry> resDef = Optional.ofNullable(ResDefEntry.from(rt));
-      resDef.ifPresent(rdef -> {
-        rtDef.setDefinitions(rdef);
-      });
+              Optional<ResDefEntry> resDef = Optional.ofNullable(ResDefEntry.from(rt));
+              resDef.ifPresent(
+                  rdef -> {
+                    rtDef.setDefinitions(rdef);
+                  });
 
-      rtDef.setRequired(Optional.ofNullable(rt.getPropTypes())
-                                .map(propertyTypes -> propertyTypes.stream()
-                                                                   .filter(propertyType -> propertyType.getMandatory())
-                                                                   .map(propertyType -> propertyType.getName())
-                                                                   .collect(Collectors.toList()))
-                                .orElse(null));
+              rtDef.setRequired(
+                  Optional.ofNullable(rt.getPropTypes())
+                      .map(
+                          propertyTypes ->
+                              propertyTypes.stream()
+                                  .filter(propertyType -> propertyType.getMandatory())
+                                  .map(propertyType -> propertyType.getName())
+                                  .collect(Collectors.toList()))
+                      .orElse(null));
 
-      return rtDef;
-    }).orElse(null);
+              return rtDef;
+            })
+        .orElse(null);
   }
 }

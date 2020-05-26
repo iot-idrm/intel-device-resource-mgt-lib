@@ -17,8 +17,7 @@ import org.springframework.stereotype.Component;
 public class SecureSocketServer {
   private static final Logger logger = LoggerFactory.getLogger(SecureSocketServer.class.getName());
 
-  @Autowired
-  private SecureSocketServerILinkMessageInitializer initializer;
+  @Autowired private SecureSocketServerILinkMessageInitializer initializer;
 
   private final int port = 1804;
 
@@ -28,8 +27,8 @@ public class SecureSocketServer {
     try {
       ServerBootstrap b = new ServerBootstrap();
       b.group(bossGroup, workerGroup)
-       .channel(NioServerSocketChannel.class)
-       .childHandler(initializer);
+          .channel(NioServerSocketChannel.class)
+          .childHandler(initializer);
       logger.info("listening on port " + port);
       b.bind(port).sync().channel().closeFuture().sync();
     } catch (Exception e) {

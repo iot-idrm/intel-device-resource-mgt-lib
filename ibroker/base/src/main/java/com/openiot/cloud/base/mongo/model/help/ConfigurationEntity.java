@@ -27,7 +27,8 @@ public class ConfigurationEntity {
   long cts;
 
   @JsonCreator
-  public ConfigurationEntity(@JsonProperty(ConstDef.F_CONFIGNAME) String cn,
+  public ConfigurationEntity(
+      @JsonProperty(ConstDef.F_CONFIGNAME) String cn,
       @JsonProperty(ConstDef.F_CONFIGVALUE) String cv) {
     this.cn = cn;
     this.cv = cv;
@@ -73,18 +74,13 @@ public class ConfigurationEntity {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     ConfigurationEntity other = (ConfigurationEntity) obj;
     if (cn == null) {
-      if (other.cn != null)
-        return false;
-    } else if (!cn.equals(other.cn))
-      return false;
+      if (other.cn != null) return false;
+    } else if (!cn.equals(other.cn)) return false;
     return true;
   }
 

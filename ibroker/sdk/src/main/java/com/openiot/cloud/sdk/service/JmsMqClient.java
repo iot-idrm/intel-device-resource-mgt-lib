@@ -7,6 +7,9 @@ package com.openiot.cloud.sdk.service;
 import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.sdk.utilities.UrlUtil;
+import java.util.Map;
+import java.util.Set;
+import javax.jms.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQMapMessage;
 import org.apache.activemq.command.ActiveMQQueue;
@@ -32,9 +35,6 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import javax.jms.*;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 @EnableScheduling
@@ -46,15 +46,13 @@ public class JmsMqClient extends MqClient {
   // @Autowired
   private JmsListenerEndpointRegistrar registar;
 
-  @Autowired
-  private JmsListenerEndpointRegistry registry;
+  @Autowired private JmsListenerEndpointRegistry registry;
 
   @Autowired
   @Qualifier(value = "sdkJmsListenerContainerFactory")
   private DefaultJmsListenerContainerFactory sdkJmsListenerContainerFactory;
 
-  @Autowired
-  private JmsListenerConfigurer jmsListenerConfigurer;
+  @Autowired private JmsListenerConfigurer jmsListenerConfigurer;
 
   @Autowired
   @Qualifier(value = "sdkJmsTemplate")
@@ -82,8 +80,9 @@ public class JmsMqClient extends MqClient {
   }
 
   @Bean
-  JmsListenerConfigurer jmsListenerConfigurer(@Qualifier(
-      value = "sdkJmsListenerContainerFactory") DefaultJmsListenerContainerFactory sdkJmsListenerContainerFactory) {
+  JmsListenerConfigurer jmsListenerConfigurer(
+      @Qualifier(value = "sdkJmsListenerContainerFactory")
+          DefaultJmsListenerContainerFactory sdkJmsListenerContainerFactory) {
     logger.debug("create jmsListenerConfigurer");
     return new JmsListenerConfigurer() {
       @Override
@@ -119,10 +118,11 @@ public class JmsMqClient extends MqClient {
     String url = "tcp://" + mqHost + ":61616";
     logger.info("trying to connect: " + url);
     ActiveMQConnectionFactory activeMQConnection = new ActiveMQConnectionFactory(url);
-    activeMQConnection.setExceptionListener(exception -> {
-      logger.error("current activemq connection meets an exception " + exception);
-      logger.error(BaseUtil.getStackTrace(exception));
-    });
+    activeMQConnection.setExceptionListener(
+        exception -> {
+          logger.error("current activemq connection meets an exception " + exception);
+          logger.error(BaseUtil.getStackTrace(exception));
+        });
 
     PooledConnectionFactory connFactory = new PooledConnectionFactory();
     connFactory.setConnectionFactory(activeMQConnection);
@@ -131,18 +131,19 @@ public class JmsMqClient extends MqClient {
   }
 
   @Bean(name = "sdkJmsListenerContainerFactory")
-  public DefaultJmsListenerContainerFactory
-      sdkJmsListenerContainerFactory(ConnectionFactory connectionFactory) {
+  public DefaultJmsListenerContainerFactory sdkJmsListenerContainerFactory(
+      ConnectionFactory connectionFactory) {
 
     DefaultJmsListenerContainerFactory listenerContainerFactory =
         new DefaultJmsListenerContainerFactory();
     listenerContainerFactory.setConnectionFactory(connectionFactory);
     listenerContainerFactory.setSessionTransacted(true);
     listenerContainerFactory.setMessageConverter(new SimpleMessageConverter());
-    listenerContainerFactory.setErrorHandler(exception -> {
-      logger.error("there is an exception during jms listener processing incoming messages");
-      logger.error(BaseUtil.getStackTrace(exception));
-    });
+    listenerContainerFactory.setErrorHandler(
+        exception -> {
+          logger.error("there is an exception during jms listener processing incoming messages");
+          logger.error(BaseUtil.getStackTrace(exception));
+        });
     // listenerContainerFactory.setPubSubDomain(true);
 
     logger.debug("create DefaultJmsListenerContainerFactory " + listenerContainerFactory);
@@ -185,15 +186,17 @@ public class JmsMqClient extends MqClient {
         HttpStatus status =
             HttpStatus.valueOf(responseMessage.getString(ConstDef.JMS_MSG_KEY_STATUS));
         IConnectResponse response =
-            IConnectResponse.createFromRequest(handler.getiConnectRequest(),
-                                               status,
-                                               fmt,
-                                               responseMessage.getBytes(ConstDef.JMS_MSG_KEY_PAYLOAD));
+            IConnectResponse.createFromRequest(
+                handler.getiConnectRequest(),
+                status,
+                fmt,
+                responseMessage.getBytes(ConstDef.JMS_MSG_KEY_PAYLOAD));
         logger.info("receive: " + response);
         handler.getHandler().onResponse(response);
         responseHandlers.remove(messageID);
       } catch (JMSException e) {
-        logger.error("Exception: " + BaseUtil.getStackTrace(e));;
+        logger.error("Exception: " + BaseUtil.getStackTrace(e));
+        ;
       }
     } else {
       logger.error("No response handler for mesasage id: " + messageID);
@@ -216,24 +219,27 @@ public class JmsMqClient extends MqClient {
       return;
     }
 
-    jmsTemplateSimpleConvert.send(dst, session -> {
-      ActiveMQMapMessage message = (ActiveMQMapMessage) session.createMapMessage();
-      message.setJMSCorrelationID(response.getMessageID());
-      message.setString(ConstDef.JMS_MSG_KEY_STATUS, response.getStatus().name());
-      message.setString(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT, response.getFormat().toString());
-      message.setBytes(ConstDef.JMS_MSG_KEY_PAYLOAD, response.getPayload());
-      logger.info("send response 1:  " + response.toString() + "   to " + dst);
-      return message;
-    });
+    jmsTemplateSimpleConvert.send(
+        dst,
+        session -> {
+          ActiveMQMapMessage message = (ActiveMQMapMessage) session.createMapMessage();
+          message.setJMSCorrelationID(response.getMessageID());
+          message.setString(ConstDef.JMS_MSG_KEY_STATUS, response.getStatus().name());
+          message.setString(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT, response.getFormat().toString());
+          message.setBytes(ConstDef.JMS_MSG_KEY_PAYLOAD, response.getPayload());
+          logger.info("send response 1:  " + response.toString() + "   to " + dst);
+          return message;
+        });
   }
 
   public IConnectResponse send(IConnectRequest iConnectRequest) {
     if (iConnectRequest == null) {
       logger.warn("Null iConnectRequest instance to send");
-      return IConnectResponse.createFromRequest(iConnectRequest,
-                                                HttpStatus.BAD_REQUEST,
-                                                MediaType.TEXT_PLAIN,
-                                                "an empty request".getBytes());
+      return IConnectResponse.createFromRequest(
+          iConnectRequest,
+          HttpStatus.BAD_REQUEST,
+          MediaType.TEXT_PLAIN,
+          "an empty request".getBytes());
     }
 
     // since we are not sure users' attempts, we are going to always remove tailing slashes
@@ -247,45 +253,54 @@ public class JmsMqClient extends MqClient {
 
     if (dst != null && !dst.isEmpty() && !url.startsWith(dst)) {
       logger.warn("the destination " + dst + " has to be the prefix of the url " + url);
-      return IConnectResponse.createFromRequest(iConnectRequest,
-                                                HttpStatus.BAD_REQUEST,
-                                                MediaType.TEXT_PLAIN,
-                                                "the destination has to be the prefix of the url".getBytes());
+      return IConnectResponse.createFromRequest(
+          iConnectRequest,
+          HttpStatus.BAD_REQUEST,
+          MediaType.TEXT_PLAIN,
+          "the destination has to be the prefix of the url".getBytes());
     }
 
     dst = dst == null || dst.isEmpty() ? url : dst;
     try {
       String finalDst = dst;
-      jmsTemplateSimpleConvert.send(finalDst, session -> {
-        ActiveMQMapMessage message = (ActiveMQMapMessage) session.createMapMessage();
-        message.setJMSReplyTo(new ActiveMQQueue(responseDst));
-        message.setJMSCorrelationID(iConnectRequest.getMessageID());
-        message.setString(ConstDef.JMS_MSG_KEY_ACTION, iConnectRequest.getAction().name());
-        message.setString(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT, iConnectRequest.getFormat().toString());
-        message.setString(ConstDef.JMS_MSG_KEY_URI, iConnectRequest.getUrl());
-        message.setBytes(ConstDef.JMS_MSG_KEY_PAYLOAD, iConnectRequest.getPayload());
+      jmsTemplateSimpleConvert.send(
+          finalDst,
+          session -> {
+            ActiveMQMapMessage message = (ActiveMQMapMessage) session.createMapMessage();
+            message.setJMSReplyTo(new ActiveMQQueue(responseDst));
+            message.setJMSCorrelationID(iConnectRequest.getMessageID());
+            message.setString(ConstDef.JMS_MSG_KEY_ACTION, iConnectRequest.getAction().name());
+            message.setString(
+                ConstDef.JMS_MSG_KEY_PAYLOAD_FMT, iConnectRequest.getFormat().toString());
+            message.setString(ConstDef.JMS_MSG_KEY_URI, iConnectRequest.getUrl());
+            message.setBytes(ConstDef.JMS_MSG_KEY_PAYLOAD, iConnectRequest.getPayload());
 
-        Map<String, String> params = iConnectRequest.getTokenInfo();
-        if (params != null && !params.isEmpty()) {
-          message.setObjectProperty(ConstDef.JMS_MSG_KEY_EXTRA, params);
-        }
+            Map<String, String> params = iConnectRequest.getTokenInfo();
+            if (params != null && !params.isEmpty()) {
+              message.setObjectProperty(ConstDef.JMS_MSG_KEY_EXTRA, params);
+            }
 
-        logger.info("send request:  " + iConnectRequest + "   to " + finalDst + " with JMS "
-            + getJmsHeadInfo(message));
-        return message;
-      });
+            logger.info(
+                "send request:  "
+                    + iConnectRequest
+                    + "   to "
+                    + finalDst
+                    + " with JMS "
+                    + getJmsHeadInfo(message));
+            return message;
+          });
     } catch (JmsException e) {
-      logger.error(BaseUtil.getStackTrace(e));;
-      return IConnectResponse.createFromRequest(iConnectRequest,
-                                                HttpStatus.EXPECTATION_FAILED,
-                                                MediaType.TEXT_PLAIN,
-                                                "an empty request".getBytes());
+      logger.error(BaseUtil.getStackTrace(e));
+      ;
+      return IConnectResponse.createFromRequest(
+          iConnectRequest,
+          HttpStatus.EXPECTATION_FAILED,
+          MediaType.TEXT_PLAIN,
+          "an empty request".getBytes());
     }
 
-    return IConnectResponse.createFromRequest(iConnectRequest,
-                                              HttpStatus.PROCESSING,
-                                              MediaType.TEXT_PLAIN,
-                                              "send successful".getBytes());
+    return IConnectResponse.createFromRequest(
+        iConnectRequest, HttpStatus.PROCESSING, MediaType.TEXT_PLAIN, "send successful".getBytes());
   }
 
   public void send(Destination dst, IConnectResponse response) {
@@ -294,15 +309,22 @@ public class JmsMqClient extends MqClient {
       return;
     }
 
-    jmsTemplateSimpleConvert.send(dst, session -> {
-      ActiveMQMapMessage message = (ActiveMQMapMessage) session.createMapMessage();
-      message.setJMSCorrelationID(response.getMessageID());
-      message.setString(ConstDef.JMS_MSG_KEY_STATUS, response.getStatus().name());
-      message.setString(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT, response.getFormat().toString());
-      message.setBytes(ConstDef.JMS_MSG_KEY_PAYLOAD, response.getPayload());
-      logger.info("send response 2:  " + response.toString() + "   to " + dst + " with JMS "
-          + getJmsHeadInfo(message));
-      return message;
-    });
+    jmsTemplateSimpleConvert.send(
+        dst,
+        session -> {
+          ActiveMQMapMessage message = (ActiveMQMapMessage) session.createMapMessage();
+          message.setJMSCorrelationID(response.getMessageID());
+          message.setString(ConstDef.JMS_MSG_KEY_STATUS, response.getStatus().name());
+          message.setString(ConstDef.JMS_MSG_KEY_PAYLOAD_FMT, response.getFormat().toString());
+          message.setBytes(ConstDef.JMS_MSG_KEY_PAYLOAD, response.getPayload());
+          logger.info(
+              "send response 2:  "
+                  + response.toString()
+                  + "   to "
+                  + dst
+                  + " with JMS "
+                  + getJmsHeadInfo(message));
+          return message;
+        });
   }
 }

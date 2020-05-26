@@ -4,16 +4,22 @@
 
 package com.openiot.cloud.base.profiling;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+
 import com.openiot.cloud.base.Application;
 import com.openiot.cloud.base.profiling.DurationCounterManageTest.DurationCounterManageConfiguration;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,11 +28,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {Application.class})
@@ -68,29 +69,25 @@ public class DurationCounterManageTest {
     }
 
     @Bean
-    public DurationCounter getRdDeviceCounter(DurationCounterConfiguration longPeriodConfiguration,
-                                              AlarmHandler simpleAlarmHandler) {
+    public DurationCounter getRdDeviceCounter(
+        DurationCounterConfiguration longPeriodConfiguration, AlarmHandler simpleAlarmHandler) {
       return new DurationCounter("get /rd/device", longPeriodConfiguration, simpleAlarmHandler);
     }
 
     @Bean
-    public DurationCounter postRdCounter(DurationCounterConfiguration shortPeriodConfiguration,
-                                         AlarmHandler simpleAlarmHandler) {
+    public DurationCounter postRdCounter(
+        DurationCounterConfiguration shortPeriodConfiguration, AlarmHandler simpleAlarmHandler) {
       return new DurationCounter("post /rd", shortPeriodConfiguration, simpleAlarmHandler);
     }
   }
 
-  @Autowired
-  private DurationCounterManage counterManage;
+  @Autowired private DurationCounterManage counterManage;
 
-  @Autowired
-  private DurationCounter getRdDeviceCounter;
+  @Autowired private DurationCounter getRdDeviceCounter;
 
-  @Autowired
-  private DurationCounter postRdCounter;
+  @Autowired private DurationCounter postRdCounter;
 
-  @Mock
-  private DurationCounter fakeCounter;
+  @Mock private DurationCounter fakeCounter;
 
   @Before
   public void setUp() {
@@ -101,8 +98,8 @@ public class DurationCounterManageTest {
 
   @After
   public void tearDown() {
-    ((Map<String, DurationCounter>) ReflectionTestUtils.getField(counterManage,
-                                                                 "counters")).clear();
+    ((Map<String, DurationCounter>) ReflectionTestUtils.getField(counterManage, "counters"))
+        .clear();
   }
 
   @Test
@@ -122,14 +119,20 @@ public class DurationCounterManageTest {
     // tell manage after 10ms, the fakeCounter statistic period will end
     doAnswer(invocation -> 10l).when(fakeCounter).periodRemainingMillis();
 
-    doAnswer(invocation -> {
-      assertThat(true).isTrue();
-      return null;
-    }).when(fakeCounter).checkAndDump();
+    doAnswer(
+            invocation -> {
+              assertThat(true).isTrue();
+              return null;
+            })
+        .when(fakeCounter)
+        .checkAndDump();
 
-    doAnswer(invocation -> {
-      return 10l;
-    }).when(fakeCounter).getStatisticPeriodMillis();
+    doAnswer(
+            invocation -> {
+              return 10l;
+            })
+        .when(fakeCounter)
+        .getStatisticPeriodMillis();
 
     counterManage.initialize();
     TimeUnit.MILLISECONDS.sleep(300);
@@ -140,12 +143,11 @@ public class DurationCounterManageTest {
 
   @Test
   public void testDurationCounterofUrlBuilder() throws Exception {
-    assertThat(DurationCounterOfUrlBuilder.readCounterOfUrl("counter_of_urls.json")).asList()
-                                                                                    .hasSize(3)
-                                                                                    .extracting("url")
-                                                                                    .containsOnly("/rd/device",
-                                                                                                  "/rd/resource",
-                                                                                                  "/rd/group");
+    assertThat(DurationCounterOfUrlBuilder.readCounterOfUrl("counter_of_urls.json"))
+        .asList()
+        .hasSize(3)
+        .extracting("url")
+        .containsOnly("/rd/device", "/rd/resource", "/rd/group");
   }
 
   @Test
@@ -171,8 +173,11 @@ public class DurationCounterManageTest {
     counters.put(counter2.getName(), counter2);
     counters.put(counter3.getName(), counter3);
 
-    assertThat(counterManage.findAProperStartUpTime().until(LocalDateTime.now(ZoneOffset.UTC),
-                                                            ChronoUnit.SECONDS)).isLessThan(1);
+    assertThat(
+            counterManage
+                .findAProperStartUpTime()
+                .until(LocalDateTime.now(ZoneOffset.UTC), ChronoUnit.SECONDS))
+        .isLessThan(1);
 
     counters.clear();
     config1.setStatisticPeriodMillis(TimeUnit.MINUTES.toMillis(4));

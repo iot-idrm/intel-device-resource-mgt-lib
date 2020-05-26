@@ -4,7 +4,6 @@
 
 package com.openiot.cloud.ibroker.proxy.dp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.ilink.ILinkMessage;
 import com.openiot.cloud.base.ilink.LeadingByte;
@@ -12,6 +11,9 @@ import com.openiot.cloud.base.ilink.MessageType;
 import com.openiot.cloud.base.mq.MessageQueue;
 import com.openiot.cloud.ibroker.base.device.IAgent;
 import com.openiot.cloud.ibroker.base.protocols.ilink.ILinkCoapOverTcpMessageHandler;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.iotivity.cloud.base.connector.ConnectorPool;
 import org.iotivity.cloud.base.device.Device;
 import org.iotivity.cloud.base.protocols.IRequest;
@@ -24,9 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Component
 @Scope("prototype")
@@ -41,8 +40,7 @@ public class GenericCoapTCPServiceClient extends Resource {
   @Value("${openiot.performance.blackHole:false}")
   private boolean blackHole;
 
-  @Autowired
-  MessageQueue<IRequest> messageQueue;
+  @Autowired MessageQueue<IRequest> messageQueue;
 
   public GenericCoapTCPServiceClient(List<String> uriSegment, String connectionKey) {
     super(uriSegment);
@@ -55,19 +53,25 @@ public class GenericCoapTCPServiceClient extends Resource {
   }
 
   private void defaultRequestHandler(Device srcDevice, IRequest request) {
-    ConnectorPool.getConnectionWithMinMatch(connectionKey).sendRequest(request, (response -> {
-      CoapResponse coapResponse = (CoapResponse) response;
-      logger.debug("onResponseReceived " + coapResponse);
+    ConnectorPool.getConnectionWithMinMatch(connectionKey)
+        .sendRequest(
+            request,
+            (response -> {
+              CoapResponse coapResponse = (CoapResponse) response;
+              logger.debug("onResponseReceived " + coapResponse);
 
-      byte[] token = coapResponse.getToken();
-      ILinkMessage iLinkResponse = new ILinkMessage(LeadingByte.RESPONSE.valueOf(),
-                                                    (byte) MessageType.COAP_OVER_TCP.valueOf());
-      ILinkCoapOverTcpMessageHandler.restoreMessageIDAndToken(token, coapResponse, iLinkResponse);
-      ILinkCoapOverTcpMessageHandler.encodeCoapMessageAsPayload(coapResponse, iLinkResponse);
-      iLinkResponse.setAgentId(srcDevice.getDeviceId());
-      ((IAgent) srcDevice).sendMessage(iLinkResponse);
-      return;
-    }));
+              byte[] token = coapResponse.getToken();
+              ILinkMessage iLinkResponse =
+                  new ILinkMessage(
+                      LeadingByte.RESPONSE.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf());
+              ILinkCoapOverTcpMessageHandler.restoreMessageIDAndToken(
+                  token, coapResponse, iLinkResponse);
+              ILinkCoapOverTcpMessageHandler.encodeCoapMessageAsPayload(
+                  coapResponse, iLinkResponse);
+              iLinkResponse.setAgentId(srcDevice.getDeviceId());
+              ((IAgent) srcDevice).sendMessage(iLinkResponse);
+              return;
+            }));
   }
 
   @Override
@@ -79,18 +83,22 @@ public class GenericCoapTCPServiceClient extends Resource {
     // or it is not marked with a COAP_MESSAGE_ETAG
     // we thought it is not going to need any response handler
     if (!request.getUriPath().startsWith(ConstDef.DATA_URI)
-        && !((CoapMessage) request).getOption(4)
-                                   .contains(ILinkCoapOverTcpMessageHandler.COAP_MESSAGE_ETAG)) {
+        && !((CoapMessage) request)
+            .getOption(4)
+            .contains(ILinkCoapOverTcpMessageHandler.COAP_MESSAGE_ETAG)) {
       logger.info("send it via a request-response way");
       defaultRequestHandler(srcDevice, request);
     } else {
       logger.info("send it via a message only way");
       // // only requests to /dp will be queued and send without any expected response handler
-      messageQueue.add(request, r -> {
-        logger.debug("[MessageQueue] defaultRequestHandler from MessageQueue @ "
-            + Thread.currentThread().getName());
-        ConnectorPool.getConnectionWithMinMatch(connectionKey).sendRequest(request, null);
-      });
+      messageQueue.add(
+          request,
+          r -> {
+            logger.debug(
+                "[MessageQueue] defaultRequestHandler from MessageQueue @ "
+                    + Thread.currentThread().getName());
+            ConnectorPool.getConnectionWithMinMatch(connectionKey).sendRequest(request, null);
+          });
     }
   }
 

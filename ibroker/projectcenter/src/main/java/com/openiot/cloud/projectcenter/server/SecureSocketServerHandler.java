@@ -22,8 +22,7 @@ public class SecureSocketServerHandler extends SimpleChannelInboundHandler<ILink
 
   static final Logger LOG = LoggerFactory.getLogger(SecureSocketServerHandler.class);
 
-  @Autowired
-  private ProvisionSslHandler provisionSslHandler;
+  @Autowired private ProvisionSslHandler provisionSslHandler;
 
   @Override
   public boolean acceptInboundMessage(Object msg) throws Exception {

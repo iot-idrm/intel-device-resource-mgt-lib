@@ -2,7 +2,6 @@
  * Copyright (C) 2020 Intel Corporation. All rights reserved. SPDX-License-Identifier: Apache-2.0
  */
 
-
 package com.openiot.cloud.event;
 
 import com.openiot.cloud.sdk.service.IConnect;
@@ -19,17 +18,13 @@ public class TaskEngine {
 
   public static final Logger logger = LoggerFactory.getLogger(TaskEngine.class);
 
-  @Autowired
-  private IConnect iConnect;
+  @Autowired private IConnect iConnect;
 
-  @Autowired
-  private IConnectService iConnectService;
+  @Autowired private IConnectService iConnectService;
 
-  @Autowired
-  private EventMonitorRequestHandler eventMonitorRequestHandler;
+  @Autowired private EventMonitorRequestHandler eventMonitorRequestHandler;
 
-  @Autowired
-  private TaskRequestHandler taskRequestHandler;
+  @Autowired private TaskRequestHandler taskRequestHandler;
 
   @EventListener
   public void onApplicationReady(final ApplicationReadyEvent event) {

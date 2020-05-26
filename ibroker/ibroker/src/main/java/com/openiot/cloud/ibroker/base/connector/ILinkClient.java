@@ -11,10 +11,10 @@ import com.openiot.cloud.base.ilink.ILinkMessage;
 import com.openiot.cloud.base.ilink.LeadingByte;
 import com.openiot.cloud.ibroker.utils.ILinkMessageBuilder;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.Random;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * We create a {@code ILinkDevice} for each {@code Channel} when {@Code channelActive()}. Each
@@ -66,14 +66,18 @@ public class ILinkClient {
       return;
     }
 
-    if (!channel.isOpen() || !channel.isActive() || !channel.isRegistered()
+    if (!channel.isOpen()
+        || !channel.isActive()
+        || !channel.isRegistered()
         || !channel.isWritable()) {
-      logger.warn(String.format("channel %s is not in a normal state open(%s),active(%s),writable(%s),registered(%s)",
-                                channel.id().asShortText(),
-                                channel.isOpen(),
-                                channel.isActive(),
-                                channel.isWritable(),
-                                channel.isRegistered()));
+      logger.warn(
+          String.format(
+              "channel %s is not in a normal state open(%s),active(%s),writable(%s),registered(%s)",
+              channel.id().asShortText(),
+              channel.isOpen(),
+              channel.isActive(),
+              channel.isWritable(),
+              channel.isRegistered()));
       responseHandle.apply(ILinkMessageBuilder.createResponse(message, ConstDef.FH_V_FAIL));
       return;
     }
@@ -90,20 +94,26 @@ public class ILinkClient {
       requestMap.put(key, rc);
     }
 
-    channel.writeAndFlush(message).addListener(future -> {
-      if (!future.isSuccess()) {
-        // requestMap might be too huge to looking for even it is O(logn) for search.
-        if (responseHandle != null && message.getLeadingByte() == LeadingByte.REQUEST.valueOf()) {
-          int key = MessageIdMaker.bytesToInteger(message.getIlinkMessageId());
-          requestMap.remove(key);
-          responseHandle.apply(ILinkMessageBuilder.createResponse(message, ConstDef.FH_V_FAIL));
-        }
-      }
-    });
+    channel
+        .writeAndFlush(message)
+        .addListener(
+            future -> {
+              if (!future.isSuccess()) {
+                // requestMap might be too huge to looking for even it is O(logn) for search.
+                if (responseHandle != null
+                    && message.getLeadingByte() == LeadingByte.REQUEST.valueOf()) {
+                  int key = MessageIdMaker.bytesToInteger(message.getIlinkMessageId());
+                  requestMap.remove(key);
+                  responseHandle.apply(
+                      ILinkMessageBuilder.createResponse(message, ConstDef.FH_V_FAIL));
+                }
+              }
+            });
   }
 
   public void disconnect() {
-    channel.disconnect().awaitUninterruptibly();;
+    channel.disconnect().awaitUninterruptibly();
+    ;
   }
 
   @Override

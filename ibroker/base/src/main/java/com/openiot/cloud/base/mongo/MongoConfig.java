@@ -5,6 +5,9 @@
 package com.openiot.cloud.base.mongo;
 
 import com.mongodb.*;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,9 +21,6 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import javax.validation.Validator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Configuration
 @EnableMongoRepositories(basePackages = "com.openiot.cloud.base.mongo.dao")
@@ -42,10 +42,11 @@ public class MongoConfig {
     MongoClient mongo;
 
     // remove empty members
-    mongoAddr = mongoAddr.stream()
-                         .map(item -> item.replace(" ", ""))
-                         .filter(addr -> !addr.isEmpty())
-                         .collect(Collectors.toList());
+    mongoAddr =
+        mongoAddr.stream()
+            .map(item -> item.replace(" ", ""))
+            .filter(addr -> !addr.isEmpty())
+            .collect(Collectors.toList());
 
     MongoClientOptions options =
         MongoClientOptions.builder().readConcern(ReadConcern.LOCAL).connectionsPerHost(64).build();
@@ -69,8 +70,8 @@ public class MongoConfig {
   public MongoTemplate mongoTemplate() {
     // remove "_class" field
     MappingMongoConverter converter =
-        new MappingMongoConverter(new DefaultDbRefResolver(mongoDbFactory()),
-                                  new MongoMappingContext());
+        new MappingMongoConverter(
+            new DefaultDbRefResolver(mongoDbFactory()), new MongoMappingContext());
     converter.setTypeMapper(new DefaultMongoTypeMapper(null));
 
     return new MongoTemplate(mongoDbFactory(), converter);

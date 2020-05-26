@@ -10,11 +10,11 @@ import com.openiot.cloud.base.help.BaseUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // @formatter:off
 /**
@@ -36,7 +36,13 @@ public class ILinkDecoder extends ByteToMessageDecoder {
   private final ObjectMapper mapper = new ObjectMapper(factory);
 
   private enum AssPhase {
-    FINISH, IN_BODY_LEN, IN_FLEXHEADER, IN_LB, IN_MID, IN_PAYLOAD, IN_TYPE;
+    FINISH,
+    IN_BODY_LEN,
+    IN_FLEXHEADER,
+    IN_LB,
+    IN_MID,
+    IN_PAYLOAD,
+    IN_TYPE;
   }
 
   private byte leadingByte = 0;
@@ -60,11 +66,10 @@ public class ILinkDecoder extends ByteToMessageDecoder {
     }
 
     while (in.isReadable(bufferToRead)) {
-      logger.debug(String.format("phase %s, r=%d, w=%d, bufferToRead=%s",
-                                 phase,
-                                 in.readerIndex(),
-                                 in.writerIndex(),
-                                 bufferToRead));
+      logger.debug(
+          String.format(
+              "phase %s, r=%d, w=%d, bufferToRead=%s",
+              phase, in.readerIndex(), in.writerIndex(), bufferToRead));
 
       switch (phase) {
         case IN_LB:
@@ -140,9 +145,10 @@ public class ILinkDecoder extends ByteToMessageDecoder {
           short flexHeaderSizeAsByte = in.readShort();
           // NN. how many entries are there
           short flexHeaderSizeAsEntry = in.readShort();
-          logger.debug(String.format("  flexHeaderLen %d(asByte) %d(asEntry)",
-                                     flexHeaderSizeAsByte,
-                                     flexHeaderSizeAsEntry));
+          logger.debug(
+              String.format(
+                  "  flexHeaderLen %d(asByte) %d(asEntry)",
+                  flexHeaderSizeAsByte, flexHeaderSizeAsEntry));
 
           byte[] flexHeaderByCBor = new byte[flexHeaderSizeAsByte];
           try {

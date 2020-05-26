@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 // import com.openiot.cloud.ibroker.proxy.prov.ProvisionProxy;
 
 @Component
@@ -22,11 +23,9 @@ public class ILinkIntelIAgentMessageHandler {
   private static final Logger logger =
       LoggerFactory.getLogger(ILinkIntelIAgentMessageHandler.class);
 
-  @Autowired
-  HandShake handshake;
+  @Autowired HandShake handshake;
 
-  @Autowired
-  Ping ping;
+  @Autowired Ping ping;
 
   public void onMessage(Device srcDevice, ILinkMessage request) {
     if (request.getTag() == null) {

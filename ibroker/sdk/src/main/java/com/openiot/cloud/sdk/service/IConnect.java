@@ -4,6 +4,10 @@
 
 package com.openiot.cloud.sdk.service;
 
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.jms.Destination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.jms.Destination;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -23,8 +23,7 @@ public class IConnect {
 
   // arguments for mq
   // private AmqpMqClient mqClient;
-  @Autowired
-  private JmsMqClient mqClient;
+  @Autowired private JmsMqClient mqClient;
 
   @Value(value = "${mq.host:localhost}")
   private String mqServerHost;
@@ -45,8 +44,8 @@ public class IConnect {
   public void init() {
     // mqClient = new AmqpMqClient(mqServerHost, mqUser, mqPassword);
     instance = this;
-    logger.info("IConnect init " + System.identityHashCode(this) + ","
-        + System.identityHashCode(mqClient));
+    logger.info(
+        "IConnect init " + System.identityHashCode(this) + "," + System.identityHashCode(mqClient));
   }
 
   public void startService(IConnectService service) {
@@ -73,8 +72,11 @@ public class IConnect {
     mqClient.send(dst, response);
   }
 
-  public void send(IConnectRequest iConnectRequest, IConnectResponseHandler handler, int timeout,
-                   TimeUnit unit) {
+  public void send(
+      IConnectRequest iConnectRequest,
+      IConnectResponseHandler handler,
+      int timeout,
+      TimeUnit unit) {
     mqClient.send(iConnectRequest, handler, timeout, unit);
   }
 

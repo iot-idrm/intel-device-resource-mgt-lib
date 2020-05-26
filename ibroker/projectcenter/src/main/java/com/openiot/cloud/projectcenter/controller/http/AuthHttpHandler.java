@@ -23,10 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class AuthHttpHandler {
-  @Autowired
-  private AuthenticationService authenticationService;
+  @Autowired private AuthenticationService authenticationService;
 
-  @PostMapping(value = "/api/user/login", consumes = MediaType.APPLICATION_JSON_VALUE,
+  @PostMapping(
+      value = "/api/user/login",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> login(@RequestBody AuthenticationAO request) {
     AuthenticationDTO authenticationDTO = new AuthenticationDTO();
@@ -42,7 +43,9 @@ public class AuthHttpHandler {
     }
   }
 
-  @PostMapping(value = "/api/user/refresh", consumes = MediaType.APPLICATION_JSON_VALUE,
+  @PostMapping(
+      value = "/api/user/refresh",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> refreshToken(@RequestBody String oldToken) {
     AuthorizationDTO authorizationDTO = authenticationService.refreshToken(oldToken);
@@ -53,10 +56,11 @@ public class AuthHttpHandler {
       BeanUtils.copyProperties(authorizationDTO, response);
       return ResponseEntity.ok(response);
     }
-
   }
 
-  @PostMapping(value = "/api/user/selectproject", consumes = MediaType.APPLICATION_JSON_VALUE,
+  @PostMapping(
+      value = "/api/user/selectproject",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> selectProject(@RequestBody AuthorizationAO request) {
     AuthorizationDTO authorizationDTO = new AuthorizationDTO();
@@ -72,7 +76,9 @@ public class AuthHttpHandler {
     }
   }
 
-  @PostMapping(value = "/api/user/validation", consumes = MediaType.APPLICATION_JSON_VALUE,
+  @PostMapping(
+      value = "/api/user/validation",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> validateToken(@RequestBody AuthorizationAO request) {
     AuthorizationDTO authorizationDTO = new AuthorizationDTO();

@@ -4,11 +4,13 @@
 
 package com.openiot.cloud.httpproxy;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.openiot.cloud.base.profiling.DurationCounter;
 import com.openiot.cloud.base.profiling.DurationCounterManage;
 import com.openiot.cloud.httpproxy.utils.HttpProxyCustomLogging;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -17,18 +19,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
 public class ApplicationTest {
-  @Autowired
-  private HttpProxyCustomLogging httpProxyCustomLogging;
-  @Autowired
-  private DurationCounterManage counterManage;
+  @Autowired private HttpProxyCustomLogging httpProxyCustomLogging;
+  @Autowired private DurationCounterManage counterManage;
 
-  private final static Logger counterLogger = LoggerFactory.getLogger("COUNTERLOGGER");
+  private static final Logger counterLogger = LoggerFactory.getLogger("COUNTERLOGGER");
 
   @Test
   public void contextLoad() throws Exception {
@@ -37,9 +36,18 @@ public class ApplicationTest {
 
   @Test
   public void testCounter() throws Exception {
-    String[] urls = new String[] {"/fc/meta/restype", "/fc/controllog/events", "/fc/dp/raw",
-        "/fc/meta/grptype", "/fc/opt/iagent/dad395b3dce1/sysinfo", "/fc/api/alarm",
-        "/fc/api/project", "/fc/stats/hstr/cfg", "/fc/dp/prodata"};
+    String[] urls =
+        new String[] {
+          "/fc/meta/restype",
+          "/fc/controllog/events",
+          "/fc/dp/raw",
+          "/fc/meta/grptype",
+          "/fc/opt/iagent/dad395b3dce1/sysinfo",
+          "/fc/api/alarm",
+          "/fc/api/project",
+          "/fc/stats/hstr/cfg",
+          "/fc/dp/prodata"
+        };
 
     for (String url : urls) {
       ReflectionTestUtils.invokeMethod(httpProxyCustomLogging, "addCount", url, 100l);

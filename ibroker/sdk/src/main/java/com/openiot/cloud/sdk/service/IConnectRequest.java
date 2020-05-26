@@ -6,15 +6,12 @@ package com.openiot.cloud.sdk.service;
 
 import com.openiot.cloud.base.help.MessageIdMaker;
 import com.openiot.cloud.sdk.utilities.UrlUtil;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 
 public class IConnectRequest {
   public String destination;
@@ -29,18 +26,23 @@ public class IConnectRequest {
 
   IConnectResponseSender responseSender;
 
-  public static IConnectRequest create(HttpMethod action, String url, MediaType format,
-                                       byte[] payload) {
+  public static IConnectRequest create(
+      HttpMethod action, String url, MediaType format, byte[] payload) {
     return create(action, url, format, payload, MessageIdMaker.getMessageIdAsInteger());
   }
 
-  public static IConnectRequest create(HttpMethod action, String url, MediaType format,
-                                       byte[] payload, int messageID) {
+  public static IConnectRequest create(
+      HttpMethod action, String url, MediaType format, byte[] payload, int messageID) {
     return create(null, action, url, format, payload, messageID);
   }
 
-  public static IConnectRequest create(String destination, HttpMethod action, String url,
-                                       MediaType format, byte[] payload, int messageID) {
+  public static IConnectRequest create(
+      String destination,
+      HttpMethod action,
+      String url,
+      MediaType format,
+      byte[] payload,
+      int messageID) {
     IConnectRequest req = new IConnectRequest();
     req.setMessageID(Integer.toString(messageID));
     req.setAction(action);
@@ -124,8 +126,7 @@ public class IConnectRequest {
   }
 
   private String dumpByteArray(byte[] data) {
-    if (Objects.isNull(data) || data.length == 0)
-      return "";
+    if (Objects.isNull(data) || data.length == 0) return "";
     StringBuilder builder = new StringBuilder();
     for (byte b : data) {
       if (builder.length() != 0) {
@@ -142,8 +143,19 @@ public class IConnectRequest {
   @Override
   public String toString() {
     String strPayload = dumpByteArray(payload);
-    return "IConnectRequest [messageID=" + messageID + ", action=" + action + ", uri=" + url
-        + ", format=" + format + ", tokenInfo:" + tokenInfo + ", payload=" + strPayload + "]";
+    return "IConnectRequest [messageID="
+        + messageID
+        + ", action="
+        + action
+        + ", uri="
+        + url
+        + ", format="
+        + format
+        + ", tokenInfo:"
+        + tokenInfo
+        + ", payload="
+        + strPayload
+        + "]";
   }
 
   public void setResponseSender(JMSResponseSender jmsResponseSender) {

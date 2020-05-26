@@ -9,6 +9,7 @@ import com.openiot.cloud.projectcenter.controller.amqp.*;
 import com.openiot.cloud.projectcenter.server.SecureSocketServer;
 import com.openiot.cloud.sdk.service.IConnect;
 import com.openiot.cloud.sdk.service.IConnectService;
+import java.util.concurrent.Executors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -16,36 +17,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Configuration
 @EnableMongoRepositories(basePackages = "com.openiot.cloud.projectcenter.repository")
 public class ApplicationConfiguration {
-  @Autowired
-  private IConnect iConnect;
-  @Autowired
-  private IConnectService iConnectService;
-  @Autowired
-  private ApiProjectAmqpHandler apiProjectAMQPHandler;
-  @Autowired
-  private ApiUserAmqpHandler apiUserAMQPHandler;
-  @Autowired
-  private AuthAmqpHandler authAmqpHandler;
-  @Autowired
-  private ProvisionAuthAmqpHandler provisionAuthAmqpHandler;
-  @Autowired
-  private ProvisionInfoAmqpHandler provisionInfoAmqpHandler;
-  @Autowired
-  private ProvisionProjectAmqpHandler provisionProjectAmqpHandler;
-  @Autowired
-  private ProvisionReplaceAmqpHandler provisionReplaceAmqpHandler;
-  @Autowired
-  private ProvisionResetAmqpHandler provisionResetAmqpHandler;
-  @Autowired
-  private ProvisionManuallyAmqpHandler provisionManuallyAmqpHandler;
-  @Autowired
-  private SecureSocketServer secureSocketServer;
+  @Autowired private IConnect iConnect;
+  @Autowired private IConnectService iConnectService;
+  @Autowired private ApiProjectAmqpHandler apiProjectAMQPHandler;
+  @Autowired private ApiUserAmqpHandler apiUserAMQPHandler;
+  @Autowired private AuthAmqpHandler authAmqpHandler;
+  @Autowired private ProvisionAuthAmqpHandler provisionAuthAmqpHandler;
+  @Autowired private ProvisionInfoAmqpHandler provisionInfoAmqpHandler;
+  @Autowired private ProvisionProjectAmqpHandler provisionProjectAmqpHandler;
+  @Autowired private ProvisionReplaceAmqpHandler provisionReplaceAmqpHandler;
+  @Autowired private ProvisionResetAmqpHandler provisionResetAmqpHandler;
+  @Autowired private ProvisionManuallyAmqpHandler provisionManuallyAmqpHandler;
+  @Autowired private SecureSocketServer secureSocketServer;
 
   @EventListener
   public void onApplicationReady(final ApplicationReadyEvent event) {
@@ -73,14 +61,16 @@ public class ApplicationConfiguration {
     iConnect.startService(iConnectService);
 
     // Start SSL server
-    Executors.newSingleThreadExecutor().submit(() -> {
-      try {
-        secureSocketServer.run();
-      } catch (Exception e) {
-        log.error("meet an exception when starting the ssl server", e);
-        throw new RuntimeException("start SSL server failed");
-      }
-    });
+    Executors.newSingleThreadExecutor()
+        .submit(
+            () -> {
+              try {
+                secureSocketServer.run();
+              } catch (Exception e) {
+                log.error("meet an exception when starting the ssl server", e);
+                throw new RuntimeException("start SSL server failed");
+              }
+            });
   }
 
   @EventListener

@@ -20,7 +20,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 
 @Configuration
-@EnableRedisRepositories(basePackages = "com.openiot.cloud.base.redis.dao",
+@EnableRedisRepositories(
+    basePackages = "com.openiot.cloud.base.redis.dao",
     enableKeyspaceEvents = RedisKeyValueAdapter.EnableKeyspaceEvents.ON_STARTUP,
     queryLookupStrategy = QueryLookupStrategy.Key.USE_DECLARED_QUERY)
 public class RedisConfig {
@@ -42,8 +43,8 @@ public class RedisConfig {
   }
 
   @Bean
-  public RedisTemplate<String, Object>
-      redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+  public RedisTemplate<String, Object> redisTemplate(
+      RedisConnectionFactory redisConnectionFactory) {
     if (redisConnectionFactory == null) {
       return null;
     }

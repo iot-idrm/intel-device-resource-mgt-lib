@@ -5,9 +5,9 @@
 package com.openiot.cloud.base.mongo.dao;
 
 import com.openiot.cloud.base.mongo.model.Folder;
+import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
 @Repository
 public interface FolderRepository extends MongoRepository<Folder, String> {

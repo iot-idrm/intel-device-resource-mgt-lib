@@ -15,15 +15,15 @@ import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = ConstDef.C_GRPTYPE)
 @JsonInclude(Include.NON_EMPTY)
@@ -72,8 +72,8 @@ public class GroupType {
 
   private static <T> T findByName(List<T> list, Predicate<T> filter) {
     return Optional.ofNullable(list)
-                   .map(l -> l.stream().filter(item -> filter.test(item)).findFirst().orElse(null))
-                   .orElse(null);
+        .map(l -> l.stream().filter(item -> filter.test(item)).findFirst().orElse(null))
+        .orElse(null);
   }
 
   private static <T> void removeByName(List<T> list, Predicate<T> filter) {
@@ -230,8 +230,27 @@ public class GroupType {
 
   @Override
   public String toString() {
-    return "GroupType{" + "n='" + n + '\'' + ", dpn='" + dpn + '\'' + ", d='" + d + '\'' + ", cs="
-        + cs + ", as=" + as + ", dss=" + dss + ", prj='" + prj + '\'' + ", devicePlan=" + devicePlan
+    return "GroupType{"
+        + "n='"
+        + n
+        + '\''
+        + ", dpn='"
+        + dpn
+        + '\''
+        + ", d='"
+        + d
+        + '\''
+        + ", cs="
+        + cs
+        + ", as="
+        + as
+        + ", dss="
+        + dss
+        + ", prj='"
+        + prj
+        + '\''
+        + ", devicePlan="
+        + devicePlan
         + '}';
   }
 
@@ -256,7 +275,14 @@ public class GroupType {
   }
 
   public static List<String> allFields() {
-    return Arrays.asList(new String[] {ConstDef.F_NAME, ConstDef.F_DISPLAYNAME,
-        ConstDef.F_DESCRIPTION, ConstDef.F_CONFIGS, ConstDef.F_ATTRS, ConstDef.F_DATASOURCES});
+    return Arrays.asList(
+        new String[] {
+          ConstDef.F_NAME,
+          ConstDef.F_DISPLAYNAME,
+          ConstDef.F_DESCRIPTION,
+          ConstDef.F_CONFIGS,
+          ConstDef.F_ATTRS,
+          ConstDef.F_DATASOURCES
+        });
   }
 }

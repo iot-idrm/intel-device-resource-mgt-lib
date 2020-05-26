@@ -6,22 +6,21 @@ package com.openiot.cloud.base.help;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapperImpl;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapperImpl;
 
 public class BaseUtil {
   private static final Logger logger = LoggerFactory.getLogger(BaseUtil.class);
@@ -31,20 +30,19 @@ public class BaseUtil {
   }
 
   public static String composeQuery(String[]... queries) {
-    return Arrays.asList(queries)
-                 .stream()
-                 .map(q -> q[0] + "=" + q[1])
-                 .collect(Collectors.joining("&"));
+    return Arrays.asList(queries).stream()
+        .map(q -> q[0] + "=" + q[1])
+        .collect(Collectors.joining("&"));
   }
 
   public static Map<String, String> validate(Validator validator, Object obj, Class... clazz) {
     return parseViolationMessage(validator.validate(obj, clazz));
   }
 
-  public static Map<String, String>
-      parseViolationMessage(Set<ConstraintViolation<Object>> varResult) {
-    return varResult.stream().collect(Collectors.toMap(i -> i.getPropertyPath().toString(),
-                                                       i -> i.getMessage()));
+  public static Map<String, String> parseViolationMessage(
+      Set<ConstraintViolation<Object>> varResult) {
+    return varResult.stream()
+        .collect(Collectors.toMap(i -> i.getPropertyPath().toString(), i -> i.getMessage()));
   }
 
   @Deprecated
@@ -62,16 +60,15 @@ public class BaseUtil {
 
   public static long getLatestNSecondsAsEpochMillis(int n) {
     return LocalDateTime.now(ZoneOffset.UTC)
-                        .minusSeconds(n)
-                        .toInstant(ZoneOffset.UTC)
-                        .toEpochMilli();
+        .minusSeconds(n)
+        .toInstant(ZoneOffset.UTC)
+        .toEpochMilli();
   }
 
   public static List<String> getPathSegments(String fullurl) {
-    return Arrays.asList(fullurl.split("/"))
-                 .stream()
-                 .filter(seg -> seg != null && !seg.isEmpty())
-                 .collect(Collectors.toList());
+    return Arrays.asList(fullurl.split("/")).stream()
+        .filter(seg -> seg != null && !seg.isEmpty())
+        .collect(Collectors.toList());
   }
 
   public static String getStackTrace(Throwable exception) {
@@ -89,56 +86,66 @@ public class BaseUtil {
    * @return
    */
   public static List<String> parseArray(String asArray) {
-    return asArray.isEmpty() ? Collections.emptyList()
-        : Arrays.asList(asArray.substring(1, asArray.length() - 1).split(","))
-                .stream()
-                .map(i -> i.trim())
-                .filter(i -> !i.isEmpty())
-                .collect(Collectors.toList());
+    return asArray.isEmpty()
+        ? Collections.emptyList()
+        : Arrays.asList(asArray.substring(1, asArray.length() - 1).split(",")).stream()
+            .map(i -> i.trim())
+            .filter(i -> !i.isEmpty())
+            .collect(Collectors.toList());
   }
 
   public static boolean isNonequivalentQuery(String queryKey, String queryValue) {
-    return queryValue == null || queryValue.isEmpty() || queryValue.startsWith("lt")
-        || queryValue.startsWith("gt") || queryValue.startsWith("gte")
-        || queryValue.startsWith("lte") || queryValue.startsWith("ne");
+    return queryValue == null
+        || queryValue.isEmpty()
+        || queryValue.startsWith("lt")
+        || queryValue.startsWith("gt")
+        || queryValue.startsWith("gte")
+        || queryValue.startsWith("lte")
+        || queryValue.startsWith("ne");
   }
 
   public static String formAFullUrl(String devId, String resUri) {
     String fullUrl = String.join("/", devId, resUri);
-    List<String> segments = Arrays.asList(fullUrl.split("/"))
-                                  .stream()
-                                  .filter(seg -> seg != null && !seg.isEmpty())
-                                  .collect(Collectors.toList());
+    List<String> segments =
+        Arrays.asList(fullUrl.split("/")).stream()
+            .filter(seg -> seg != null && !seg.isEmpty())
+            .collect(Collectors.toList());
     return "/" + String.join("/", segments);
   }
 
   public static String formAFullUrl(String devId, String resUri, String propName) {
     String fullUrl = String.join("/", devId, resUri, propName);
-    List<String> segments = Arrays.asList(fullUrl.split("/"))
-                                  .stream()
-                                  .filter(seg -> seg != null && !seg.isEmpty())
-                                  .collect(Collectors.toList());
+    List<String> segments =
+        Arrays.asList(fullUrl.split("/")).stream()
+            .filter(seg -> seg != null && !seg.isEmpty())
+            .collect(Collectors.toList());
     return "/" + String.join("/", segments);
   }
 
   public static String getDiFromRi(String ri) {
-    return Optional.ofNullable(ri).map(res -> {
-      int index = ri.indexOf("/");
-      if (index < 1) {
-        return null;
-      }
-      return ri.substring(0, index);
-    }).orElse(null);
+    return Optional.ofNullable(ri)
+        .map(
+            res -> {
+              int index = ri.indexOf("/");
+              if (index < 1) {
+                return null;
+              }
+              return ri.substring(0, index);
+            })
+        .orElse(null);
   }
 
   public static String getResUriFromRi(String ri) {
-    return Optional.ofNullable(ri).map(res -> {
-      int index = ri.indexOf("/");
-      if (index < 1) {
-        return null;
-      }
-      return ri.substring(index);
-    }).orElse(null);
+    return Optional.ofNullable(ri)
+        .map(
+            res -> {
+              int index = ri.indexOf("/");
+              if (index < 1) {
+                return null;
+              }
+              return ri.substring(index);
+            })
+        .orElse(null);
   }
 
   public static class PayloadCheckResult {
@@ -190,24 +197,26 @@ public class BaseUtil {
     }
   }
 
-  public static PayloadCheckResult checkPayload(byte[] payload, Class objClass, Validator validator,
-                                                Class validateClass) {
+  public static PayloadCheckResult checkPayload(
+      byte[] payload, Class objClass, Validator validator, Class validateClass) {
     Optional<byte[]> payloadOpt = Optional.ofNullable(payload);
     if (!payloadOpt.isPresent()) {
       return PayloadCheckResult.failed("{\"payload\": \"can not be " + "null\"}");
     }
 
-    Optional<Object> objOpt = payloadOpt.map(p -> {
-      try {
-        ObjectMapper objMapper = new ObjectMapper();
-        // ignore all unexpected fields
-        objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return objMapper.readValue(p, objClass);
-      } catch (IOException e) {
-        logger.warn(getStackTrace(e));
-        return PayloadCheckResult.failed("{\"payload\" : \"can not deserialize in JSON\"}");
-      }
-    });
+    Optional<Object> objOpt =
+        payloadOpt.map(
+            p -> {
+              try {
+                ObjectMapper objMapper = new ObjectMapper();
+                // ignore all unexpected fields
+                objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                return objMapper.readValue(p, objClass);
+              } catch (IOException e) {
+                logger.warn(getStackTrace(e));
+                return PayloadCheckResult.failed("{\"payload\" : \"can not deserialize in JSON\"}");
+              }
+            });
     if (!objOpt.isPresent()) {
       return PayloadCheckResult.failed("{\"payload\" : \"deserialization get nothing\"}");
     }
@@ -328,9 +337,16 @@ public class BaseUtil {
     }
 
     Class<?> type = dst.getClass();
-    if (type.isEnum() || type.isPrimitive() || type.isArray() || type == Boolean.class
-        || type == Byte.class || type == Character.class || type == Short.class
-        || type == Integer.class || type == Long.class || type == Double.class
+    if (type.isEnum()
+        || type.isPrimitive()
+        || type.isArray()
+        || type == Boolean.class
+        || type == Byte.class
+        || type == Character.class
+        || type == Short.class
+        || type == Integer.class
+        || type == Long.class
+        || type == Double.class
         || type == Float.class) {
       return src;
     }
@@ -351,7 +367,9 @@ public class BaseUtil {
     Object replaced = null;
     try {
       replaced = type.getConstructor().newInstance();
-    } catch (NoSuchMethodException | IllegalAccessException | InstantiationException
+    } catch (NoSuchMethodException
+        | IllegalAccessException
+        | InstantiationException
         | InvocationTargetException e) {
       logger.warn("new instance failed " + BaseUtil.getStackTrace(e));
       return null;
@@ -362,11 +380,10 @@ public class BaseUtil {
       try {
         field.setAccessible(true);
 
-        logger.debug(String.format("--> process the field name=%s, type=%s, value=%s -?-> %s\n",
-                                   field.getName(),
-                                   field.getType(),
-                                   field.get(src),
-                                   field.get(dst)));
+        logger.debug(
+            String.format(
+                "--> process the field name=%s, type=%s, value=%s -?-> %s\n",
+                field.getName(), field.getType(), field.get(src), field.get(dst)));
 
         // if a field is untouchable, using the value of the dst
         if (field.isAnnotationPresent(Untouchable.class)) {
@@ -410,10 +427,18 @@ public class BaseUtil {
     }
 
     Class<?> type = dst.getClass();
-    if (type.isEnum() || type.isPrimitive() || type.isArray() || type == String.class
-        || type == Boolean.class || type == Byte.class || type == Character.class
-        || type == Short.class || type == Integer.class || type == Long.class
-        || type == Double.class || type == Float.class) {
+    if (type.isEnum()
+        || type.isPrimitive()
+        || type.isArray()
+        || type == String.class
+        || type == Boolean.class
+        || type == Byte.class
+        || type == Character.class
+        || type == Short.class
+        || type == Integer.class
+        || type == Long.class
+        || type == Double.class
+        || type == Float.class) {
       return src;
     }
 
@@ -424,7 +449,9 @@ public class BaseUtil {
     Object updated = null;
     try {
       updated = type.getConstructor().newInstance();
-    } catch (NoSuchMethodException | IllegalAccessException | InstantiationException
+    } catch (NoSuchMethodException
+        | IllegalAccessException
+        | InstantiationException
         | InvocationTargetException e) {
       logger.warn("new instance failed " + BaseUtil.getStackTrace(e));
       return null;
@@ -436,10 +463,10 @@ public class BaseUtil {
         field.setAccessible(true);
         type = field.getType();
 
-        logger.debug(String.format("--> process the field name=%s, type=%s, value=%s\n",
-                                   field.getName(),
-                                   type,
-                                   field.get(src)));
+        logger.debug(
+            String.format(
+                "--> process the field name=%s, type=%s, value=%s\n",
+                field.getName(), type, field.get(src)));
 
         if (field.get(src) == null) {
           field.set(updated, field.get(dst));
@@ -463,21 +490,20 @@ public class BaseUtil {
   }
 
   public static String removeTrailingSlash(String url) {
-    return (url.startsWith("/") ? "/" : "") + Arrays.asList(url.split("/"))
-                                                    .stream()
-                                                    .filter(s -> s.length() > 0)
-                                                    .collect(Collectors.joining("/"));
+    return (url.startsWith("/") ? "/" : "")
+        + Arrays.asList(url.split("/")).stream()
+            .filter(s -> s.length() > 0)
+            .collect(Collectors.joining("/"));
   }
 
-
   /**
-   * it will copy every matched (with same name) property from source to target and ignore all collection properties with null values
-   * since in RestAPIs we always use below rules on a collection property, like a list, a set or a map
-   * - null to represent do not touch
-   * - empty to represent clear all
-   * - [...]/XX to represent replace the original value with the new value
+   * it will copy every matched (with same name) property from source to target and ignore all
+   * collection properties with null values since in RestAPIs we always use below rules on a
+   * collection property, like a list, a set or a map - null to represent do not touch - empty to
+   * represent clear all - [...]/XX to represent replace the original value with the new value
    *
-   * it should be considered during updating
+   * <p>it should be considered during updating
+   *
    * @param source
    * @param target
    */
@@ -494,9 +520,8 @@ public class BaseUtil {
       }
     }
 
-    BeanUtils.copyProperties(source,
-                             target,
-                             nullPropertyNames.toArray(new String[nullPropertyNames.size()]));
+    BeanUtils.copyProperties(
+        source, target, nullPropertyNames.toArray(new String[nullPropertyNames.size()]));
 
     // remove empty collection properties from target
     wrapper = new BeanWrapperImpl(target);
@@ -523,9 +548,8 @@ public class BaseUtil {
       }
     }
 
-    BeanUtils.copyProperties(source,
-                             target,
-                             nullPropertyNames.toArray(new String[nullPropertyNames.size()]));
+    BeanUtils.copyProperties(
+        source, target, nullPropertyNames.toArray(new String[nullPropertyNames.size()]));
 
     // remove empty collection properties from the target
     // remove empty string properties form the target

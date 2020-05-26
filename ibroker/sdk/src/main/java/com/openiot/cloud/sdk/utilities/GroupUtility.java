@@ -12,17 +12,17 @@ import com.openiot.cloud.base.mongo.model.Group.MemberResRef;
 import com.openiot.cloud.base.mongo.model.help.AttributeEntity;
 import com.openiot.cloud.base.mongo.model.help.ConfigurationEntity;
 import com.openiot.cloud.base.mongo.model.help.DataSourceEntity;
-import com.openiot.cloud.sdk.service.ApplicationContextProvider;
 import com.openiot.cloud.sdk.event.TaskOperations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.openiot.cloud.sdk.service.ApplicationContextProvider;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The utility to access groups in openiot cloud.<br>
@@ -35,14 +35,11 @@ import java.util.stream.Collectors;
 @Component
 public class GroupUtility {
   private static final Logger logger = LoggerFactory.getLogger(GroupUtility.class.getName());
-  @Autowired
-  GroupTypeRepository grptRepo;
+  @Autowired GroupTypeRepository grptRepo;
 
-  @Autowired
-  GroupRepository grpRepo;
+  @Autowired GroupRepository grpRepo;
 
-  @Autowired
-  TaskOperations taskOps;
+  @Autowired TaskOperations taskOps;
 
   public static GroupUtility getInstance() {
     return ApplicationContextProvider.getBean(GroupUtility.class);
@@ -57,10 +54,8 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public Group addGroup(String project, String name, String displayName, String gtName) {
-    return addOrUpdateGroup(new Group().setN(name)
-                                       .setDpn(displayName)
-                                       .setGt(gtName)
-                                       .setPrj(project));
+    return addOrUpdateGroup(
+        new Group().setN(name).setDpn(displayName).setGt(gtName).setPrj(project));
   }
 
   /**
@@ -71,17 +66,21 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public Group addOrUpdateGroup(Group group) {
-    return Optional.ofNullable(grpRepo.createOrUpdateOne(group)).map(g -> {
-      taskOps.createTask("CFG_MONITOR",
-                         ConstDef.EVENT_TYPE_CFG_SYNC,
-                         null,
-                         ConstDef.EVENT_TARGET_TYPE_GROUP,
-                         group.getN(),
-                         ConstDef.DAY_SECONDS,
-                         null,
-                         null);
-      return g;
-    }).orElse(null);
+    return Optional.ofNullable(grpRepo.createOrUpdateOne(group))
+        .map(
+            g -> {
+              taskOps.createTask(
+                  "CFG_MONITOR",
+                  ConstDef.EVENT_TYPE_CFG_SYNC,
+                  null,
+                  ConstDef.EVENT_TARGET_TYPE_GROUP,
+                  group.getN(),
+                  ConstDef.DAY_SECONDS,
+                  null,
+                  null);
+              return g;
+            })
+        .orElse(null);
   }
 
   /**
@@ -111,44 +110,55 @@ public class GroupUtility {
    * @return List of all groups that match all specified conditions.
    * @see com.openiot.cloud.base.mongo.model.Group
    */
-  public List<Group> getGroupWithValue(String projectId, String gName, String gtName, String dpName,
-                                       Map<String, String> with_attrs, Map<String, String> with_dss,
-                                       Map<String, String> with_cfgs) {
-    return grpRepo.filter(Optional.ofNullable(projectId),
-                          Optional.ofNullable(gName).map(gn -> Arrays.asList(new String[] {gn})),
-                          Optional.ofNullable(gtName).map(gtn -> Arrays.asList(new String[] {gtn})),
-                          Optional.ofNullable(dpName).map(dpn -> Arrays.asList(new String[] {dpn})),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.ofNullable(with_attrs),
-                          Optional.ofNullable(with_cfgs),
-                          Optional.of(Group.allFields()),
-                          null);
+  public List<Group> getGroupWithValue(
+      String projectId,
+      String gName,
+      String gtName,
+      String dpName,
+      Map<String, String> with_attrs,
+      Map<String, String> with_dss,
+      Map<String, String> with_cfgs) {
+    return grpRepo.filter(
+        Optional.ofNullable(projectId),
+        Optional.ofNullable(gName).map(gn -> Arrays.asList(new String[] {gn})),
+        Optional.ofNullable(gtName).map(gtn -> Arrays.asList(new String[] {gtn})),
+        Optional.ofNullable(dpName).map(dpn -> Arrays.asList(new String[] {dpn})),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(with_attrs),
+        Optional.ofNullable(with_cfgs),
+        Optional.of(Group.allFields()),
+        null);
   }
 
-  public List<Group> getGroupWith(String gName, String gtName, String dpName,
-                                  List<String> attrNames, List<String> cfgNames,
-                                  List<String> dssNames) {
-    return grpRepo.filter(Optional.empty(),
-                          Optional.ofNullable(gName).map(gn -> Arrays.asList(new String[] {gn})),
-                          Optional.ofNullable(gtName).map(gtn -> Arrays.asList(new String[] {gtn})),
-                          Optional.ofNullable(dpName).map(dpn -> Arrays.asList(new String[] {dpn})),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.ofNullable(attrNames),
-                          Optional.ofNullable(cfgNames),
-                          Optional.ofNullable(dssNames),
-                          Optional.empty(),
-                          Optional.empty(),
-                          Optional.of(Group.allFields()),
-                          null);
+  public List<Group> getGroupWith(
+      String gName,
+      String gtName,
+      String dpName,
+      List<String> attrNames,
+      List<String> cfgNames,
+      List<String> dssNames) {
+    return grpRepo.filter(
+        Optional.empty(),
+        Optional.ofNullable(gName).map(gn -> Arrays.asList(new String[] {gn})),
+        Optional.ofNullable(gtName).map(gtn -> Arrays.asList(new String[] {gtn})),
+        Optional.ofNullable(dpName).map(dpn -> Arrays.asList(new String[] {dpn})),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.ofNullable(attrNames),
+        Optional.ofNullable(cfgNames),
+        Optional.ofNullable(dssNames),
+        Optional.empty(),
+        Optional.empty(),
+        Optional.of(Group.allFields()),
+        null);
   }
 
   /**
@@ -160,29 +170,34 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean updateGroupAttr(String gName, Map<String, String> attrs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(attrs)
-                     .filter(as -> !as.isEmpty())
-                     .map(as -> as.entrySet()
-                                  .stream()
-                                  .map(entry -> new AttributeEntity(entry.getKey(),
-                                                                    entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(as -> {
-                       as.forEach(a -> g.insertOrUpdateAs(a));
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(attrs)
+                  .filter(as -> !as.isEmpty())
+                  .map(
+                      as ->
+                          as.entrySet().stream()
+                              .map(entry -> new AttributeEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      as -> {
+                        as.forEach(a -> g.insertOrUpdateAs(a));
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -197,29 +212,36 @@ public class GroupUtility {
    */
   // TODO need to check
   public boolean updateGroupCfg(String gName, Map<String, String> cfgs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(cfgs)
-                     .filter(cs -> !cs.isEmpty())
-                     .map(cs -> cs.entrySet()
-                                  .stream()
-                                  .map(entry -> new ConfigurationEntity(entry.getKey(),
-                                                                        entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(cs -> {
-                       cs.forEach(c -> g.insertOrUpdateCs(c));
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(cfgs)
+                  .filter(cs -> !cs.isEmpty())
+                  .map(
+                      cs ->
+                          cs.entrySet().stream()
+                              .map(
+                                  entry ->
+                                      new ConfigurationEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      cs -> {
+                        cs.forEach(c -> g.insertOrUpdateCs(c));
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -233,28 +255,39 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean updateGroupDss(String gName, Map<String, String> dtsrcs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(dtsrcs)
-                     .filter(dss -> !dss.isEmpty())
-                     .map(dss -> dss.entrySet().stream().map(entry -> {
-                       DataSourceEntity ds = new DataSourceEntity(entry.getKey(), entry.getValue());
-                       return ds;
-                     }).collect(Collectors.toList()))
-                     .map(dss -> {
-                       dss.forEach(ds -> g.insertOrUpdateDss(ds));
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(dtsrcs)
+                  .filter(dss -> !dss.isEmpty())
+                  .map(
+                      dss ->
+                          dss.entrySet().stream()
+                              .map(
+                                  entry -> {
+                                    DataSourceEntity ds =
+                                        new DataSourceEntity(entry.getKey(), entry.getValue());
+                                    return ds;
+                                  })
+                              .collect(Collectors.toList()))
+                  .map(
+                      dss -> {
+                        dss.forEach(ds -> g.insertOrUpdateDss(ds));
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -294,29 +327,34 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean updateGroupDevMember(String gName, Map<String, String> resMap) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(resMap)
-                     .filter(resources -> !resources.isEmpty())
-                     .map(resources -> resources.entrySet()
-                                                .stream()
-                                                .map(entry -> new MemberResRef(entry.getKey(),
-                                                                               entry.getValue()))
-                                                .collect(Collectors.toList()))
-                     .map(mr -> {
-                       g.insertOrUpdateMrs(mr);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(resMap)
+                  .filter(resources -> !resources.isEmpty())
+                  .map(
+                      resources ->
+                          resources.entrySet().stream()
+                              .map(entry -> new MemberResRef(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      mr -> {
+                        g.insertOrUpdateMrs(mr);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -328,21 +366,28 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean updateGroupResMember(String gName, List<String> devIds) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(devIds).map(devs -> {
-        g.insertOrUpdateMds(devs);
-        grpRepo.save(g);
-        taskOps.createTask("CFG_MONITOR",
-                           ConstDef.EVENT_TYPE_CFG_SYNC,
-                           null,
-                           ConstDef.EVENT_TARGET_TYPE_GROUP,
-                           g.getN(),
-                           ConstDef.DAY_SECONDS,
-                           null,
-                           null);
-        return true;
-      }).orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(devIds)
+                  .map(
+                      devs -> {
+                        g.insertOrUpdateMds(devs);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -354,29 +399,34 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean replaceGroupAttr(String gName, Map<String, String> attrs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(attrs)
-                     .filter(as -> !as.isEmpty())
-                     .map(as -> as.entrySet()
-                                  .stream()
-                                  .map(entry -> new AttributeEntity(entry.getKey(),
-                                                                    entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(as -> {
-                       g.setAs(as);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(attrs)
+                  .filter(as -> !as.isEmpty())
+                  .map(
+                      as ->
+                          as.entrySet().stream()
+                              .map(entry -> new AttributeEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      as -> {
+                        g.setAs(as);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -388,29 +438,36 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean replaceGroupCfg(String gName, Map<String, String> cfgs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(cfgs)
-                     .filter(cs -> !cs.isEmpty())
-                     .map(cs -> cs.entrySet()
-                                  .stream()
-                                  .map(entry -> new ConfigurationEntity(entry.getKey(),
-                                                                        entry.getValue()))
-                                  .collect(Collectors.toList()))
-                     .map(cs -> {
-                       g.setCs(cs);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(cfgs)
+                  .filter(cs -> !cs.isEmpty())
+                  .map(
+                      cs ->
+                          cs.entrySet().stream()
+                              .map(
+                                  entry ->
+                                      new ConfigurationEntity(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      cs -> {
+                        g.setCs(cs);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -422,28 +479,39 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean replaceGroupDss(String gName, Map<String, String> dtsrcs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(dtsrcs)
-                     .filter(dss -> !dss.isEmpty())
-                     .map(dss -> dss.entrySet().stream().map(entry -> {
-                       DataSourceEntity ds = new DataSourceEntity(entry.getKey(), entry.getValue());
-                       return ds;
-                     }).collect(Collectors.toList()))
-                     .map(dss -> {
-                       g.setDss(dss);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(dtsrcs)
+                  .filter(dss -> !dss.isEmpty())
+                  .map(
+                      dss ->
+                          dss.entrySet().stream()
+                              .map(
+                                  entry -> {
+                                    DataSourceEntity ds =
+                                        new DataSourceEntity(entry.getKey(), entry.getValue());
+                                    return ds;
+                                  })
+                              .collect(Collectors.toList()))
+                  .map(
+                      dss -> {
+                        g.setDss(dss);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -455,27 +523,34 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean deleteGroupAttr(String gName, List<String> attrs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(attrs)
-                     .filter(as -> !as.isEmpty())
-                     .map(as -> as.stream()
-                                  .map(attrName -> new AttributeEntity(attrName, null))
-                                  .collect(Collectors.toList()))
-                     .map(as -> {
-                       g.getAs().removeAll(as);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(attrs)
+                  .filter(as -> !as.isEmpty())
+                  .map(
+                      as ->
+                          as.stream()
+                              .map(attrName -> new AttributeEntity(attrName, null))
+                              .collect(Collectors.toList()))
+                  .map(
+                      as -> {
+                        g.getAs().removeAll(as);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -487,27 +562,34 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean deleteGroupCfg(String gName, List<String> cfgs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(cfgs)
-                     .filter(cs -> !cs.isEmpty())
-                     .map(cs -> cs.stream()
-                                  .map(cfgName -> new ConfigurationEntity(cfgName, null))
-                                  .collect(Collectors.toList()))
-                     .map(cs -> {
-                       g.getCs().removeAll(cs);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(cfgs)
+                  .filter(cs -> !cs.isEmpty())
+                  .map(
+                      cs ->
+                          cs.stream()
+                              .map(cfgName -> new ConfigurationEntity(cfgName, null))
+                              .collect(Collectors.toList()))
+                  .map(
+                      cs -> {
+                        g.getCs().removeAll(cs);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -519,28 +601,39 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean deleteGroupDss(String gName, Map<String, String> dtsrcs) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(dtsrcs)
-                     .filter(dss -> !dss.isEmpty())
-                     .map(dss -> dss.entrySet().stream().map(entry -> {
-                       DataSourceEntity ds = new DataSourceEntity(entry.getKey(), entry.getValue());
-                       return ds;
-                     }).collect(Collectors.toList()))
-                     .map(dss -> {
-                       g.getDss().removeAll(dss);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(dtsrcs)
+                  .filter(dss -> !dss.isEmpty())
+                  .map(
+                      dss ->
+                          dss.entrySet().stream()
+                              .map(
+                                  entry -> {
+                                    DataSourceEntity ds =
+                                        new DataSourceEntity(entry.getKey(), entry.getValue());
+                                    return ds;
+                                  })
+                              .collect(Collectors.toList()))
+                  .map(
+                      dss -> {
+                        g.getDss().removeAll(dss);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -581,22 +674,29 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean deleteGroupDevMember(String gName, List<String> devList) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(devList).map(devs -> {
-        // g.getMs().removeAll(ms);
-        g.removeItemsFromMd(devs);
-        grpRepo.save(g);
-        taskOps.createTask("CFG_MONITOR",
-                           ConstDef.EVENT_TYPE_CFG_SYNC,
-                           null,
-                           ConstDef.EVENT_TARGET_TYPE_GROUP,
-                           g.getN(),
-                           ConstDef.DAY_SECONDS,
-                           null,
-                           null);
-        return true;
-      }).orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(devList)
+                  .map(
+                      devs -> {
+                        // g.getMs().removeAll(ms);
+                        g.removeItemsFromMd(devs);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -609,29 +709,34 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean deleteGroupResMember(String gName, Map<String, String> resMap) {
-    return Optional.ofNullable(grpRepo.findOneByName(gName)).map(g -> {
-      return Optional.ofNullable(resMap)
-                     .filter(resources -> !resources.isEmpty())
-                     .map(resources -> resources.entrySet()
-                                                .stream()
-                                                .map(entry -> new MemberResRef(entry.getKey(),
-                                                                               entry.getValue()))
-                                                .collect(Collectors.toList()))
-                     .map(mr -> {
-                       g.removeItemsFromMr(mr);
-                       grpRepo.save(g);
-                       taskOps.createTask("CFG_MONITOR",
-                                          ConstDef.EVENT_TYPE_CFG_SYNC,
-                                          null,
-                                          ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                          g.getN(),
-                                          ConstDef.DAY_SECONDS,
-                                          null,
-                                          null);
-                       return true;
-                     })
-                     .orElse(false);
-    }).orElse(false);
+    return Optional.ofNullable(grpRepo.findOneByName(gName))
+        .map(
+            g -> {
+              return Optional.ofNullable(resMap)
+                  .filter(resources -> !resources.isEmpty())
+                  .map(
+                      resources ->
+                          resources.entrySet().stream()
+                              .map(entry -> new MemberResRef(entry.getKey(), entry.getValue()))
+                              .collect(Collectors.toList()))
+                  .map(
+                      mr -> {
+                        g.removeItemsFromMr(mr);
+                        grpRepo.save(g);
+                        taskOps.createTask(
+                            "CFG_MONITOR",
+                            ConstDef.EVENT_TYPE_CFG_SYNC,
+                            null,
+                            ConstDef.EVENT_TARGET_TYPE_GROUP,
+                            g.getN(),
+                            ConstDef.DAY_SECONDS,
+                            null,
+                            null);
+                        return true;
+                      })
+                  .orElse(false);
+            })
+        .orElse(false);
   }
 
   /**
@@ -642,10 +747,14 @@ public class GroupUtility {
    * @see com.openiot.cloud.base.mongo.model.Group
    */
   public boolean deleteGroupByName(String name) {
-    return Optional.ofNullable(name).map(n -> grpRepo.findOneByName(n)).map(g -> {
-      grpRepo.delete(g);
-      return true;
-    }).orElse(false);
+    return Optional.ofNullable(name)
+        .map(n -> grpRepo.findOneByName(n))
+        .map(
+            g -> {
+              grpRepo.delete(g);
+              return true;
+            })
+        .orElse(false);
   }
 
   public boolean updateGroupCfg(Group group, Map<String, String> cfgs) {
@@ -654,21 +763,24 @@ public class GroupUtility {
 
   public DataSourceEntity findOneDsByGroupNameAndDsName(String gName, String dsName) {
     return Optional.ofNullable(grpRepo.findDssByGroupNameAndDsName(gName, dsName).get(0))
-                   .orElse(null);
+        .orElse(null);
   }
 
   public void changeGroupType(Group group, String newGT) {
     Optional.ofNullable(group)
-            .map(g -> addOrUpdateGroup(g.setGt(newGT)))
-            .map(g -> g.getN())
-            .ifPresent(n -> taskOps.createTask("CFG_MONITOR",
-                                               ConstDef.EVENT_TYPE_CFG_SYNC,
-                                               null,
-                                               ConstDef.EVENT_TARGET_TYPE_GROUP,
-                                               group.getN(),
-                                               ConstDef.DAY_SECONDS,
-                                               null,
-                                               null));
+        .map(g -> addOrUpdateGroup(g.setGt(newGT)))
+        .map(g -> g.getN())
+        .ifPresent(
+            n ->
+                taskOps.createTask(
+                    "CFG_MONITOR",
+                    ConstDef.EVENT_TYPE_CFG_SYNC,
+                    null,
+                    ConstDef.EVENT_TARGET_TYPE_GROUP,
+                    group.getN(),
+                    ConstDef.DAY_SECONDS,
+                    null,
+                    null));
   }
 
   public List<Group> getGroupWithMemberDev(String devId) {

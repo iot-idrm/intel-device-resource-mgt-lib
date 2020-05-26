@@ -7,8 +7,8 @@ package com.openiot.cloud.ibroker.base.server;
 import com.openiot.cloud.base.ilink.ILinkDecoder;
 import com.openiot.cloud.base.ilink.ILinkEncoder;
 import io.netty.channel.ChannelHandler;
-import org.iotivity.cloud.base.server.Server;
 import java.net.InetSocketAddress;
+import org.iotivity.cloud.base.server.Server;
 
 public class ILinkServer extends Server {
 

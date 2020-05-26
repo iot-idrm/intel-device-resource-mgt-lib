@@ -15,14 +15,14 @@ public class TokenUtil {
 
     // by default, we believe all IConnectRequests are from internal services which are able to
     // access everything
-    tokenContent.setUser(Optional.ofNullable(request.getTokenInfo(ConstDef.MSG_KEY_USR))
-                                 .orElse("beihai"));
+    tokenContent.setUser(
+        Optional.ofNullable(request.getTokenInfo(ConstDef.MSG_KEY_USR)).orElse("beihai"));
     Optional.ofNullable(request.getTokenInfo(ConstDef.MSG_KEY_PRJ))
-            .ifPresent(project -> tokenContent.setProject(project));
-    tokenContent.setRole(Optional.ofNullable(request.getTokenInfo(ConstDef.MSG_KEY_ROLE))
-                                 .map(roleString -> UserRole.valueOf(roleString.replaceFirst("ROLE_",
-                                                                                             "")))
-                                 .orElse(UserRole.SYS_ADMIN));
+        .ifPresent(project -> tokenContent.setProject(project));
+    tokenContent.setRole(
+        Optional.ofNullable(request.getTokenInfo(ConstDef.MSG_KEY_ROLE))
+            .map(roleString -> UserRole.valueOf(roleString.replaceFirst("ROLE_", "")))
+            .orElse(UserRole.SYS_ADMIN));
 
     return tokenContent;
   }

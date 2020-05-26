@@ -7,7 +7,12 @@ package com.openiot.cloud.ibroker.base.device;
 import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.ibroker.proxy.rd.RDProxy;
-import io.netty.channel.Channel;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Data;
 import org.iotivity.cloud.base.connector.CoapClient;
 import org.iotivity.cloud.base.connector.ConnectorPool;
@@ -16,20 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class IAgentCache {
   private static final Logger logger = LoggerFactory.getLogger(IAgentCache.class);
 
   private AtomicBoolean lostRdConnection = new AtomicBoolean(false);
-  @Autowired
-  private RDProxy rdProxy;
+  @Autowired private RDProxy rdProxy;
 
   @Data
   class IAgentOnlineInfo {
@@ -46,20 +44,22 @@ public class IAgentCache {
   private ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(1);
 
   public IAgentCache() {
-    ses.scheduleAtFixedRate(() -> {
-      try {
-        maintainConnectionWithRd();
-        maintainMissedPingCount();
-      } catch (Exception e) {
-        logger.error("meet an exception during missed ping check " + BaseUtil.getStackTrace(e));
-      }
-    }, 1, 60, TimeUnit.SECONDS);
+    ses.scheduleAtFixedRate(
+        () -> {
+          try {
+            maintainConnectionWithRd();
+            maintainMissedPingCount();
+          } catch (Exception e) {
+            logger.error("meet an exception during missed ping check " + BaseUtil.getStackTrace(e));
+          }
+        },
+        1,
+        60,
+        TimeUnit.SECONDS);
   }
 
-
   public IAgent getAgent(String di) {
-    if (di == null)
-      return null;
+    if (di == null) return null;
 
     logger.debug(String.format("looking for %s in %s", di, this));
     for (Map.Entry<String, IAgentOnlineInfo> entry : agentPool.entrySet()) {
@@ -75,22 +75,20 @@ public class IAgentCache {
   }
 
   public void addAgent(IAgent agent) {
-    if (agent == null)
-      return;
+    if (agent == null) return;
 
     addAgent(agent.getAgentId(), agent);
   }
 
   public void addAgent(String aid, IAgent agent) {
-    if (agent == null)
-      return;
+    if (agent == null) return;
 
     // if there is existing socket for the same agent id,
     // we need to disconnect it before we setup the new context for the aid.
     if (agentPool.containsKey(aid)) {
       IAgent device = agentPool.get(aid).getAgent();
-      logger.warn("find another agent with same agent id " + aid + " @ "
-          + device.getRequestChannel());
+      logger.warn(
+          "find another agent with same agent id " + aid + " @ " + device.getRequestChannel());
 
       removeAgent(device.getAgentId(), false);
 
@@ -107,8 +105,7 @@ public class IAgentCache {
   }
 
   public IAgent removeAgent(String aid, boolean report) {
-    if (aid == null)
-      return null;
+    if (aid == null) return null;
 
     IAgent result = agentPool.remove(aid).getAgent();
     logger.info(String.format("aft remove %s from agentPool %s", aid, this));
@@ -116,7 +113,7 @@ public class IAgentCache {
     if (report && result != null) {
       if (ConnectorPool.getConnection((ConstDef.RD_URI)) != null) {
         ConnectorPool.getConnection(ConstDef.RD_URI)
-                     .sendRequest(rdProxy.reportDeviceDisconnected((IAgent) result), null);
+            .sendRequest(rdProxy.reportDeviceDisconnected((IAgent) result), null);
       }
     }
 
@@ -179,7 +176,6 @@ public class IAgentCache {
       }
     }
   }
-
 
   @Override
   public String toString() {

@@ -12,6 +12,9 @@ import com.openiot.cloud.sdk.service.IConnectRequest;
 import com.openiot.cloud.sdk.service.IConnectResponse;
 import com.openiot.cloud.sdk.service.IConnectServiceHandler;
 import com.openiot.cloud.sdk.utilities.UrlUtil;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +22,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
 
 @Component
 public class EventMonitorRequestHandler implements IConnectServiceHandler {
 
   public static final Logger logger = LoggerFactory.getLogger(EventMonitorRequestHandler.class);
 
-  @Autowired
-  private EventMonitorRepository monitorRepo;
+  @Autowired private EventMonitorRepository monitorRepo;
 
   @Override
   public void onRequest(IConnectRequest request) {
@@ -54,10 +53,9 @@ public class EventMonitorRequestHandler implements IConnectServiceHandler {
       respPayload = "Query params 'monitor' is required!";
       respCode = HttpStatus.BAD_REQUEST;
       respDataType = MediaType.TEXT_PLAIN;
-      resp = IConnectResponse.createFromRequest(request,
-                                                respCode,
-                                                respDataType,
-                                                respPayload.getBytes());
+      resp =
+          IConnectResponse.createFromRequest(
+              request, respCode, respDataType, respPayload.getBytes());
       resp.send();
       return;
     }
@@ -68,10 +66,9 @@ public class EventMonitorRequestHandler implements IConnectServiceHandler {
       respPayload = String.format("can not find %s", monitorName);
       respCode = HttpStatus.BAD_REQUEST;
       respDataType = MediaType.TEXT_PLAIN;
-      resp = IConnectResponse.createFromRequest(request,
-                                                respCode,
-                                                respDataType,
-                                                respPayload.getBytes());
+      resp =
+          IConnectResponse.createFromRequest(
+              request, respCode, respDataType, respPayload.getBytes());
       resp.send();
       return;
     }
@@ -91,10 +88,9 @@ public class EventMonitorRequestHandler implements IConnectServiceHandler {
       respPayload = "Request payload is null!";
       respCode = HttpStatus.BAD_REQUEST;
       respDataType = MediaType.TEXT_PLAIN;
-      resp = IConnectResponse.createFromRequest(request,
-                                                respCode,
-                                                respDataType,
-                                                respPayload.getBytes());
+      resp =
+          IConnectResponse.createFromRequest(
+              request, respCode, respDataType, respPayload.getBytes());
       resp.send();
       return;
     }
@@ -120,10 +116,9 @@ public class EventMonitorRequestHandler implements IConnectServiceHandler {
       respPayload = "Request payload format is incorrect!";
       respCode = HttpStatus.BAD_REQUEST;
       respDataType = MediaType.TEXT_PLAIN;
-      resp = IConnectResponse.createFromRequest(request,
-                                                respCode,
-                                                respDataType,
-                                                respPayload.getBytes());
+      resp =
+          IConnectResponse.createFromRequest(
+              request, respCode, respDataType, respPayload.getBytes());
       resp.send();
       return;
     }

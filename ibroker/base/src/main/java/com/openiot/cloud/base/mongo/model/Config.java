@@ -16,8 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @JsonInclude(Include.NON_NULL)
 public class Config {
 
-  @Id
-  String id;
+  @Id String id;
 
   @Field(ConstDef.F_TGTTYPE)
   @JsonProperty(ConstDef.F_TGTTYPE)
@@ -74,7 +73,12 @@ public class Config {
 
   @Override
   public String toString() {
-    return "Config [targetType=" + targetType + ", targetId=" + targetId + "] [config=" + config
+    return "Config [targetType="
+        + targetType
+        + ", targetId="
+        + targetId
+        + "] [config="
+        + config
         + "]";
   }
 }

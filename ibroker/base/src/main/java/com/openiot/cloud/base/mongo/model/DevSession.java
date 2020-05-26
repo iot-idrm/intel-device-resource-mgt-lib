@@ -15,8 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document(collection = ConstDef.C_DEVSESS)
 @JsonInclude(Include.NON_NULL)
 public class DevSession {
-  @Id
-  String id;
+  @Id String id;
 
   @Field(ConstDef.F_DEV)
   @JsonProperty(ConstDef.F_DEV)
@@ -98,7 +97,23 @@ public class DevSession {
 
   @Override
   public String toString() {
-    return "DevSession{" + "id='" + id + '\'' + ", devId='" + devId + '\'' + ", begin=" + begin
-        + ", end=" + end + ", iAgentId='" + iAgentId + '\'' + ", iBroker='" + iBroker + '\'' + '}';
+    return "DevSession{"
+        + "id='"
+        + id
+        + '\''
+        + ", devId='"
+        + devId
+        + '\''
+        + ", begin="
+        + begin
+        + ", end="
+        + end
+        + ", iAgentId='"
+        + iAgentId
+        + '\''
+        + ", iBroker='"
+        + iBroker
+        + '\''
+        + '}';
   }
 }

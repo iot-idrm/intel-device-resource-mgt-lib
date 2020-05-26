@@ -4,5 +4,4 @@
 
 package com.openiot.cloud.base.mongo.dao.custom;
 
-public class EventMonitorRepositoryImpl implements EventMonitorRepositoryCustom {
-}
+public class EventMonitorRepositoryImpl implements EventMonitorRepositoryCustom {}

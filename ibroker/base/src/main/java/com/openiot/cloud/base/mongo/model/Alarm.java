@@ -19,9 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Alarm {
-  @Untouchable
-  @Id
-  String id;
+  @Untouchable @Id String id;
 
   @Untouchable
   @Field(ConstDef.F_ALARMID)
@@ -74,7 +72,9 @@ public class Alarm {
   private String sev;
 
   public enum Status {
-    ACTIVE(0), CLEARED(1), SOLVED(2);
+    ACTIVE(0),
+    CLEARED(1),
+    SOLVED(2);
     private int level;
 
     Status(int level) {
@@ -87,7 +87,11 @@ public class Alarm {
   }
 
   public enum TargetType {
-    RESOURCE, DEVICE, PROPERTY, DATASOURCE, GROUP;
+    RESOURCE,
+    DEVICE,
+    PROPERTY,
+    DATASOURCE,
+    GROUP;
   }
   // public enum Status {
   // ACTIVE("active"), CLEARED("cleared"), SOLVED("solved");
@@ -255,8 +259,24 @@ public class Alarm {
 
   @Override
   public String toString() {
-    return "Alarm [project=" + project + ", group=" + group + ", alarmid=" + alarmid
-        + ", targettype=" + targettype + ", targetid=" + targetid + ", content=" + content
-        + ", set_t=" + settime + ", status=" + status + ", clear_t=" + cleartime + "]";
+    return "Alarm [project="
+        + project
+        + ", group="
+        + group
+        + ", alarmid="
+        + alarmid
+        + ", targettype="
+        + targettype
+        + ", targetid="
+        + targetid
+        + ", content="
+        + content
+        + ", set_t="
+        + settime
+        + ", status="
+        + status
+        + ", clear_t="
+        + cleartime
+        + "]";
   }
 }

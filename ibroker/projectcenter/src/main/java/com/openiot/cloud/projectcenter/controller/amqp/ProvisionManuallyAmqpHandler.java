@@ -12,6 +12,11 @@ import com.openiot.cloud.projectcenter.utils.RandomKeyGen;
 import com.openiot.cloud.sdk.service.IConnectRequest;
 import com.openiot.cloud.sdk.service.IConnectResponse;
 import com.openiot.cloud.sdk.service.IConnectServiceHandler;
+import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONObject;
@@ -20,22 +25,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.io.IOException;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Component
 public class ProvisionManuallyAmqpHandler implements IConnectServiceHandler {
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private GatewayService gatewayService;
-
+  @Autowired private GatewayService gatewayService;
 
   @Override
   public void onRequest(IConnectRequest request) {
@@ -47,34 +44,37 @@ public class ProvisionManuallyAmqpHandler implements IConnectServiceHandler {
       if (path.startsWith("/prov/manually")) {
         provisionManually(request);
       } else {
-        IConnectResponse.createFromRequest(request,
-                                           HttpStatus.NOT_IMPLEMENTED,
-                                           MediaType.APPLICATION_JSON,
-                                           objectMapper.writeValueAsBytes(new ErrorMessage("not support "
-                                               + path)))
-                        .send();
+        IConnectResponse.createFromRequest(
+                request,
+                HttpStatus.NOT_IMPLEMENTED,
+                MediaType.APPLICATION_JSON,
+                objectMapper.writeValueAsBytes(new ErrorMessage("not support " + path)))
+            .send();
       }
     } catch (IOException e) {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.INTERNAL_SERVER_ERROR,
-                                         MediaType.APPLICATION_JSON,
-                                         new JSONObject().append("error",
-                                                                 "failed to serialize/deserialize with JSON")
-                                                         .toString()
-                                                         .getBytes())
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.INTERNAL_SERVER_ERROR,
+              MediaType.APPLICATION_JSON,
+              new JSONObject()
+                  .append("error", "failed to serialize/deserialize with JSON")
+                  .toString()
+                  .getBytes())
+          .send();
     }
   }
 
-
   public void provisionManually(IConnectRequest request) throws IOException {
-    Map<String, String> queryParams = UriComponentsBuilder.fromUriString(request.getUrl())
-                                                          .build()
-                                                          .getQueryParams()
-                                                          .toSingleValueMap();
+    Map<String, String> queryParams =
+        UriComponentsBuilder.fromUriString(request.getUrl())
+            .build()
+            .getQueryParams()
+            .toSingleValueMap();
     // request payload can not be null
 
-    if (!queryParams.isEmpty() && !queryParams.containsValue("") && queryParams.containsKey("sn")
+    if (!queryParams.isEmpty()
+        && !queryParams.containsValue("")
+        && queryParams.containsKey("sn")
         && queryParams.containsKey("pi")) {
 
       // the gateway has existed
@@ -92,12 +92,13 @@ public class ProvisionManuallyAmqpHandler implements IConnectServiceHandler {
       }
 
       if (isExisted) {
-        IConnectResponse.createFromRequest(request,
-                                           HttpStatus.BAD_REQUEST,
-                                           MediaType.APPLICATION_JSON,
-                                           objectMapper.writeValueAsBytes(new ErrorMessage(String.format("%s has existed",
-                                                                                                         queryParams.get("sn")))))
-                        .send();
+        IConnectResponse.createFromRequest(
+                request,
+                HttpStatus.BAD_REQUEST,
+                MediaType.APPLICATION_JSON,
+                objectMapper.writeValueAsBytes(
+                    new ErrorMessage(String.format("%s has existed", queryParams.get("sn")))))
+            .send();
         return;
       }
 
@@ -118,20 +119,21 @@ public class ProvisionManuallyAmqpHandler implements IConnectServiceHandler {
       Objects.requireNonNull(gateway.getProvKey());
       Objects.requireNonNull(gateway.getHwSn());
       gatewayService.save(gateway);
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.OK,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(String.format("provision success")))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.OK,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(String.format("provision success")))
+          .send();
 
     } else {
-      IConnectResponse.createFromRequest(request,
-                                         HttpStatus.BAD_REQUEST,
-                                         MediaType.APPLICATION_JSON,
-                                         objectMapper.writeValueAsBytes(new ErrorMessage("need \"sn\" and \"pi\"")))
-                      .send();
+      IConnectResponse.createFromRequest(
+              request,
+              HttpStatus.BAD_REQUEST,
+              MediaType.APPLICATION_JSON,
+              objectMapper.writeValueAsBytes(new ErrorMessage("need \"sn\" and \"pi\"")))
+          .send();
       return;
     }
-
   }
 }

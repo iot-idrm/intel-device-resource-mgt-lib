@@ -4,27 +4,28 @@
 
 package com.openiot.cloud.ibroker.utils;
 
+import static com.openiot.cloud.base.ilink.MessageType.COAP_OVER_TCP;
+import static com.openiot.cloud.base.ilink.MessageType.INTEL_IAGENT;
+
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.help.MessageIdMaker;
 import com.openiot.cloud.base.ilink.ILinkMessage;
 import com.openiot.cloud.base.ilink.LeadingByte;
-import static com.openiot.cloud.base.ilink.MessageType.COAP_OVER_TCP;
-import static com.openiot.cloud.base.ilink.MessageType.INTEL_IAGENT;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import java.lang.reflect.Method;
 import org.iotivity.cloud.base.protocols.coap.CoapEncoder;
 import org.iotivity.cloud.base.protocols.coap.CoapMessage;
 import org.springframework.util.ReflectionUtils;
-import java.lang.reflect.Method;
 
 public class ILinkMessageBuilder {
 
   // handshake is a plain message which doesn't have messageId
   public static ILinkMessage createHandShake1Request(String gatewayId) {
-    return new ILinkMessage(LeadingByte.PLAIN.valueOf(),
-                            (byte) INTEL_IAGENT.valueOf()).setAgentId(gatewayId)
-                                                          .setTag(ConstDef.FH_V_HAN1);
+    return new ILinkMessage(LeadingByte.PLAIN.valueOf(), (byte) INTEL_IAGENT.valueOf())
+        .setAgentId(gatewayId)
+        .setTag(ConstDef.FH_V_HAN1);
   }
 
   static ILinkMessage createHandShake1Response() {
@@ -33,10 +34,10 @@ public class ILinkMessageBuilder {
 
   // handshake is a plain message which doesn't have messageId
   public static ILinkMessage createHandShake2Request(String gatewayId, byte[] payload) {
-    return new ILinkMessage(LeadingByte.PLAIN.valueOf(),
-                            (byte) INTEL_IAGENT.valueOf()).setAgentId(gatewayId)
-                                                          .setTag(ConstDef.FH_V_HAN2)
-                                                          .setPayload(payload);
+    return new ILinkMessage(LeadingByte.PLAIN.valueOf(), (byte) INTEL_IAGENT.valueOf())
+        .setAgentId(gatewayId)
+        .setTag(ConstDef.FH_V_HAN2)
+        .setPayload(payload);
   }
 
   static ILinkMessage createHandShake2Response() {
@@ -51,13 +52,15 @@ public class ILinkMessageBuilder {
     return null;
   }
 
-  public static ILinkMessage createCOAPRequest(String deviceId, int messageId,
-                                               CoapMessage payload) {
-    Method encodeMethod = ReflectionUtils.findMethod(CoapEncoder.class,
-                                                     "encode",
-                                                     ChannelHandlerContext.class,
-                                                     CoapMessage.class,
-                                                     ByteBuf.class);
+  public static ILinkMessage createCOAPRequest(
+      String deviceId, int messageId, CoapMessage payload) {
+    Method encodeMethod =
+        ReflectionUtils.findMethod(
+            CoapEncoder.class,
+            "encode",
+            ChannelHandlerContext.class,
+            CoapMessage.class,
+            ByteBuf.class);
     ReflectionUtils.makeAccessible(encodeMethod);
 
     ByteBuf out = Unpooled.buffer();
@@ -71,10 +74,10 @@ public class ILinkMessageBuilder {
     out.getBytes(out.readerIndex(), coapMessageBinary);
     out.release();
 
-    return new ILinkMessage(LeadingByte.REQUEST.valueOf(),
-                            (byte) COAP_OVER_TCP.valueOf()).setAgentId(deviceId)
-                                                           .setIlinkMessageId(MessageIdMaker.IntegerToBytes(messageId))
-                                                           .setPayload(coapMessageBinary);
+    return new ILinkMessage(LeadingByte.REQUEST.valueOf(), (byte) COAP_OVER_TCP.valueOf())
+        .setAgentId(deviceId)
+        .setIlinkMessageId(MessageIdMaker.IntegerToBytes(messageId))
+        .setPayload(coapMessageBinary);
   }
 
   public static ILinkMessage createCOAPResponse(ILinkMessage request) {

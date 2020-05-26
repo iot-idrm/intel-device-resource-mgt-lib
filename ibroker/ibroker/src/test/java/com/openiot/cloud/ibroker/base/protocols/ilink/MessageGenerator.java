@@ -11,6 +11,11 @@ import com.openiot.cloud.base.ilink.LeadingByte;
 import com.openiot.cloud.base.ilink.MessageType;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
 import org.iotivity.cloud.base.protocols.MessageBuilder;
 import org.iotivity.cloud.base.protocols.coap.CoapEncoder;
 import org.iotivity.cloud.base.protocols.coap.CoapMessage;
@@ -20,31 +25,61 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class MessageGenerator {
   private final String POST_RD_GW_PAYLOAD_FORMAT =
-      "[{" + "\"di\":\"%s\"," + "\"aid\":\"%s\"," + "\"status\":\"on\"," + "\"st\":\"\","
-          + "\"addr\":\"\"," + "\"dt\":\"intel.iagent\"," + "\"set\":\"\"," + "\"links\":[]" + "}]";
+      "[{"
+          + "\"di\":\"%s\","
+          + "\"aid\":\"%s\","
+          + "\"status\":\"on\","
+          + "\"st\":\"\","
+          + "\"addr\":\"\","
+          + "\"dt\":\"intel.iagent\","
+          + "\"set\":\"\","
+          + "\"links\":[]"
+          + "}]";
 
-  private final String POST_RD_DEV_PAYLOAD_FORMAT = "[{" + "\"di\":\"%s\"," + "\"aid\":\"%s\","
-      + "\"status\":\"on\"," + "\"st\":\"modbus\"," + "\"addr\":\"gwbus://modbus\","
-      + "\"dt\":\"imrt.smb350\"," + "\"set\":\"\"," + "\"links\":[%s]" + "}]";
+  private final String POST_RD_DEV_PAYLOAD_FORMAT =
+      "[{"
+          + "\"di\":\"%s\","
+          + "\"aid\":\"%s\","
+          + "\"status\":\"on\","
+          + "\"st\":\"modbus\","
+          + "\"addr\":\"gwbus://modbus\","
+          + "\"dt\":\"imrt.smb350\","
+          + "\"set\":\"\","
+          + "\"links\":[%s]"
+          + "}]";
 
   private final String POST_RD_RES_FORMAT = "{\"href\":\"%s\",\"rt\":[\"%s\"]}";
 
   private String[] deviceIdSurfix = new String[] {"-di17", "-di19", "-di23", "-di27"};
 
-  private String[] resource = new String[] {"/common_voltage", "/monitor", "/airflow", "/boiler",
-      "/battery", "/current_per_phase", "/power_per_phase", "/switch", "/airflow", "/washer",
-      "/dryer", "/refrigerator", "/dishwasher", "/cooktops", "/oven", "/range_hoods", "/blender",
-      "/juicer", "/iron", "/sewing"};
+  private String[] resource =
+      new String[] {
+        "/common_voltage",
+        "/monitor",
+        "/airflow",
+        "/boiler",
+        "/battery",
+        "/current_per_phase",
+        "/power_per_phase",
+        "/switch",
+        "/airflow",
+        "/washer",
+        "/dryer",
+        "/refrigerator",
+        "/dishwasher",
+        "/cooktops",
+        "/oven",
+        "/range_hoods",
+        "/blender",
+        "/juicer",
+        "/iron",
+        "/sewing"
+      };
 
   private int messageAmout = 10;
   private Random random = new Random(1024);
@@ -70,13 +105,8 @@ public class MessageGenerator {
       for (String deviceId : deviceIdSurfix) {
         for (String res : resource) {
           for (String pro : property) {
-            urlPathList.add(String.format("%s%s/%s%s%s%s",
-                                          commonPrefix,
-                                          deviceType,
-                                          aid,
-                                          deviceId,
-                                          res,
-                                          pro));
+            urlPathList.add(
+                String.format("%s%s/%s%s%s%s", commonPrefix, deviceType, aid, deviceId, res, pro));
           }
         }
       }
@@ -104,33 +134,36 @@ public class MessageGenerator {
     System.out.println(sb.toString());
   }
 
-  public ILinkMessage produceOneRequest(Map<String, Object> flexHeader, String urlPath,
-                                        String urlQuery, RequestMethod action, ContentFormat format,
-                                        byte[] payload) {
-    return produceOneMessage(LeadingByte.REQUEST,
-                             flexHeader,
-                             urlPath,
-                             urlQuery,
-                             action,
-                             format,
-                             payload);
+  public ILinkMessage produceOneRequest(
+      Map<String, Object> flexHeader,
+      String urlPath,
+      String urlQuery,
+      RequestMethod action,
+      ContentFormat format,
+      byte[] payload) {
+    return produceOneMessage(
+        LeadingByte.REQUEST, flexHeader, urlPath, urlQuery, action, format, payload);
   }
 
-  public ILinkMessage produceOneResponse(Map<String, Object> flexHeader, String urlPath,
-                                         String urlQuery, RequestMethod action,
-                                         ContentFormat format, byte[] payload) {
-    return produceOneMessage(LeadingByte.RESPONSE,
-                             flexHeader,
-                             urlPath,
-                             urlQuery,
-                             action,
-                             format,
-                             payload);
+  public ILinkMessage produceOneResponse(
+      Map<String, Object> flexHeader,
+      String urlPath,
+      String urlQuery,
+      RequestMethod action,
+      ContentFormat format,
+      byte[] payload) {
+    return produceOneMessage(
+        LeadingByte.RESPONSE, flexHeader, urlPath, urlQuery, action, format, payload);
   }
 
-  ILinkMessage produceOneMessage(LeadingByte leadingByte, Map<String, Object> flexHeader,
-                                 String urlPath, String urlQuery, RequestMethod action,
-                                 ContentFormat format, byte[] payload) {
+  ILinkMessage produceOneMessage(
+      LeadingByte leadingByte,
+      Map<String, Object> flexHeader,
+      String urlPath,
+      String urlQuery,
+      RequestMethod action,
+      ContentFormat format,
+      byte[] payload) {
     // frame a CoapMessage
     CoapMessage cm =
         (CoapMessage) MessageBuilder.createRequest(action, urlPath, urlQuery, format, payload);
@@ -144,8 +177,10 @@ public class MessageGenerator {
     // frame a ILinkCoapOverTcpMessage
     int randomMid = this.random.nextInt(this.messageAmout);
     ILinkMessage message =
-        new ILinkMessage(leadingByte.valueOf(),
-                         (byte) MessageType.COAP_OVER_TCP.valueOf()).setIlinkMessageId(Integer.toString(randomMid).getBytes()).setFlexHeadre(flexHeader).setPayload(cmBytes);
+        new ILinkMessage(leadingByte.valueOf(), (byte) MessageType.COAP_OVER_TCP.valueOf())
+            .setIlinkMessageId(Integer.toString(randomMid).getBytes())
+            .setFlexHeadre(flexHeader)
+            .setPayload(cmBytes);
     return message;
   }
 
@@ -169,10 +204,10 @@ public class MessageGenerator {
     for (String aid : this.aidBucket) {
       byte[] randomMid = Integer.toString(this.random.nextInt(0xFFFF)).getBytes();
       ILinkMessage message =
-          new ILinkMessage(LeadingByte.REQUEST.valueOf(),
-                           (byte) MessageType.INTEL_IAGENT.valueOf()).setAgentId(aid)
-                                                                     .setTag(ConstDef.FH_V_HAN2)
-                                                                     .setIlinkMessageId(randomMid);
+          new ILinkMessage(LeadingByte.REQUEST.valueOf(), (byte) MessageType.INTEL_IAGENT.valueOf())
+              .setAgentId(aid)
+              .setTag(ConstDef.FH_V_HAN2)
+              .setIlinkMessageId(randomMid);
       byte[] binary = serializeMessage(message);
       sb.append(byteArrayToHexString(binary));
     }
@@ -187,12 +222,14 @@ public class MessageGenerator {
       flexHeader.put("_aid", aid);
       String urlPath = "/rd";
       byte[] payload = String.format(POST_RD_GW_PAYLOAD_FORMAT, aid, aid).getBytes();
-      ILinkMessage putRD = produceOneRequest(flexHeader,
-                                             urlPath,
-                                             null,
-                                             RequestMethod.POST,
-                                             ContentFormat.APPLICATION_TEXTPLAIN,
-                                             payload);
+      ILinkMessage putRD =
+          produceOneRequest(
+              flexHeader,
+              urlPath,
+              null,
+              RequestMethod.POST,
+              ContentFormat.APPLICATION_TEXTPLAIN,
+              payload);
       byte[] binary = serializeMessage(putRD);
       sb.append(byteArrayToHexString(binary));
     }
@@ -215,12 +252,14 @@ public class MessageGenerator {
 
         byte[] payload =
             String.format(POST_RD_DEV_PAYLOAD_FORMAT, aid + dev, aid, href.toString()).getBytes();
-        ILinkMessage putRD = produceOneRequest(flexHeader,
-                                               urlPath,
-                                               null,
-                                               RequestMethod.POST,
-                                               ContentFormat.APPLICATION_TEXTPLAIN,
-                                               payload);
+        ILinkMessage putRD =
+            produceOneRequest(
+                flexHeader,
+                urlPath,
+                null,
+                RequestMethod.POST,
+                ContentFormat.APPLICATION_TEXTPLAIN,
+                payload);
         byte[] binary = serializeMessage(putRD);
         sb.append(byteArrayToHexString(binary));
       }
@@ -256,12 +295,9 @@ public class MessageGenerator {
       ContentFormat format = ContentFormat.APPLICATION_TEXTPLAIN;
       // byte[] payload = randomPickOne(payloadBucket).getBytes();
       byte[] payload = Integer.toString(random.nextInt(0x7FFFFFFF)).getBytes();
-      byte[] binary = serializeMessage(produceOneRequest(flexHeader,
-                                                         urlPath,
-                                                         urlQuery,
-                                                         action,
-                                                         format,
-                                                         payload));
+      byte[] binary =
+          serializeMessage(
+              produceOneRequest(flexHeader, urlPath, urlQuery, action, format, payload));
       ret.append(byteArrayToHexString(binary));
     }
 
@@ -286,12 +322,9 @@ public class MessageGenerator {
       String urlQuery = null;
       RequestMethod action = RequestMethod.PUT;
       ContentFormat format = ContentFormat.APPLICATION_TEXTPLAIN;
-      byte[] binary = serializeMessage(produceOneRequest(flexHeader,
-                                                         urlPath,
-                                                         urlQuery,
-                                                         action,
-                                                         format,
-                                                         payload));
+      byte[] binary =
+          serializeMessage(
+              produceOneRequest(flexHeader, urlPath, urlQuery, action, format, payload));
       byte[] newBinary = Arrays.copyOf(binary, binary.length - payload.length);
       ret.append(byteArrayToHexString(newBinary));
     }

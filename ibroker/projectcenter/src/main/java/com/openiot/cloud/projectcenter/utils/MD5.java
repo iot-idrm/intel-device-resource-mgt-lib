@@ -4,9 +4,9 @@
 
 package com.openiot.cloud.projectcenter.utils;
 
-import lombok.extern.slf4j.Slf4j;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MD5 {

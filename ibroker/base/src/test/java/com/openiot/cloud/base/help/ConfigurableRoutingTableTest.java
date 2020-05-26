@@ -5,15 +5,16 @@
 package com.openiot.cloud.base.help;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -100,8 +101,8 @@ public class ConfigurableRoutingTableTest {
     assertThat(routingTable.get("/dp").getHostString()).isEqualTo("127.0.0.1");
     assertThat(routingTable.get("/dp").getPort()).isEqualTo(5685);
 
-    assertThat(routingTable.get("/rd")
-                           .getHostString()).isEqualTo("openiot-server-service-1.bj.intel.com");
+    assertThat(routingTable.get("/rd").getHostString())
+        .isEqualTo("openiot-server-service-1.bj.intel.com");
     assertThat(routingTable.get("/rd").getPort()).isEqualTo(5684);
 
     assertThat(routingTable.get("/meta").getHostString()).isEqualTo("localhost");

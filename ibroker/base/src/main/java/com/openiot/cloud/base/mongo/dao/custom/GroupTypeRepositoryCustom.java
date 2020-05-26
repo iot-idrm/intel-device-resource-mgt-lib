@@ -5,17 +5,24 @@
 package com.openiot.cloud.base.mongo.dao.custom;
 
 import com.openiot.cloud.base.mongo.model.GroupType;
-import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 
 public interface GroupTypeRepositoryCustom {
 
-  List<GroupType> filter(Optional<String> project, Optional<String> name,
-                         Optional<String> displayName, List<String> withAttr, List<String> withCfg,
-                         List<String> withDs, Map<String, String> attrMap,
-                         Map<String, String> cfgMap, List<String> fields, Pageable pageRequest);
+  List<GroupType> filter(
+      Optional<String> project,
+      Optional<String> name,
+      Optional<String> displayName,
+      List<String> withAttr,
+      List<String> withCfg,
+      List<String> withDs,
+      Map<String, String> attrMap,
+      Map<String, String> cfgMap,
+      List<String> fields,
+      Pageable pageRequest);
 
   GroupType createOrUpdateOne(GroupType newGroupType);
 }

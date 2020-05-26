@@ -8,21 +8,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.openiot.cloud.base.mongo.model.validator.CreateValidator;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Optional;
+import javax.validation.constraints.NotNull;
 import org.bson.types.Binary;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Optional;
 
 @Document(collection = "TaskNew")
 @JsonInclude(Include.NON_NULL)
 public class TaskNew {
 
-  @Id
-  String id;
+  @Id String id;
 
   @Field("monitorName")
   @JsonProperty("monitorName")
@@ -148,9 +147,26 @@ public class TaskNew {
 
   @Override
   public String toString() {
-    return "TaskNew [id=" + id + ", monitorName=" + monitorName + ", eventType=" + eventType
-        + ", targetType=" + targetType + ", targetId=" + targetId + ", desc=" + desc
-        + ", createTime=" + createTime + ", deadline=" + deadline + ", dataFmt=" + dataFmt
-        + ", data=" + Arrays.toString(getData()) + "]";
+    return "TaskNew [id="
+        + id
+        + ", monitorName="
+        + monitorName
+        + ", eventType="
+        + eventType
+        + ", targetType="
+        + targetType
+        + ", targetId="
+        + targetId
+        + ", desc="
+        + desc
+        + ", createTime="
+        + createTime
+        + ", deadline="
+        + deadline
+        + ", dataFmt="
+        + dataFmt
+        + ", data="
+        + Arrays.toString(getData())
+        + "]";
   }
 }

@@ -15,6 +15,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserAndRole {
   private String name;
-  @EqualsAndHashCode.Exclude
-  private UserRole role;
+  @EqualsAndHashCode.Exclude private UserRole role;
 }

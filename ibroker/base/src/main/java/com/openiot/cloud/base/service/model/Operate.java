@@ -16,8 +16,15 @@ public class Operate {
 
   public Operate() {}
 
-  public Operate(String type, String background_state, String di, String url, String pn,
-      String sched, String state_cmds, Integer repeat) {
+  public Operate(
+      String type,
+      String background_state,
+      String di,
+      String url,
+      String pn,
+      String sched,
+      String state_cmds,
+      Integer repeat) {
     this.type = type == null || type.isEmpty() ? null : type;
     this.background_state =
         background_state == null || background_state.isEmpty() ? null : background_state;
@@ -95,8 +102,30 @@ public class Operate {
 
   @Override
   public String toString() {
-    return "Operate{" + "type='" + type + '\'' + ", background_state='" + background_state + '\''
-        + ", di='" + di + '\'' + ", url='" + url + '\'' + ", pn='" + pn + '\'' + ", sched='" + sched
-        + '\'' + ", state_cmds='" + state_cmds + '\'' + ", repeat=" + repeat + '}';
+    return "Operate{"
+        + "type='"
+        + type
+        + '\''
+        + ", background_state='"
+        + background_state
+        + '\''
+        + ", di='"
+        + di
+        + '\''
+        + ", url='"
+        + url
+        + '\''
+        + ", pn='"
+        + pn
+        + '\''
+        + ", sched='"
+        + sched
+        + '\''
+        + ", state_cmds='"
+        + state_cmds
+        + '\''
+        + ", repeat="
+        + repeat
+        + '}';
   }
 }

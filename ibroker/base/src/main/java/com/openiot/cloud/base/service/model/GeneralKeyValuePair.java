@@ -38,7 +38,14 @@ public class GeneralKeyValuePair {
 
   @Override
   public String toString() {
-    return "GeneralKeyValuePair{" + "key='" + key + '\'' + ", value=" + value + ", accessTime="
-        + accessTime + '}';
+    return "GeneralKeyValuePair{"
+        + "key='"
+        + key
+        + '\''
+        + ", value="
+        + value
+        + ", accessTime="
+        + accessTime
+        + '}';
   }
 }

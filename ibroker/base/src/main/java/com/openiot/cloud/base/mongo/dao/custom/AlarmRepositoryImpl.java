@@ -4,6 +4,8 @@
 
 package com.openiot.cloud.base.mongo.dao.custom;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+
 import com.openiot.cloud.base.help.BaseUtil;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.dao.AlarmDefinitionRepository;
@@ -12,6 +14,11 @@ import com.openiot.cloud.base.mongo.model.Alarm;
 import com.openiot.cloud.base.mongo.model.Alarm.Status;
 import com.openiot.cloud.base.mongo.model.AlarmStats;
 import com.openiot.cloud.base.mongo.model.DssStats;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,41 +30,35 @@ import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
-import static org.springframework.data.mongodb.core.query.Criteria.where;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 @Component
 public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
   public static final Logger logger = LoggerFactory.getLogger(AlarmRepositoryImpl.class);
   private static ExecutorService executor = Executors.newFixedThreadPool(4);
 
-  @Autowired
-  AlarmRepository alarmRepo;
-  @Autowired
-  AlarmDefinitionRepository alarmDefRepo;
-  @Autowired
-  MongoOperations monOp;
+  @Autowired AlarmRepository alarmRepo;
+  @Autowired AlarmDefinitionRepository alarmDefRepo;
+  @Autowired MongoOperations monOp;
 
   @Override
-  public List<?> filter(String project, String[] aid, String tt, String tid, String unit,
-                        String grp, Long from, Long to, String status, PageRequest pageReq) {
+  public List<?> filter(
+      String project,
+      String[] aid,
+      String tt,
+      String tid,
+      String unit,
+      String grp,
+      Long from,
+      Long to,
+      String status,
+      PageRequest pageReq) {
 
-    logger.info(String.format("query param: project=%s aid=%s tt=%s tid=%s unit=%s grp=%s from=%s to=%s status=%s ",
-                              project,
-                              aid,
-                              tt,
-                              tid,
-                              unit,
-                              grp,
-                              from,
-                              to,
-                              status));
+    logger.info(
+        String.format(
+            "query param: project=%s aid=%s tt=%s tid=%s unit=%s grp=%s from=%s to=%s status=%s ",
+            project, aid, tt, tid, unit, grp, from, to, status));
 
     // 1. for history stats query unit
     if (unit != null) {
@@ -86,9 +87,12 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
         }
 
         final Date fBegin = (Date) Begin.clone();
-        futureTasks.put(IntervalStart, new FutureTask<AlarmStats>(() -> {
-          return getAlarmStats(project, tt, tid, aid, IntervalStart, fBegin);
-        }));
+        futureTasks.put(
+            IntervalStart,
+            new FutureTask<AlarmStats>(
+                () -> {
+                  return getAlarmStats(project, tt, tid, aid, IntervalStart, fBegin);
+                }));
       }
 
       for (FutureTask futureTask : futureTasks.values()) {
@@ -120,11 +124,11 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
 
       // targettype
       Optional.ofNullable(tt)
-              .map(t -> t.toString())
-              .ifPresent(ttStr -> q.addCriteria(where(ConstDef.F_ALARMTAGTYPE).is(ttStr)));
+          .map(t -> t.toString())
+          .ifPresent(ttStr -> q.addCriteria(where(ConstDef.F_ALARMTAGTYPE).is(ttStr)));
 
       Optional.ofNullable(tid)
-              .ifPresent(tDi -> q.addCriteria(where(ConstDef.F_ALARMTAGID).is(tid)));
+          .ifPresent(tDi -> q.addCriteria(where(ConstDef.F_ALARMTAGID).is(tid)));
 
       if (grp != null) {
         q.addCriteria(where(ConstDef.F_TAGGRP).is(grp));
@@ -154,36 +158,38 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
       // }
       // begin and end
       if (from != null && to != null) {
-        q.addCriteria(new Criteria().andOperator(where(ConstDef.F_ALARMBEGINNINGTIME).gte(from),
-                                                 where(ConstDef.F_ALARMBEGINNINGTIME).lte(to)));
+        q.addCriteria(
+            new Criteria()
+                .andOperator(
+                    where(ConstDef.F_ALARMBEGINNINGTIME).gte(from),
+                    where(ConstDef.F_ALARMBEGINNINGTIME).lte(to)));
       } else {
-        if (from != null)
-          q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).gte(from));
-        if (to != null)
-          q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).lte(to));
+        if (from != null) q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).gte(from));
+        if (to != null) q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).lte(to));
       }
       // status support !ACTIVE ACTIVE RESOLVED CLEARED
-      Optional.ofNullable(status).ifPresent(s -> {
-        if (status.startsWith("!")) {
-          q.addCriteria(where(ConstDef.F_ALARMSTATUS).ne(s.substring(1).toUpperCase()));
-        } else {
-          q.addCriteria(where(ConstDef.F_ALARMSTATUS).is(s.toUpperCase()));
-        }
-      });
+      Optional.ofNullable(status)
+          .ifPresent(
+              s -> {
+                if (status.startsWith("!")) {
+                  q.addCriteria(where(ConstDef.F_ALARMSTATUS).ne(s.substring(1).toUpperCase()));
+                } else {
+                  q.addCriteria(where(ConstDef.F_ALARMSTATUS).is(s.toUpperCase()));
+                }
+              });
 
       Optional.ofNullable(pageReq).ifPresent(p -> q.with(p));
 
       logger.info("query: " + q.toString());
 
-      return monOp.find(q.with(new Sort(Sort.Direction.DESC,
-                                        ConstDef.F_ALARMBEGINNINGTIME,
-                                        ConstDef.F_ID)),
-                        Alarm.class);
+      return monOp.find(
+          q.with(new Sort(Sort.Direction.DESC, ConstDef.F_ALARMBEGINNINGTIME, ConstDef.F_ID)),
+          Alarm.class);
     }
   }
 
-  private AlarmStats getAlarmStats(String project, String tt, String tid, String[] aid,
-                                   Date intervalStart, Date begin) {
+  private AlarmStats getAlarmStats(
+      String project, String tt, String tid, String[] aid, Date intervalStart, Date begin) {
 
     AlarmStats alarmStats = new AlarmStats();
     for (Status s : Status.values()) {
@@ -191,22 +197,28 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
       Query q = new Query(Criteria.where(ConstDef.Q_PROJECT).is(project));
       // targettype
       Optional.ofNullable(tt)
-              .map(t -> t.toString())
-              .ifPresent(ttStr -> q.addCriteria(where(ConstDef.F_ALARMTAGTYPE).is(ttStr)));
+          .map(t -> t.toString())
+          .ifPresent(ttStr -> q.addCriteria(where(ConstDef.F_ALARMTAGTYPE).is(ttStr)));
 
       Optional.ofNullable(tid).ifPresent(tDi -> q.addCriteria(where(ConstDef.F_ALARMTAGID).is(tt)));
       // aid
       Optional.ofNullable(aid).ifPresent(idStr -> q.addCriteria(where(ConstDef.F_ALARMID).in(aid)));
 
       if (s == Status.ACTIVE) {
-        q.addCriteria(new Criteria().andOperator(where(ConstDef.F_ALARMBEGINNINGTIME).gte(intervalStart.getTime()),
-                                                 where(ConstDef.F_ALARMBEGINNINGTIME).lt(begin.getTime())));
+        q.addCriteria(
+            new Criteria()
+                .andOperator(
+                    where(ConstDef.F_ALARMBEGINNINGTIME).gte(intervalStart.getTime()),
+                    where(ConstDef.F_ALARMBEGINNINGTIME).lt(begin.getTime())));
         // q.addCriteria(where(ConstDef.F_ALARMSTATUS).is(Status.ACTIVE));
         alarmStats.active_num = (int) monOp.count(q, Alarm.class);
         logger.info("/api/alarm query: " + q);
       } else if (s == Status.CLEARED) {
-        q.addCriteria(new Criteria().andOperator(where(ConstDef.F_ALARMENDTIME).gte(intervalStart.getTime()),
-                                                 where(ConstDef.F_ALARMENDTIME).lt(begin.getTime())));
+        q.addCriteria(
+            new Criteria()
+                .andOperator(
+                    where(ConstDef.F_ALARMENDTIME).gte(intervalStart.getTime()),
+                    where(ConstDef.F_ALARMENDTIME).lt(begin.getTime())));
         q.addCriteria(where(ConstDef.F_ALARMSTATUS).is(Status.CLEARED));
         alarmStats.clear_num = (int) monOp.count(q, Alarm.class);
         logger.info("/api/alarm query: " + q);
@@ -218,8 +230,8 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
   }
 
   @Override
-  public List<DssStats> getDssStats(String project, String dssName, String unit, Long from, Long to,
-                                    String page, String limit) {
+  public List<DssStats> getDssStats(
+      String project, String dssName, String unit, Long from, Long to, String page, String limit) {
 
     List<AggregationOperation> operations = new ArrayList<>();
 
@@ -230,8 +242,9 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
     match.and(ConstDef.F_ALARMTAGTYPE).is("dss");
     match.and(ConstDef.F_ALARMENDTIME).gt(0L);
     match.and(ConstDef.F_ALARMTAGID).regex(".*:" + dssName);
-    match.andOperator(where(ConstDef.F_ALARMBEGINNINGTIME).gte(from),
-                      where(ConstDef.F_ALARMBEGINNINGTIME).lte(to));
+    match.andOperator(
+        where(ConstDef.F_ALARMBEGINNINGTIME).gte(from),
+        where(ConstDef.F_ALARMBEGINNINGTIME).lte(to));
     operations.add(Aggregation.match(match));
 
     // 2. {$group:{_id:"$targetid", grp_count:{$sum:1},
@@ -245,7 +258,7 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
     // ConstDef.F_ALARMBEGINNINGTIME);
     AggregationExpression expr =
         ArithmeticOperators.Subtract.valueOf(ConstDef.F_ALARMENDTIME)
-                                    .subtract(ConstDef.F_ALARMBEGINNINGTIME);
+            .subtract(ConstDef.F_ALARMBEGINNINGTIME);
     groupByRoom = groupByRoom.sum(expr).as("grpsum");
     groupByRoom = groupByRoom.max(expr).as("grpmax");
     groupByRoom = groupByRoom.min(expr).as("grpmin");
@@ -283,17 +296,19 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
   }
 
   @Override
-  public Long filterCnt(String project, String[] aid, String tt, String tid, String grp, Long from,
-                        Long to, String status) {
-    logger.info(String.format("query param: project=%s aid=%s tt=%s tid=%s grp=%s from=%s to=%s status=%s ",
-                              project,
-                              aid,
-                              tt,
-                              tid,
-                              grp,
-                              from,
-                              to,
-                              status));
+  public Long filterCnt(
+      String project,
+      String[] aid,
+      String tt,
+      String tid,
+      String grp,
+      Long from,
+      Long to,
+      String status) {
+    logger.info(
+        String.format(
+            "query param: project=%s aid=%s tt=%s tid=%s grp=%s from=%s to=%s status=%s ",
+            project, aid, tt, tid, grp, from, to, status));
 
     Query q = new Query(Criteria.where(ConstDef.Q_PROJECT).is(project));
     // aid
@@ -301,8 +316,8 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
 
     // targettype
     Optional.ofNullable(tt)
-            .map(t -> t.toString())
-            .ifPresent(ttStr -> q.addCriteria(where(ConstDef.F_ALARMTAGTYPE).is(ttStr)));
+        .map(t -> t.toString())
+        .ifPresent(ttStr -> q.addCriteria(where(ConstDef.F_ALARMTAGTYPE).is(ttStr)));
 
     Optional.ofNullable(tid).ifPresent(tDi -> q.addCriteria(where(ConstDef.F_ALARMTAGID).is(tid)));
 
@@ -310,22 +325,25 @@ public class AlarmRepositoryImpl implements AlarmRepositoryCustom {
       q.addCriteria(where(ConstDef.F_TAGGRP).is(grp));
     }
     if (from != null && to != null) {
-      q.addCriteria(new Criteria().andOperator(where(ConstDef.F_ALARMBEGINNINGTIME).gte(from),
-                                               where(ConstDef.F_ALARMBEGINNINGTIME).lte(to)));
+      q.addCriteria(
+          new Criteria()
+              .andOperator(
+                  where(ConstDef.F_ALARMBEGINNINGTIME).gte(from),
+                  where(ConstDef.F_ALARMBEGINNINGTIME).lte(to)));
     } else {
-      if (from != null)
-        q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).gte(from));
-      if (to != null)
-        q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).lte(to));
+      if (from != null) q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).gte(from));
+      if (to != null) q.addCriteria(where(ConstDef.F_ALARMBEGINNINGTIME).lte(to));
     }
     // status support !ACTIVE ACTIVE RESOLVED CLEARED
-    Optional.ofNullable(status).ifPresent(s -> {
-      if (status.startsWith("!")) {
-        q.addCriteria(where(ConstDef.F_ALARMSTATUS).ne(s.substring(1).toUpperCase()));
-      } else {
-        q.addCriteria(where(ConstDef.F_ALARMSTATUS).is(s.toUpperCase()));
-      }
-    });
+    Optional.ofNullable(status)
+        .ifPresent(
+            s -> {
+              if (status.startsWith("!")) {
+                q.addCriteria(where(ConstDef.F_ALARMSTATUS).ne(s.substring(1).toUpperCase()));
+              } else {
+                q.addCriteria(where(ConstDef.F_ALARMSTATUS).is(s.toUpperCase()));
+              }
+            });
 
     logger.info("query: " + q.toString());
 

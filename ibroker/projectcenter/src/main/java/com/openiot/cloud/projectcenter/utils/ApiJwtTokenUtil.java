@@ -9,16 +9,16 @@ import com.openiot.cloud.base.help.ConstDef;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 // refer to
 // https://github.com/szerhusenBC/jwt-spring-security-demo/blob/master/src/main/java/org/zerhusen/security/JwtTokenUtil.java
@@ -69,23 +69,26 @@ public class ApiJwtTokenUtil implements Serializable {
     final Date expiration = getExpirationDateFromToken(token);
     boolean result = expiration.getTime() < (BaseUtil.getNow().getTime() / 1000 * 1000);
     if (result) {
-      logger.warn("{} is expired, expiration of token is {} and now is {}",
-                  token,
-                  expiration,
-                  BaseUtil.getNow());
+      logger.warn(
+          "{} is expired, expiration of token is {} and now is {}",
+          token,
+          expiration,
+          BaseUtil.getNow());
     }
     return result;
   }
 
   private Boolean isCreatedAfterLastPasswordReset(Date created, Date lastPasswordReset) {
-    boolean result = lastPasswordReset == null
-        || created.getTime() >= (lastPasswordReset.getTime() / 1000 * 1000);
+    boolean result =
+        lastPasswordReset == null
+            || created.getTime() >= (lastPasswordReset.getTime() / 1000 * 1000);
     if (!result) {
-      logger.warn("the token creation time {}({}) is not after password latest modification time {}({})",
-                  created,
-                  created.toInstant(),
-                  lastPasswordReset,
-                  lastPasswordReset.toInstant());
+      logger.warn(
+          "the token creation time {}({}) is not after password latest modification time {}({})",
+          created,
+          created.toInstant(),
+          lastPasswordReset,
+          lastPasswordReset.toInstant());
     }
     return result;
   }
@@ -107,12 +110,12 @@ public class ApiJwtTokenUtil implements Serializable {
     final Date createdDate = BaseUtil.getNow();
     final Date expirationDate = calculateExpirationDate(createdDate);
     return Jwts.builder()
-               .setClaims(claims)
-               .setSubject(subject)
-               .setIssuedAt(createdDate)
-               .setExpiration(expirationDate)
-               .signWith(SignatureAlgorithm.HS512, secret)
-               .compact();
+        .setClaims(claims)
+        .setSubject(subject)
+        .setIssuedAt(createdDate)
+        .setExpiration(expirationDate)
+        .signWith(SignatureAlgorithm.HS512, secret)
+        .compact();
   }
 
   // TODO: should be checked

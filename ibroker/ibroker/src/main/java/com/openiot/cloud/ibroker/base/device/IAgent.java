@@ -10,12 +10,12 @@ import com.openiot.cloud.base.mongo.model.help.ShortSession;
 import com.openiot.cloud.ibroker.base.connector.ILinkClient;
 import com.openiot.cloud.ibroker.utils.ILinkMessageBuilder;
 import io.netty.channel.ChannelHandlerContext;
-import org.iotivity.cloud.base.device.Device;
-import org.iotivity.cloud.base.protocols.IResponse;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import org.iotivity.cloud.base.device.Device;
+import org.iotivity.cloud.base.protocols.IResponse;
 
 public class IAgent extends Device implements Comparable<IAgent> {
   private String agentId = null;
@@ -100,10 +100,11 @@ public class IAgent extends Device implements Comparable<IAgent> {
 
   @Override
   public String toString() {
-    return String.format("iAgent: %s, channel: %s, epList: [%s]",
-                         this.agentId,
-                         this.ctx == null ? "null" : this.ctx.channel().id().asShortText(),
-                         this.epList);
+    return String.format(
+        "iAgent: %s, channel: %s, epList: [%s]",
+        this.agentId,
+        this.ctx == null ? "null" : this.ctx.channel().id().asShortText(),
+        this.epList);
   }
 
   @Override

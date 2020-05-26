@@ -4,8 +4,6 @@
 
 package com.openiot.cloud.base.profiling;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -14,6 +12,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DurationCounter {
 
@@ -41,8 +41,8 @@ public class DurationCounter {
 
   private final String separatorLine = String.join("", Collections.nCopies(70, "="));
 
-  public DurationCounter(String name, DurationCounterConfiguration configuration,
-      AlarmHandler alarmHandler) {
+  public DurationCounter(
+      String name, DurationCounterConfiguration configuration, AlarmHandler alarmHandler) {
     this.name = name;
     this.configuration = configuration;
     this.alarmHandler = alarmHandler;
@@ -53,8 +53,10 @@ public class DurationCounter {
   }
 
   public void count(long executionSeconds) {
-    long bucketName = executionSeconds / configuration.getExecutionTimeBucketSize()
-        * configuration.getExecutionTimeBucketSize();
+    long bucketName =
+        executionSeconds
+            / configuration.getExecutionTimeBucketSize()
+            * configuration.getExecutionTimeBucketSize();
     executionTimeStatistic.put(bucketName, executionTimeStatistic.getOrDefault(bucketName, 0l) + 1);
 
     // if exceeds threshold
@@ -75,8 +77,10 @@ public class DurationCounter {
   }
 
   long periodRemainingMillis() {
-    return Math.max(configuration.getStatisticPeriodMillis()
-        - (Instant.now(Clock.systemUTC()).toEpochMilli() - currentPeriodStartMillis), 0);
+    return Math.max(
+        configuration.getStatisticPeriodMillis()
+            - (Instant.now(Clock.systemUTC()).toEpochMilli() - currentPeriodStartMillis),
+        0);
   }
 
   void checkAndDump() {
@@ -112,17 +116,24 @@ public class DurationCounter {
     builder.append("\n");
     builder.append("alarm: " + alarmReported);
     builder.append("\n");
-    builder.append("date: "
-        + LocalDateTime.ofInstant(Instant.ofEpochMilli(currentPeriodStartMillis), ZoneOffset.UTC)
-                       .toLocalDate());
+    builder.append(
+        "date: "
+            + LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(currentPeriodStartMillis), ZoneOffset.UTC)
+                .toLocalDate());
     builder.append("\n");
-    builder.append("period: "
-        + LocalDateTime.ofInstant(Instant.ofEpochMilli(currentPeriodStartMillis), ZoneOffset.UTC)
-                       .toLocalTime());
+    builder.append(
+        "period: "
+            + LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(currentPeriodStartMillis), ZoneOffset.UTC)
+                .toLocalTime());
     builder.append("\n");
     long toMinutes = TimeUnit.MILLISECONDS.toMinutes(configuration.getStatisticPeriodMillis());
-    builder.append("duration: "
-        + (toMinutes > 0 ? toMinutes + " min" : configuration.getStatisticPeriodMillis() + " ms"));
+    builder.append(
+        "duration: "
+            + (toMinutes > 0
+                ? toMinutes + " min"
+                : configuration.getStatisticPeriodMillis() + " ms"));
     builder.append("\n");
     builder.append("Count distribution: ");
     builder.append("\n");
@@ -130,10 +141,12 @@ public class DurationCounter {
       builder.append("[No stats]\n");
     } else {
       for (Map.Entry<Long, Long> entry : executionTimeStatistic.entrySet()) {
-        builder.append(String.format("[%8d - %8d]: %d\n",
-                                     entry.getKey(),
-                                     entry.getKey() + configuration.getExecutionTimeBucketSize(),
-                                     entry.getValue()));
+        builder.append(
+            String.format(
+                "[%8d - %8d]: %d\n",
+                entry.getKey(),
+                entry.getKey() + configuration.getExecutionTimeBucketSize(),
+                entry.getValue()));
       }
     }
     builder.append(separatorLine);

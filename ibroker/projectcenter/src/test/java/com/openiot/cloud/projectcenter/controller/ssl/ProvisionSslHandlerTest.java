@@ -4,6 +4,8 @@
 
 package com.openiot.cloud.projectcenter.controller.ssl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.ilink.ILinkMessage;
@@ -17,8 +19,9 @@ import com.openiot.cloud.projectcenter.utils.AES128CBC;
 import com.openiot.cloud.projectcenter.utils.MD5;
 import com.openiot.cloud.sdk.service.IConnectRequest;
 import com.openiot.cloud.sdk.service.JMSResponseSender;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,27 +33,21 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class ProvisionSslHandlerTest {
-  @Autowired
-  private ProvisionSslHandler provisionSslHandler;
-  @Autowired
-  private ProvisionResetAmqpHandler provisionResetAmqpHandler;
-  @Autowired
-  private ProvisionReplaceAmqpHandler provisionReplaceAmqpHandler;
-  @Autowired
-  private GatewayService gatewayService;
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private ProvisionSslHandler provisionSslHandler;
+  @Autowired private ProvisionResetAmqpHandler provisionResetAmqpHandler;
+  @Autowired private ProvisionReplaceAmqpHandler provisionReplaceAmqpHandler;
+  @Autowired private GatewayService gatewayService;
+  @Autowired private ObjectMapper objectMapper;
+
   @Value("${provision.factory-key:hello iagent}")
   private String DEFAULT_FACTORY_KEY;
-  @Mock
-  private JMSResponseSender fakeJMSResponseSender;
+
+  @Mock private JMSResponseSender fakeJMSResponseSender;
   private final byte[] token = "cantaloupebanana".getBytes();
   private final String serialNumber = "pomegranate";
   private final String newSerialNumber = "grape";
@@ -94,9 +91,10 @@ public class ProvisionSslHandlerTest {
     assertThat(response.getPayload()).isNotEmpty();
 
     GatewayDTO gatewayDTO = gatewayService.findBySerialNumber(serialNumber, false);
-    assertThat(gatewayDTO).hasFieldOrPropertyWithValue("hwSn", serialNumber)
-                          .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
-                          .hasFieldOrPropertyWithValue("reset", false);
+    assertThat(gatewayDTO)
+        .hasFieldOrPropertyWithValue("hwSn", serialNumber)
+        .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
+        .hasFieldOrPropertyWithValue("reset", false);
 
     // the newer again
     response = provisionSslHandler.onMessage(request);
@@ -116,10 +114,10 @@ public class ProvisionSslHandlerTest {
     assertThat(response.getPayload()).isNotEmpty();
 
     gatewayDTO = gatewayService.findBySerialNumber(serialNumber, false);
-    assertThat(gatewayDTO).hasFieldOrPropertyWithValue("hwSn", serialNumber)
-                          .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
-                          .hasFieldOrPropertyWithValue("reset", false);
-
+    assertThat(gatewayDTO)
+        .hasFieldOrPropertyWithValue("hwSn", serialNumber)
+        .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
+        .hasFieldOrPropertyWithValue("reset", false);
 
     // replace the newer with a same serial number
     gatewayDTO.setNewHwSn(serialNumber);
@@ -160,20 +158,22 @@ public class ProvisionSslHandlerTest {
     assertThat(response.getPayload()).isNotEmpty();
 
     GatewayDTO gatewayDTO = gatewayService.findBySerialNumber(serialNumber, false);
-    assertThat(gatewayDTO).hasFieldOrPropertyWithValue("hwSn", serialNumber)
-                          .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
-                          .hasFieldOrPropertyWithValue("reset", false);
+    assertThat(gatewayDTO)
+        .hasFieldOrPropertyWithValue("hwSn", serialNumber)
+        .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
+        .hasFieldOrPropertyWithValue("reset", false);
 
     // reset the newer
     IConnectRequest iConnectRequest =
-        IConnectRequest.create(HttpMethod.POST,
-                               UriComponentsBuilder.newInstance()
-                                                   .path(ConstDef.MQ_QUEUE_PROV_RESET)
-                                                   .queryParam("reset", "true")
-                                                   .build()
-                                                   .toString(),
-                               MediaType.APPLICATION_JSON,
-                               objectMapper.writeValueAsBytes(new String[] {serialNumber}));
+        IConnectRequest.create(
+            HttpMethod.POST,
+            UriComponentsBuilder.newInstance()
+                .path(ConstDef.MQ_QUEUE_PROV_RESET)
+                .queryParam("reset", "true")
+                .build()
+                .toString(),
+            MediaType.APPLICATION_JSON,
+            objectMapper.writeValueAsBytes(new String[] {serialNumber}));
     iConnectRequest.setResponseSender(fakeJMSResponseSender);
     provisionResetAmqpHandler.onRequest(iConnectRequest);
 
@@ -184,20 +184,22 @@ public class ProvisionSslHandlerTest {
     assertThat(response.getPayload()).isNotEmpty();
 
     gatewayDTO = gatewayService.findBySerialNumber(serialNumber, false);
-    assertThat(gatewayDTO).hasFieldOrPropertyWithValue("hwSn", serialNumber)
-                          .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
-                          .hasFieldOrPropertyWithValue("reset", false);
+    assertThat(gatewayDTO)
+        .hasFieldOrPropertyWithValue("hwSn", serialNumber)
+        .hasFieldOrPropertyWithValue("iAgentId", serialNumber)
+        .hasFieldOrPropertyWithValue("reset", false);
 
     // replace the newer with a different serial number
     iConnectRequest =
-        IConnectRequest.create(HttpMethod.POST,
-                               UriComponentsBuilder.newInstance()
-                                                   .path(ConstDef.MQ_QUEUE_PROV_REPLACE)
-                                                   .queryParam("aid", serialNumber)
-                                                   .build()
-                                                   .toString(),
-                               MediaType.APPLICATION_JSON,
-                               objectMapper.writeValueAsBytes(newSerialNumber));
+        IConnectRequest.create(
+            HttpMethod.POST,
+            UriComponentsBuilder.newInstance()
+                .path(ConstDef.MQ_QUEUE_PROV_REPLACE)
+                .queryParam("aid", serialNumber)
+                .build()
+                .toString(),
+            MediaType.APPLICATION_JSON,
+            objectMapper.writeValueAsBytes(newSerialNumber));
     iConnectRequest.setResponseSender(fakeJMSResponseSender);
     provisionReplaceAmqpHandler.onRequest(iConnectRequest);
 

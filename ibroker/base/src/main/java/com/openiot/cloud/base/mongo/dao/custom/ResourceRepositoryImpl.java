@@ -4,21 +4,22 @@
 
 package com.openiot.cloud.base.mongo.dao.custom;
 
+import static org.springframework.data.mongodb.core.query.Criteria.where;
+
 import com.openiot.cloud.base.help.ConstDef;
 import com.openiot.cloud.base.mongo.model.Group;
 import com.openiot.cloud.base.mongo.model.Group.MemberResRef;
 import com.openiot.cloud.base.mongo.model.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Criteria;
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceRepositoryImpl implements ResourceRepositoryCustom {
@@ -43,12 +44,16 @@ public class ResourceRepositoryImpl implements ResourceRepositoryCustom {
     }
   }
 
-  @Autowired
-  MongoOperations monOp;
+  @Autowired MongoOperations monOp;
 
   @Override
-  public List<Resource> filter(String devId, String resName, String resUrl, String resType,
-                               String group, Pageable pageable) {
+  public List<Resource> filter(
+      String devId,
+      String resName,
+      String resUrl,
+      String resType,
+      String group,
+      Pageable pageable) {
     Query q = new Query();
 
     Optional.ofNullable(devId).ifPresent(di -> q.addCriteria(where(ConstDef.F_DEVID).is(di)));
@@ -70,16 +75,19 @@ public class ResourceRepositoryImpl implements ResourceRepositoryCustom {
   public List<Resource> findAllResourcesByGroup(Group group) {
     Optional<List<MemberResRef>> risOpt = Optional.ofNullable(group.getMr());
 
-    return risOpt.map(ris -> {
-      List<String> devIds = ris.stream().map(ri -> ri.getDi()).collect(Collectors.toList());
-      List<String> resUrls = ris.stream().map(ri -> ri.getUri()).collect(Collectors.toList());
+    return risOpt
+        .map(
+            ris -> {
+              List<String> devIds = ris.stream().map(ri -> ri.getDi()).collect(Collectors.toList());
+              List<String> resUrls =
+                  ris.stream().map(ri -> ri.getUri()).collect(Collectors.toList());
 
-      return monOp.find(Query.query(Criteria.where(ConstDef.F_DEVID)
-                                            .in(devIds)
-                                            .and(ConstDef.F_URL)
-                                            .in(resUrls)),
-                        Resource.class,
-                        ConstDef.C_RES);
-    }).orElse(Collections.emptyList());
+              return monOp.find(
+                  Query.query(
+                      Criteria.where(ConstDef.F_DEVID).in(devIds).and(ConstDef.F_URL).in(resUrls)),
+                  Resource.class,
+                  ConstDef.C_RES);
+            })
+        .orElse(Collections.emptyList());
   }
 }
