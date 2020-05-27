@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+<hibernate-mapping> 
+    <class name="com.intel.iot.ams.entity.ProductDownloadPackage" table="ProductDownloadPackage"> 
+        <id name="id" type="java.lang.Integer"> 
+            <column name="id" /> 
+            <generator class="identity" /> 
+        </id> 
+        <property name="hashcode" type="string"> 
+            <column name="hashcode" /> 
+        </property> 
+        <property name="size" type="java.lang.Long"> 
+            <column name="size" /> 
+        </property> 
+        <property name="format" type="string"> 
+            <column name="format" /> 
+        </property> 
+        <property name="genDate" type="java.util.Date"> 
+            <column name="genDate" /> 
+        </property> 
+        <property name="expiryDate" type="java.util.Date"> 
+            <column name="expiryDate" /> 
+        </property> 
+        <property name="category" type="java.lang.Integer"> 
+            <column name="category" /> 
+        </property> 
+        <property name="productName" type="string"> 
+            <column name="productName" /> 
+        </property> 
+        <property name="fromId" type="java.lang.Integer"> 
+            <column name="fromId" /> 
+        </property> 
+        <property name="toId" type="java.lang.Integer"> 
+            <column name="toId" /> 
+        </property> 
+        <property name="lastUsedTime" type="java.util.Date"> 
+            <column name="lastUsedTime" /> 
+        </property> 
+        <property name="isAot" type="java.lang.Boolean"> 
+            <column name="isAot" /> 
+        </property> 
+    </class> 
+</hibernate-mapping>

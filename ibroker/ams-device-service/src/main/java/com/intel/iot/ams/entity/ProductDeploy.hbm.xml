@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+<hibernate-mapping> 
+    <class name="com.intel.iot.ams.entity.ProductDeploy" table="ProductDeploy"> 
+        <id name="id" type="java.lang.Integer"> 
+            <column name="id" /> 
+            <generator class="identity" /> 
+        </id> 
+        <property name="productDeviceId" type="string"> 
+            <column name="productDeviceId" /> 
+        </property> 
+        <property name="productName" type="string"> 
+            <column name="productName" /> 
+        </property> 
+        <property name="clientUuid" type="string"> 
+            <column name="amsClientUuid" /> 
+        </property> 
+        <property name="version" type="string"> 
+            <column name="version" /> 
+        </property> 
+        <property name="isAot" type="java.lang.Boolean"> 
+            <column name="isAot" /> 
+        </property> 
+    </class> 
+</hibernate-mapping>
