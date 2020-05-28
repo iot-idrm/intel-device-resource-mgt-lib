@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-alpine
 
 ARG JAVA_OPTS="--spring.jmx.enabled=false -noverify -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-ARG JAR_FILE=./target/amsclientcloud-0.0.1-jar-with-dependencies.jar
+ARG JAR_FILE=./target/ams-device-service-0.0.1-jar-with-dependencies.jar
 
 COPY ${JAR_FILE} /app/app.jar
 
