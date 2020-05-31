@@ -71,7 +71,7 @@ public class ProvResource extends CoapResource {
 
     String clientUuid = null;
     AmsClient client =
-        ServiceBundle.getInstance().getClientSrv().findByHardwareSerial(request.getSerial());
+        ServiceBundle.getInstance().getClientSrv().findByClientUUID(request.getDi());
     if (client == null) {
       clientUuid = request.getDi();
       client = new AmsClient();
