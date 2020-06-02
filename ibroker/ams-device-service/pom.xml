@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.intel.iot.ams</groupId>
-  <artifactId>amsclientcloud</artifactId>
+  <artifactId>ams-device-service</artifactId>
   <version>0.0.1</version>
   <packaging>jar</packaging>
-  <name>amsclientcloud</name>
+  <name>ams-device-service</name>
   <description>iMRT Application Management Service Client Service RESTful APIs</description>
 
   <properties>

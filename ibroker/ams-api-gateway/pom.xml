@@ -4,8 +4,8 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.intel.iot.ams</groupId>
-  <artifactId>amsusercloud</artifactId>
-  <name>amsusercloud</name>
+  <artifactId>ams-api-gateway</artifactId>
+  <name>ams-api-gateway</name>
   <packaging>jar</packaging>
   <version>0.0.1</version>
   <description>Application Management Service User Cloud RESTful APIs</description>
