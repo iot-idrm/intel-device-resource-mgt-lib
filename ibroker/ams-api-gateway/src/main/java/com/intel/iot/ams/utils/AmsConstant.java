@@ -3,13 +3,18 @@
  */
 
 package com.intel.iot.ams.utils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AmsConstant {
 
   /** Linux AMS repo root directories */
-  public static final String repoPath = "/ams/ams_cloud/";
+  @Value("${ams.repoPath}")
+  public String repoPath;
+
   /** Windows AMS repo root directories */
   // public static final String repoPath = "C:\\code\\ams\\";
-
-  public static final String tempPath = repoPath + "/temp/";
+  @Value("${ams.tempPath}")
+  public String tempPath;
 }

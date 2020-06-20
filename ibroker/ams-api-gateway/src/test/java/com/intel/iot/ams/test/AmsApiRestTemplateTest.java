@@ -66,6 +66,8 @@ public class AmsApiRestTemplateTest {
 
   @Autowired private ProductInstanceService piSrv;
 
+  @Autowired private AmsConstant AmsConst;
+
   AmsClient client1 = null;
 
   @Value("${jwt.header}")
@@ -359,10 +361,11 @@ public class AmsApiRestTemplateTest {
     // Clear DB
     productSrv.removeByName("iagent");
     piSrv.removeByName("iagent");
-    FileUtils.deleteDirectory(new File(AmsConstant.repoPath + "iagent"));
+    FileUtils.deleteDirectory(new File(AmsConst.repoPath + "iagent"));
 
     // 1. Upload a product package
     String classPath = this.getClass().getResource("/").getPath();
+
     String filePath = classPath + "iagent.zip";
     Resource resource = new FileSystemResource(filePath);
     assertThat(resource.exists()).isTrue();
@@ -552,7 +555,7 @@ public class AmsApiRestTemplateTest {
     // Clear DB
     productSrv.removeByName("iagent");
     piSrv.removeByName("iagent");
-    FileUtils.deleteDirectory(new File(AmsConstant.repoPath + "iagent"));
+    FileUtils.deleteDirectory(new File(AmsConst.repoPath + "iagent"));
 
     // 1. Upload a product package
     String classPath = this.getClass().getResource("/").getPath();
@@ -778,7 +781,7 @@ public class AmsApiRestTemplateTest {
     // Clear DB
     productSrv.removeByName("iagent");
     piSrv.removeByName("iagent");
-    FileUtils.deleteDirectory(new File(AmsConstant.repoPath + "iagent"));
+    FileUtils.deleteDirectory(new File(AmsConst.repoPath + "iagent"));
 
     // 1. Upload a product package
     String classPath = this.getClass().getResource("/").getPath();

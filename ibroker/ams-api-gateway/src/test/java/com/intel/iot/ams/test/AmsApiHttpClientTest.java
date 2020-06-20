@@ -56,6 +56,9 @@ public class AmsApiHttpClientTest {
 
   @Autowired private ProductInstanceService piSrv;
 
+  @Autowired private AmsConstant AmsConst;
+
+
   AmsClient client1 = null;
 
   @Value("${jwt.header}")
@@ -98,7 +101,7 @@ public class AmsApiHttpClientTest {
     // Clear DB
     productSrv.removeByName("iagent");
     piSrv.removeByName("iagent");
-    FileUtils.deleteDirectory(new File(AmsConstant.repoPath + "iagent"));
+    FileUtils.deleteDirectory(new File(AmsConst.repoPath + "iagent"));
 
     CloseableHttpClient httpClient = HttpClientBuilder.create().build();
     CloseableHttpResponse httpResponse = null;
@@ -324,7 +327,7 @@ public class AmsApiHttpClientTest {
     // Clear DB
     productSrv.removeByName("iagent");
     piSrv.removeByName("iagent");
-    FileUtils.deleteDirectory(new File(AmsConstant.repoPath + "iagent"));
+    FileUtils.deleteDirectory(new File(AmsConst.repoPath + "iagent"));
 
     CloseableHttpClient httpClient = HttpClientBuilder.create().build();
     CloseableHttpResponse httpResponse = null;
@@ -542,7 +545,7 @@ public class AmsApiHttpClientTest {
     // Clear DB
     productSrv.removeByName("iagent");
     piSrv.removeByName("iagent");
-    FileUtils.deleteDirectory(new File(AmsConstant.repoPath + "iagent"));
+    FileUtils.deleteDirectory(new File(AmsConst.repoPath + "iagent"));
 
     CloseableHttpClient httpClient = HttpClientBuilder.create().build();
     CloseableHttpResponse httpResponse = null;

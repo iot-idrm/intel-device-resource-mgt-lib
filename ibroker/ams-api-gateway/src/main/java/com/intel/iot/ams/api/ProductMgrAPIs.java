@@ -65,6 +65,7 @@ public class ProductMgrAPIs {
 
   @Autowired private LogService LogSrv;
 
+  @Autowired private AmsConstant AmsConst;
   // ----------------------------------------------------------------
   //
   // RESTful APIs
@@ -359,9 +360,9 @@ public class ProductMgrAPIs {
       /** Delete Product version from repository */
       try {
         if (p.getCategory() == 4) {
-          new File(AmsConstant.repoPath + p.getName() + "/" + version + ".bpk").delete();
+          new File(AmsConst.repoPath + p.getName() + "/" + version + ".bpk").delete();
         } else {
-          FileUtils.deleteDirectory(new File(AmsConstant.repoPath + p.getName() + "/" + version));
+          FileUtils.deleteDirectory(new File(AmsConst.repoPath + p.getName() + "/" + version));
         }
       } catch (IOException e) {
         /** TODO: clean */
@@ -390,7 +391,7 @@ public class ProductMgrAPIs {
 
       /** Delete Product from repository */
       try {
-        FileUtils.deleteDirectory(new File(AmsConstant.repoPath + p.getName()));
+        FileUtils.deleteDirectory(new File(AmsConst.repoPath + p.getName()));
       } catch (IOException e) {
         /** TODO: clean */
         e.printStackTrace();
@@ -808,11 +809,11 @@ public class ProductMgrAPIs {
       instance.setMetadata(new String(rawMeta).trim());
 
       /** Save iMRT app to repository */
-      File productRoot = new File(AmsConstant.repoPath + p.getName());
+      File productRoot = new File(AmsConst.repoPath + p.getName());
       if (!productRoot.exists()) {
         productRoot.mkdir();
       }
-      String destDirStr = AmsConstant.repoPath + p.getName() + "/" + metadata.getVersion() + ".bpk";
+      String destDirStr = AmsConst.repoPath + p.getName() + "/" + metadata.getVersion() + ".bpk";
       file.transferTo(new File(destDirStr));
 
       /** Add/Update Product into DB */
@@ -878,17 +879,17 @@ public class ProductMgrAPIs {
       /** Save the uploaded file on AMS local space */
       Date upload_time = new Date();
       String temp_filename = String.valueOf(upload_time.getTime()) + ".zip";
-      FileAndDirUtils.saveFile(file, AmsConstant.tempPath, temp_filename);
+      FileAndDirUtils.saveFile(file, AmsConst.tempPath, temp_filename);
 
       /** Create temp unzip dir */
-      String tempDest = AmsConstant.tempPath + String.valueOf(upload_time.getTime());
+      String tempDest = AmsConst.tempPath + String.valueOf(upload_time.getTime());
       File tempDestDir = new File(tempDest);
       if (!tempDestDir.exists()) {
         tempDestDir.mkdir();
       }
 
       /** Unzip the file */
-      ZipFile zFile = new ZipFile(AmsConstant.tempPath + temp_filename);
+      ZipFile zFile = new ZipFile(AmsConst.tempPath + temp_filename);
       if (!zFile.isValidZipFile()) {
         throw new ZipException("invalid zip file! " + zFile.getFile());
       }
@@ -1112,12 +1113,12 @@ public class ProductMgrAPIs {
       }
 
       /** Copy product from temp dir to repository */
-      File productRoot = new File(AmsConstant.repoPath + p.getName());
+      File productRoot = new File(AmsConst.repoPath + p.getName());
       if (!productRoot.exists()) {
         productRoot.mkdir();
       }
 
-      String destDirStr = AmsConstant.repoPath + p.getName() + "/" + pkgInfo.getVersion();
+      String destDirStr = AmsConst.repoPath + p.getName() + "/" + pkgInfo.getVersion();
       FileUtils.moveDirectory(tempDestDir, new File(destDirStr));
 
       /** Add/Update Product into DB */
