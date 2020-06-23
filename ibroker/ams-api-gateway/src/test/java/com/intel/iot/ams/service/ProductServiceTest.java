@@ -31,7 +31,6 @@ public class ProductServiceTest {
     productA.setName("jostaberry");
     productA.setCategory(29);
     productA.setVendor("blackberry");
-    productA.setDefaultVersion("1.0");
 
     if (productDao.findByUuid(productA.getUuid()) == null) {
       productDao.saveAndFlush(productA);

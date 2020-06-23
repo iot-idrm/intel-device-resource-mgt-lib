@@ -244,8 +244,8 @@ public class ProductMgrAPIs {
   public ResponseEntity<String> updateProductInfo(@RequestBody UpdateProductInfo info) {
 
     if (info == null
-        || info.getProductName() == null
-        || (info.getDescription() == null && info.getDefaultVersion() == null)) {
+        || info.getProductName() == null || info.getDescription() == null) {
+
       return new ResponseEntity<String>(
           "POST payload format is not correct", HttpStatus.BAD_REQUEST);
     }
@@ -258,21 +258,6 @@ public class ProductMgrAPIs {
 
     if (info.getDescription() != null) {
       p.setDescription(info.getDescription());
-    }
-
-    if (info.getDefaultVersion() != null) {
-      List<ProductInstance> piList =
-          piSrv.findByNameAndVersion(p.getName(), info.getDefaultVersion());
-      if (piList == null) {
-        return new ResponseEntity<String>(
-            "Product: "
-                + info.getProductName()
-                + " doesnot have version "
-                + info.getDefaultVersion(),
-            HttpStatus.BAD_REQUEST);
-      }
-
-      p.setDefaultVersion(info.getDefaultVersion());
     }
 
     pSrv.update(p);
@@ -337,11 +322,6 @@ public class ProductMgrAPIs {
     }
 
     if (version != null) {
-      if (version.equals(p.getDefaultVersion())) {
-        return new ResponseEntity<String>(
-            "Cannot delete a default version!", HttpStatus.BAD_REQUEST);
-      }
-
       List<ProductInstance> piList = piSrv.findByNameAndVersion(p.getName(), version);
       if (piList == null) {
         return new ResponseEntity<String>(
@@ -460,10 +440,6 @@ public class ProductMgrAPIs {
 
     if (p.getVendor() != null) {
       jProduct.addProperty("vendor", p.getVendor());
-    }
-
-    if (p.getDefaultVersion() != null) {
-      jProduct.addProperty("default_version", p.getDefaultVersion());
     }
 
     JsonArray jProperties = new JsonArray();
@@ -777,7 +753,6 @@ public class ProductMgrAPIs {
         p = new Product();
         p.setUuid(metadata.getAppUuid());
         p.setName(metadata.getAppName());
-        p.setDefaultVersion(metadata.getVersion());
         p.setCategory(4);
         if (metadata.getVendor() != null) {
           p.setVendor(metadata.getVendor());
@@ -928,7 +903,6 @@ public class ProductMgrAPIs {
         p = new Product();
         p.setUuid(UUID.randomUUID().toString());
         p.setName(pkgInfo.getProductName());
-        p.setDefaultVersion(pkgInfo.getVersion());
         if (pkgInfo.getCategory().toLowerCase().equals("software_product")) {
           p.setCategory(1);
         } else if (pkgInfo.getCategory().toLowerCase().equals("fw_product")) {

@@ -28,9 +28,6 @@ public class Product {
 
   @Column private String vendor;
 
-  @Column(nullable = false)
-  private String defaultVersion;
-
   public Integer getId() {
     return id;
   }
@@ -77,13 +74,5 @@ public class Product {
 
   public void setVendor(String vendor) {
     this.vendor = vendor;
-  }
-
-  public String getDefaultVersion() {
-    return defaultVersion;
-  }
-
-  public void setDefaultVersion(String defaultVersion) {
-    this.defaultVersion = defaultVersion;
   }
 }

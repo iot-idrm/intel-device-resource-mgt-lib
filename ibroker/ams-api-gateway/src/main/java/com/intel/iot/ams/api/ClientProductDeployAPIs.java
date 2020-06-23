@@ -495,7 +495,7 @@ public class ClientProductDeployAPIs {
       instance =
           findInstanceForClient(
               p.getName(),
-              ((version != null) ? version : p.getDefaultVersion()),
+              version,
               p.getCategory(),
               client);
       if (instance == null) {
@@ -524,7 +524,7 @@ public class ClientProductDeployAPIs {
         instance =
             pInstanceSrv.findByNameAndVersionAndCpuAndPlatformAndOs(
                 p.getName(),
-                ((version != null) ? version : p.getDefaultVersion()),
+                version,
                 null,
                 null,
                 null);
@@ -532,7 +532,7 @@ public class ClientProductDeployAPIs {
         instance =
             pInstanceSrv.findByNameAndVersionAndCpuAndPlatformAndOs(
                 p.getName(),
-                ((version != null) ? version : p.getDefaultVersion()),
+                version,
                 client.getCpu(),
                 null,
                 client.getOs());
@@ -1159,7 +1159,7 @@ public class ClientProductDeployAPIs {
     ProductInstance instance =
         findInstanceForClient(
             p.getName(),
-            (info.getVersion() == null ? p.getDefaultVersion() : info.getVersion()),
+            info.getVersion(),
             p.getCategory(),
             client);
     if (instance == null) {
@@ -1214,7 +1214,7 @@ public class ClientProductDeployAPIs {
     ProductDeploy deploy = new ProductDeploy();
     deploy.setClientUuid(info.getClientUuid());
     deploy.setProductName(p.getName());
-    deploy.setVersion((info.getVersion() == null ? p.getDefaultVersion() : info.getVersion()));
+    deploy.setVersion(info.getVersion());
     if (info.getAotEnable() != null) {
       deploy.setIsAot(info.getAotEnable());
     }
@@ -1228,7 +1228,7 @@ public class ClientProductDeployAPIs {
         "Deploy software( name: "
             + p.getName()
             + ", version:"
-            + (info.getVersion() == null ? p.getDefaultVersion() : info.getVersion())
+            + info.getVersion()
             + " ) for client",
         client.getClientUuid());
 
@@ -1262,7 +1262,7 @@ public class ClientProductDeployAPIs {
       ProductInstance instance =
           findInstanceForClient(
               p.getName(),
-              (info.getVersion() == null ? p.getDefaultVersion() : info.getVersion()),
+              info.getVersion(),
               p.getCategory(),
               client);
       if (instance == null) {
@@ -1295,7 +1295,7 @@ public class ClientProductDeployAPIs {
       deploy.setClientUuid(mapping.getClientUuid());
       deploy.setProductDeviceId(info.getDeviceId());
       deploy.setProductName(p.getName());
-      deploy.setVersion((info.getVersion() == null ? p.getDefaultVersion() : info.getVersion()));
+      deploy.setVersion(info.getVersion());
       if (info.getAotEnable() != null) {
         deploy.setIsAot(info.getAotEnable());
       }
@@ -1320,7 +1320,7 @@ public class ClientProductDeployAPIs {
       ProductDeploy deploy = new ProductDeploy();
       deploy.setProductDeviceId(info.getDeviceId());
       deploy.setProductName(p.getName());
-      deploy.setVersion((info.getVersion() == null ? p.getDefaultVersion() : info.getVersion()));
+      deploy.setVersion(info.getVersion());
       if (info.getAotEnable() != null) {
         deploy.setIsAot(info.getAotEnable());
       }
