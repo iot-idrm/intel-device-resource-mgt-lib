@@ -78,6 +78,15 @@ public class ClientAllCfgResource extends CoapResource {
       return;
     }
 
+    if (client.getProductLock()){
+      logger.info("Client:"+client.getClientUuid()+" has been locked, can not update config");
+      resp = new Response(ResponseCode.BAD_REQUEST);
+      resp.setPayload("client:" + shortId + " has been locked, can not update config");
+      exchange.respond(resp);
+      return;
+    }
+
+
     //get template_item template list in customized template content
     AmsTemplate template =
         ServiceBundle.getInstance().getTemplateSrv().findByName(client.getTemplateName());

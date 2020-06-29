@@ -7,6 +7,7 @@ package com.intel.iot.ams.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.intel.iot.ams.task.AmsTaskType;
 import com.intel.iot.ams.api.requestbody.UpdateAmsClientInfo;
 import com.intel.iot.ams.entity.AmsClient;
 import com.intel.iot.ams.entity.ClientDeviceMapping;
@@ -408,6 +409,19 @@ public class ClientMgrAPIs {
 
     if (info.getProductLock() != null) {
       client.setProductLock(info.getProductLock());
+      /** if the product lock switch: on (true) --> off (false)
+       *  should create ams task to calculate product change
+       */
+      if (!info.getProductLock()){
+        /** Create a AmsTask to calculate product changes of this client */
+        AmsTask task = new AmsTask();
+        task.setTaskType(AmsTaskType.CALCULATE_PRODUCT_CHANGES);
+        task.setTaskCreateTime(new Date());
+        JsonObject jTaskProperty = new JsonObject();
+        jTaskProperty.addProperty("client_uuid", client.getClientUuid());
+        task.setTaskProperties(jTaskProperty.toString());
+        taskSrv.save(task);
+      }
     }
 
     clientSrv.update(client);
