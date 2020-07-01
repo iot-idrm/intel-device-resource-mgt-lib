@@ -7,6 +7,7 @@ package com.intel.iot.ams.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.intel.iot.ams.entity.AmsTask;
 import com.intel.iot.ams.task.AmsTaskType;
 import com.intel.iot.ams.api.requestbody.UpdateAmsClientInfo;
 import com.intel.iot.ams.entity.AmsClient;
@@ -58,6 +59,8 @@ public class ClientMgrAPIs {
   @Autowired private ProductChangesService pcSrv;
 
   @Autowired private ProductDownloadHistoryService pdhSrv;
+
+  @Autowired private AmsTaskService taskSrv;
 
   @Autowired private LogService logSrv;
 

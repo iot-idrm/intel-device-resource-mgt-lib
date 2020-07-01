@@ -245,7 +245,6 @@ public class CoapTestDemo {
         //1.1 Add Product item.
         Product prod=new Product();
         prod.setCategory(5);
-        prod.setDefaultVersion("2019-09-27");
         prod.setName("test_Product01");
         prod.setDescription("test_desc01");
         prod.setUuid("aabb-ccdd-eeff-gghh-iijj-001");

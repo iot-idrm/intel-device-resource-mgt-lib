@@ -20,8 +20,5 @@
         <property name="vendor" type="string"> 
             <column name="vendor" /> 
         </property> 
-        <property name="defaultVersion" type="string"> 
-            <column name="defaultVersion" /> 
-        </property> 
     </class> 
 </hibernate-mapping>

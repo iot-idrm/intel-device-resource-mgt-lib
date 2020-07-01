@@ -131,17 +131,17 @@ public class AmsTaskHandler implements Runnable {
     if (client == null) {
       return false;
     }
+
     /**
       if client's prodcut lock is true, should not calculate product change
       and old product changes items should be deleted
      */
-
-    if (client.getProductLock()){
-      logger.info("Client:"+client.getClientUuid()+" has been locked, can not calculate prodcut changes");
+    if ( client.getProductLock() != null && client.getProductLock()){
+      logger.info("==> Client:"+client.getClientUuid()+" has been locked, can not calculate prodcut changes");
       // delete old product changes
       changeSrv.removeByClientUuid(client.getClientUuid());
       // delete the task item
-      return ture;
+      return true;
     }
 
     /** Calculate product changes of this client */

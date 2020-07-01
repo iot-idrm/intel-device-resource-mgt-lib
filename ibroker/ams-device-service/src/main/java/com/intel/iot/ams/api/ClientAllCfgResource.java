@@ -78,8 +78,8 @@ public class ClientAllCfgResource extends CoapResource {
       return;
     }
 
-    if (client.getProductLock()){
-      logger.info("Client:"+client.getClientUuid()+" has been locked, can not update config");
+    if (client.getProductLock() != null && client.getProductLock()){
+      logger.info("==> Client:"+client.getClientUuid()+" has been locked, can not update config");
       resp = new Response(ResponseCode.BAD_REQUEST);
       resp.setPayload("client:" + shortId + " has been locked, can not update config");
       exchange.respond(resp);

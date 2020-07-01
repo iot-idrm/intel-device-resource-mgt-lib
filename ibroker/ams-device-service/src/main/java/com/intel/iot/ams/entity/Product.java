@@ -19,8 +19,6 @@ public class Product {
 
   private String vendor;
 
-  private String defaultVersion;
-
   public Integer getId() {
     return id;
   }
@@ -68,13 +66,4 @@ public class Product {
   public void setVendor(String vendor) {
     this.vendor = vendor;
   }
-
-  public String getDefaultVersion() {
-    return defaultVersion;
-  }
-
-  public void setDefaultVersion(String defaultVersion) {
-    this.defaultVersion = defaultVersion;
-  }
-
 }
