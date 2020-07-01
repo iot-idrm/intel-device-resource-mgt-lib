@@ -59,6 +59,18 @@ public class GatewayService {
           newProjectId == null ? null : newProjectId.getBytes(),
           null,
           null);
+
+      // to device.cfg
+      taskOperations.createTask(
+          "CFG_MONITOR",
+          ConstDef.EVENT_TYPE_CFG_SYNC,
+          "sync project information",
+          ConstDef.EVENT_TARGET_TYPE_DEVICE,
+          gateway.getIAgentId(),
+          ConstDef.DAY_SECONDS,
+          null,
+          null,
+          ConstDef.EVENT_TASK_OPTION_OVERWRITE);
     }
   }
 

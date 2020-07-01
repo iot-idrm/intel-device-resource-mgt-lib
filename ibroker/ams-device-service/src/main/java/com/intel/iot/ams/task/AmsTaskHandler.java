@@ -141,7 +141,7 @@ public class AmsTaskHandler implements Runnable {
       // delete old product changes
       changeSrv.removeByClientUuid(client.getClientUuid());
       // delete the task item
-      return ture;
+      return true;
     }
 
     /** Calculate product changes of this client */
